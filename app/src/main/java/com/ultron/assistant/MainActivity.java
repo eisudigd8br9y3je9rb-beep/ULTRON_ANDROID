@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
             SurfaceTexture texture = preview.getSurfaceTexture();
             Surface surface = new Surface(texture);
 
-            android.hardware.camera2.CaptureRequest request =
+            android.hardware.camera2.CaptureRequest.Builder request =
                     camera.createCaptureRequest(
                             CameraDevice.TEMPLATE_PREVIEW
                     );
