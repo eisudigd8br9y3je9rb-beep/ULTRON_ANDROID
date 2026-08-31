@@ -23,6 +23,7 @@ public class MainActivity extends Activity {
     private TextureView preview;
     private TextView status;
     private CameraDevice camera;
+    private CameraCaptureSession cameraSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,15 @@ public class MainActivity extends Activity {
             );
             return;
         }
+            if (cameraSession != null) {
+                cameraSession.close();
+                cameraSession = null;
+            }
+
+            if (camera != null) {
+                camera.close();
+                camera = null;
+            }
 
         try {
             CameraManager manager =
@@ -169,6 +179,7 @@ public class MainActivity extends Activity {
                         public void onConfigured(
                                 CameraCaptureSession session) {
                             try {
+                                  cameraSession = session;
                                 session.setRepeatingRequest(
                                         request.build(),
                                         null,
@@ -206,5 +217,9 @@ public class MainActivity extends Activity {
             camera.close();
             camera = null;
         }
+          if (cameraSession != null) {
+              cameraSession.close();
+              cameraSession = null;
+          }
     }
 }
