@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
 
         rear.setOnClickListener(v -> openCamera(true));
         front.setOnClickListener(v -> openCamera(false));
-        voice.setOnClickListener(v -> startVoice());
+        voice.setOnClickListener(v -> { status.setText("Voice button clicked"); startVoice(); });
 
         if (checkSelfPermission(Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
