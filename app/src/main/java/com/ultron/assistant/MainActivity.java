@@ -8,6 +8,11 @@ import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import android.speech.RecognitionListener;
+import android.content.Intent;
+import java.util.ArrayList;
 import android.os.Bundle;
 import android.view.Surface;
 import android.view.TextureView;
@@ -23,6 +28,7 @@ public class MainActivity extends Activity {
     private TextureView preview;
     private TextView status;
     private CameraDevice camera;
+    private SpeechRecognizer speechRecognizer;
     private CameraCaptureSession cameraSession;
 
     @Override
@@ -46,6 +52,8 @@ public class MainActivity extends Activity {
 
         Button front = new Button(this);
         front.setText("Open Front Camera");
+        Button voice = new Button(this);
+        voice.setText("🎤 Start Voice Command");
 
         root.addView(title);
         root.addView(status);
@@ -55,11 +63,13 @@ public class MainActivity extends Activity {
         );
         root.addView(rear);
         root.addView(front);
+        root.addView(voice);
 
         setContentView(root);
 
         rear.setOnClickListener(v -> openCamera(true));
         front.setOnClickListener(v -> openCamera(false));
+        voice.setOnClickListener(v -> startVoice());
 
         if (checkSelfPermission(Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -69,6 +79,60 @@ public class MainActivity extends Activity {
             );
         }
     }
+    private void startVoice() {
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 101);
+            return;
+        }
+
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            status.setText("Speech recognition not available");
+            return;
+        }
+
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
+                java.util.Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                "Speak now");
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override public void onReadyForSpeech(Bundle params) {
+                status.setText("Listening...");
+            }
+
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float rmsdB) {}
+            @Override public void onBufferReceived(byte[] buffer) {}
+            @Override public void onEndOfSpeech() {}
+
+            @Override public void onError(int error) {
+                status.setText("Voice error: " + error);
+            }
+
+            @Override public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(
+                        SpeechRecognizer.RESULTS_RECOGNITION);
+                if (matches != null && !matches.isEmpty()) {
+                    status.setText("You said: " + matches.get(0));
+                }
+            }
+
+            @Override public void onPartialResults(Bundle partialResults) {}
+            @Override public void onEvent(int eventType, Bundle params) {}
+        });
+
+        speechRecognizer.startListening(intent);
+    }
+
 
     private void openCamera(boolean rear) {
         if (checkSelfPermission(Manifest.permission.CAMERA)
