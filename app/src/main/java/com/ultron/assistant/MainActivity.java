@@ -85,10 +85,6 @@ public class MainActivity extends Activity {
             return;
         }
 
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            status.setText("Speech recognition not available");
-            return;
-        }
 
         if (speechRecognizer != null) {
             speechRecognizer.destroy();
