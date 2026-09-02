@@ -14,6 +14,10 @@ public class CommandManager {
         CALL,
         SMS,
         OPEN_CAMERA,
+        GREETING,
+        HOW_ARE_YOU,
+        WHO_ARE_YOU,
+        WHAT_IS_YOUR_NAME,
         UNKNOWN
     }
 
@@ -24,6 +28,31 @@ public class CommandManager {
         }
 
         String text = command.toLowerCase(Locale.getDefault()).trim();
+
+        if (text.contains("hello ultron")
+                || text.contains("hi ultron")
+                || text.equals("hello")
+                || text.equals("hi")
+                || text.contains("हेलो अल्ट्रॉन")
+                || text.contains("हाय अल्ट्रॉन")) {
+            return CommandType.GREETING;
+        }
+
+        if (text.contains("how are you")
+                || text.contains("कैसे हो")) {
+            return CommandType.HOW_ARE_YOU;
+        }
+
+        if (text.contains("who are you")
+                || text.contains("तुम कौन हो")) {
+            return CommandType.WHO_ARE_YOU;
+        }
+
+        if (text.contains("what is your name")
+                || text.contains("तुम्हारा नाम क्या है")
+                || text.contains("आपका नाम क्या है")) {
+            return CommandType.WHAT_IS_YOUR_NAME;
+        }
 
         if (text.contains("youtube") || text.contains("यूट्यूब")) {
             return CommandType.OPEN_YOUTUBE;

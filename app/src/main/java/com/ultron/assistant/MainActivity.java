@@ -232,6 +232,30 @@ public class MainActivity extends Activity {
 
         switch (commandType) {
 
+            case GREETING:
+                status.setText(
+                        "Hello! I am ULTRON. How can I help you?"
+                );
+                break;
+
+            case HOW_ARE_YOU:
+                status.setText(
+                        "I am working perfectly. How can I help you?"
+                );
+                break;
+
+            case WHO_ARE_YOU:
+                status.setText(
+                        "I am ULTRON, your AI assistant."
+                );
+                break;
+
+            case WHAT_IS_YOUR_NAME:
+                status.setText(
+                        "My name is ULTRON."
+                );
+                break;
+
             case OPEN_YOUTUBE:
                 openYouTube();
                 break;
