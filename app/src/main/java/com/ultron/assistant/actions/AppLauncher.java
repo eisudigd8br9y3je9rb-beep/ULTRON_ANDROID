@@ -3,6 +3,7 @@ package com.ultron.assistant.actions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 
 public class AppLauncher {
 
@@ -13,15 +14,25 @@ public class AppLauncher {
     }
 
     public boolean openPackage(String packageName) {
+
         try {
-            PackageManager packageManager = context.getPackageManager();
+
+            PackageManager packageManager =
+                    context.getPackageManager();
 
             Intent intent =
-                    packageManager.getLaunchIntentForPackage(packageName);
+                    packageManager.getLaunchIntentForPackage(
+                            packageName
+                    );
 
             if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                intent.addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+                );
+
                 context.startActivity(intent);
+
                 return true;
             }
 
@@ -33,14 +44,44 @@ public class AppLauncher {
     }
 
     public boolean openYouTube() {
-        return openPackage("com.google.android.youtube");
+
+        if (openPackage("com.google.android.youtube")) {
+            return true;
+        }
+
+        try {
+
+            Intent intent = new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.youtube.com")
+            );
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+            );
+
+            context.startActivity(intent);
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     public boolean openInstagram() {
-        return openPackage("com.instagram.android");
+
+        if (openPackage("com.instagram.android")) {
+            return true;
+        }
+
+        return false;
     }
 
     public boolean openPUBG() {
+
         if (openPackage("com.tencent.ig")) {
             return true;
         }

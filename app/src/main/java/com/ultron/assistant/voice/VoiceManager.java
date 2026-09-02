@@ -20,7 +20,7 @@ public class VoiceManager {
 
     private final Context context;
     private SpeechRecognizer speechRecognizer;
-    private VoiceCallback callback;
+    private final VoiceCallback callback;
 
     public VoiceManager(Context context, VoiceCallback callback) {
         this.context = context;
@@ -29,16 +29,26 @@ public class VoiceManager {
 
     public void startListening() {
 
-        if (speechRecognizer != null) {
-            speechRecognizer.destroy();
-            speechRecognizer = null;
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+
+            if (callback != null) {
+                callback.onStatus(
+                        "Speech recognition service is not available"
+                );
+            }
+
+            return;
         }
+
+        destroy();
 
         speechRecognizer =
                 SpeechRecognizer.createSpeechRecognizer(context);
 
         Intent intent =
-                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                new Intent(
+                        RecognizerIntent.ACTION_RECOGNIZE_SPEECH
+                );
 
         intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -47,7 +57,12 @@ public class VoiceManager {
 
         intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
-                Locale.getDefault()
+                Locale.getDefault().toLanguageTag()
+        );
+
+        intent.putExtra(
+                RecognizerIntent.EXTRA_MAX_RESULTS,
+                5
         );
 
         intent.putExtra(
@@ -58,92 +73,241 @@ public class VoiceManager {
         speechRecognizer.setRecognitionListener(
                 new RecognitionListener() {
 
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-                if (callback != null) {
-                    callback.onStatus("Listening...");
-                }
-            }
+                    @Override
+                    public void onReadyForSpeech(
+                            Bundle params
+                    ) {
 
-            @Override
-            public void onBeginningOfSpeech() {
-                if (callback != null) {
-                    callback.onStatus("Speak now...");
-                }
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-                if (callback != null) {
-                    callback.onStatus("Processing...");
-                }
-            }
-
-            @Override
-            public void onError(int error) {
-                if (callback != null) {
-                    callback.onError(error);
-                }
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-
-                ArrayList<String> matches =
-                        results.getStringArrayList(
-                                SpeechRecognizer.RESULTS_RECOGNITION
-                        );
-
-                if (matches != null && !matches.isEmpty()) {
-
-                    if (callback != null) {
-                        callback.onResult(matches.get(0));
+                        if (callback != null) {
+                            callback.onStatus(
+                                    "Listening... Speak now"
+                            );
+                        }
                     }
 
-                } else {
+                    @Override
+                    public void onBeginningOfSpeech() {
 
-                    if (callback != null) {
-                        callback.onError(
-                                SpeechRecognizer.ERROR_NO_MATCH
-                        );
+                        if (callback != null) {
+                            callback.onStatus(
+                                    "I can hear you..."
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void onRmsChanged(float rmsdB) {
+                    }
+
+                    @Override
+                    public void onBufferReceived(
+                            byte[] buffer
+                    ) {
+                    }
+
+                    @Override
+                    public void onEndOfSpeech() {
+
+                        if (callback != null) {
+                            callback.onStatus(
+                                    "Processing voice command..."
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void onError(int error) {
+
+                        if (callback != null) {
+
+                            String message;
+
+                            switch (error) {
+
+                                case SpeechRecognizer.ERROR_AUDIO:
+                                    message =
+                                            "Voice error: microphone problem";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_CLIENT:
+                                    message =
+                                            "Voice error: client error";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                                    message =
+                                            "Voice error: microphone permission";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_NETWORK:
+                                    message =
+                                            "Voice error: network problem";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                                    message =
+                                            "Voice error: network timeout";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_NO_MATCH:
+                                    message =
+                                            "I could not understand. Try again.";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                                    message =
+                                            "Voice recognizer is busy. Try again.";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_SERVER:
+                                    message =
+                                            "Voice recognition server error";
+                                    break;
+
+                                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                                    message =
+                                            "No speech detected";
+                                    break;
+
+                                default:
+                                    message =
+                                            "Voice error: " + error;
+                                    break;
+                            }
+
+                            callback.onStatus(message);
+                            callback.onError(error);
+                        }
+                    }
+
+                    @Override
+                    public void onResults(Bundle results) {
+
+                        if (results == null) {
+
+                            if (callback != null) {
+                                callback.onStatus(
+                                        "No voice result received"
+                                );
+                            }
+
+                            return;
+                        }
+
+                        ArrayList<String> matches =
+                                results.getStringArrayList(
+                                        SpeechRecognizer.RESULTS_RECOGNITION
+                                );
+
+                        if (matches != null
+                                && !matches.isEmpty()
+                                && matches.get(0) != null
+                                && !matches.get(0).trim().isEmpty()) {
+
+                            String command =
+                                    matches.get(0).trim();
+
+                            if (callback != null) {
+
+                                callback.onStatus(
+                                        "Recognized: " + command
+                                );
+
+                                callback.onResult(command);
+                            }
+
+                        } else {
+
+                            if (callback != null) {
+
+                                callback.onStatus(
+                                        "No command recognized"
+                                );
+
+                                callback.onError(
+                                        SpeechRecognizer.ERROR_NO_MATCH
+                                );
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onPartialResults(
+                            Bundle partialResults
+                    ) {
+
+                        if (partialResults == null
+                                || callback == null) {
+                            return;
+                        }
+
+                        ArrayList<String> partial =
+                                partialResults.getStringArrayList(
+                                        SpeechRecognizer.RESULTS_RECOGNITION
+                                );
+
+                        if (partial != null
+                                && !partial.isEmpty()
+                                && partial.get(0) != null) {
+
+                            callback.onStatus(
+                                    "Hearing: "
+                                            + partial.get(0)
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void onEvent(
+                            int eventType,
+                            Bundle params
+                    ) {
                     }
                 }
+        );
+
+        try {
+
+            if (callback != null) {
+                callback.onStatus(
+                        "Starting voice recognition..."
+                );
             }
 
-            @Override
-            public void onPartialResults(
-                    Bundle partialResults) {
-            }
+            speechRecognizer.startListening(intent);
 
-            @Override
-            public void onEvent(
-                    int eventType,
-                    Bundle params) {
-            }
-        });
+        } catch (Exception e) {
 
-        speechRecognizer.startListening(intent);
+            if (callback != null) {
+
+                callback.onStatus(
+                        "Could not start voice recognition"
+                );
+            }
+        }
     }
 
     public void stopListening() {
 
         if (speechRecognizer != null) {
-            speechRecognizer.stopListening();
+
+            try {
+                speechRecognizer.stopListening();
+            } catch (Exception ignored) {
+            }
         }
     }
 
     public void destroy() {
 
         if (speechRecognizer != null) {
-            speechRecognizer.destroy();
+
+            try {
+                speechRecognizer.cancel();
+                speechRecognizer.destroy();
+            } catch (Exception ignored) {
+            }
+
             speechRecognizer = null;
         }
     }
