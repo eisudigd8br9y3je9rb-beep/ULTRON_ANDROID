@@ -19,6 +19,7 @@ import com.ultron.assistant.actions.PhoneActions;
 import com.ultron.assistant.communication.CommunicationManager;
 import com.ultron.assistant.core.CommandManager;
 import com.ultron.assistant.voice.VoiceManager;
+import com.ultron.assistant.voice.VoiceSpeaker;
 
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -36,6 +37,7 @@ public class MainActivity extends Activity {
     private CameraCaptureSession cameraSession;
 
     private VoiceManager voiceManager;
+    private VoiceSpeaker voiceSpeaker;
     private CommandManager commandManager;
     private AppLauncher appLauncher;
     private PhoneActions phoneActions;
@@ -52,6 +54,7 @@ public class MainActivity extends Activity {
 
         createUserInterface();
         createVoiceManager();
+        voiceSpeaker = new VoiceSpeaker(this);
         requestRequiredPermissions();
     }
 
@@ -218,6 +221,15 @@ public class MainActivity extends Activity {
         voiceManager.startListening();
     }
 
+    private void respond(String message) {
+
+        status.setText(message);
+
+        if (voiceSpeaker != null) {
+            voiceSpeaker.speak(message);
+        }
+    }
+
     private void handleVoiceCommand(String command) {
 
         if (command == null || command.trim().isEmpty()) {
@@ -233,25 +245,25 @@ public class MainActivity extends Activity {
         switch (commandType) {
 
             case GREETING:
-                status.setText(
+                respond(
                         "Hello! I am ULTRON. How can I help you?"
                 );
                 break;
 
             case HOW_ARE_YOU:
-                status.setText(
+                respond(
                         "I am working perfectly. How can I help you?"
                 );
                 break;
 
             case WHO_ARE_YOU:
-                status.setText(
+                respond(
                         "I am ULTRON, your AI assistant."
                 );
                 break;
 
             case WHAT_IS_YOUR_NAME:
-                status.setText(
+                respond(
                         "My name is ULTRON."
                 );
                 break;
@@ -880,6 +892,11 @@ public class MainActivity extends Activity {
         if (voiceManager != null) {
             voiceManager.destroy();
             voiceManager = null;
+        }
+
+        if (voiceSpeaker != null) {
+            voiceSpeaker.destroy();
+            voiceSpeaker = null;
         }
     }
 }
