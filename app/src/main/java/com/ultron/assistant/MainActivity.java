@@ -157,11 +157,8 @@ public class MainActivity extends Activity {
 
                     @Override
                     public void onError(int errorCode) {
-                        runOnUiThread(
-                                () -> status.setText(
-                                        "Voice error: " + errorCode
-                                )
-                        );
+                        // Detailed error status is already shown by VoiceManager.
+                        // Keep the useful message visible on screen.
                     }
                 }
         );
