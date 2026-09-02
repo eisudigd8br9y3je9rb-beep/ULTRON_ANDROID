@@ -29,17 +29,6 @@ public class VoiceManager {
 
     public void startListening() {
 
-        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-
-            if (callback != null) {
-                callback.onStatus(
-                        "Speech recognition service is not available"
-                );
-            }
-
-            return;
-        }
-
         destroy();
 
         speechRecognizer =
