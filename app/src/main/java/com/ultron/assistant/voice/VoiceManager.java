@@ -48,7 +48,7 @@ public class VoiceManager {
 
         intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
-                Locale.getDefault().toLanguageTag()
+                "hi-IN"
         );
 
         intent.putExtra(
