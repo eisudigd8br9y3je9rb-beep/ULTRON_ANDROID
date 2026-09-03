@@ -80,6 +80,47 @@ public class AppLauncher {
         return false;
     }
 
+    public boolean openChrome() {
+
+        if (openPackage("com.android.chrome")) {
+            return true;
+        }
+
+        try {
+            Intent intent = new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.google.com")
+            );
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+            );
+
+            context.startActivity(intent);
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean openWhatsApp() {
+
+        if (openPackage("com.whatsapp")) {
+            return true;
+        }
+
+        if (openPackage("com.whatsapp.w4b")) {
+            return true;
+        }
+
+        return false;
+    }
+
+
     public boolean openPUBG() {
 
         if (openPackage("com.tencent.ig")) {
