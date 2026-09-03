@@ -384,6 +384,47 @@ public class MainActivity extends Activity {
 
 
 
+    private void openRequestedApp(String command) {
+
+        String text = command.toLowerCase().trim();
+
+        if (text.contains("chrome")
+                || text.contains("क्रोम")) {
+
+            boolean opened =
+                    appLauncher.openChrome();
+
+            if (opened) {
+                respond("Opening Chrome.");
+            } else {
+                respond("Chrome is not installed.");
+            }
+
+            return;
+        }
+
+        if (text.contains("whatsapp")
+                || text.contains("व्हाट्सएप")
+                || text.contains("वॉट्सऐप")) {
+
+            boolean opened =
+                    appLauncher.openWhatsApp();
+
+            if (opened) {
+                respond("Opening WhatsApp.");
+            } else {
+                respond("WhatsApp is not installed.");
+            }
+
+            return;
+        }
+
+        respond(
+                "Sorry, I do not know which app to open yet."
+        );
+    }
+
+
     private void openWifiSettings() {
 
         try {
