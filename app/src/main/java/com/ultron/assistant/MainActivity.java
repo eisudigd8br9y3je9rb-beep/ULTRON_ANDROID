@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 public class MainActivity extends Activity {
 
     private static final int CAMERA_REQUEST = 100;
+    private static final int CALL_REQUEST = 103;
     private static final int AUDIO_REQUEST = 101;
 
     private TextureView preview;
@@ -189,6 +190,18 @@ public class MainActivity extends Activity {
                             Manifest.permission.RECORD_AUDIO
                     },
                     AUDIO_REQUEST
+            );
+        }
+
+        if (checkSelfPermission(
+                Manifest.permission.CALL_PHONE
+        ) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{
+                            Manifest.permission.CALL_PHONE
+                    },
+                    CALL_REQUEST
             );
         }
     }
@@ -422,12 +435,17 @@ public class MainActivity extends Activity {
         }
 
         status.setText(
-                "Opening dialer for: " + phoneNumber
+                "Calling: " + phoneNumber
         );
 
-        communicationManager.openDialer(
-                phoneNumber
-        );
+        boolean called =
+                communicationManager.call(phoneNumber);
+
+        if (!called) {
+            status.setText(
+                    "Call permission required or call failed"
+            );
+        }
     }
 
     private void sendSms(String command) {
@@ -847,6 +865,24 @@ public class MainActivity extends Activity {
 
                 status.setText(
                         "Microphone permission denied"
+                );
+            }
+        }
+
+        if (requestCode == CALL_REQUEST) {
+
+            if (grantResults.length > 0
+                    && grantResults[0]
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                status.setText(
+                        "Call permission granted"
+                );
+
+            } else {
+
+                status.setText(
+                        "Call permission denied"
                 );
             }
         }
