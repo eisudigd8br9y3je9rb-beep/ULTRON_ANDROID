@@ -18,6 +18,8 @@ public class CommandManager {
         HOW_ARE_YOU,
         WHO_ARE_YOU,
         WHAT_IS_YOUR_NAME,
+        WHO_AM_I,
+        WHO_IS_YOUR_OWNER,
         UNKNOWN
     }
 
@@ -52,6 +54,14 @@ public class CommandManager {
                 || text.contains("तुम्हारा नाम क्या है")
                 || text.contains("आपका नाम क्या है")) {
             return CommandType.WHAT_IS_YOUR_NAME;
+        }
+
+        if (text.contains("who am i") || text.contains("मैं कौन हूँ") || text.contains("मेरा नाम क्या है")) {
+            return CommandType.WHO_AM_I;
+        }
+
+        if (text.contains("who is your owner") || text.contains("तुम्हारा मालिक कौन है")) {
+            return CommandType.WHO_IS_YOUR_OWNER;
         }
 
         if (text.contains("youtube") || text.contains("यूट्यूब")) {

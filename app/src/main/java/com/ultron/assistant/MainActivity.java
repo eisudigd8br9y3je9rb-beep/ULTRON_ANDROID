@@ -281,6 +281,14 @@ public class MainActivity extends Activity {
                 );
                 break;
 
+            case WHO_AM_I:
+                respond("You are Imtiyaz, my primary user.");
+                break;
+
+            case WHO_IS_YOUR_OWNER:
+                respond("My primary user is Imtiyaz.");
+                break;
+
             case OPEN_YOUTUBE:
                 openYouTube();
                 break;
