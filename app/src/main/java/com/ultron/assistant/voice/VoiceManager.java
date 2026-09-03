@@ -21,6 +21,7 @@ public class VoiceManager {
     private final Context context;
     private SpeechRecognizer speechRecognizer;
     private final VoiceCallback callback;
+    private boolean resultDelivered = false;
 
     public VoiceManager(Context context, VoiceCallback callback) {
         this.context = context;
@@ -30,6 +31,7 @@ public class VoiceManager {
     public void startListening() {
 
         destroy();
+        resultDelivered = false;
 
         speechRecognizer =
                 SpeechRecognizer.createSpeechRecognizer(context);
@@ -106,6 +108,10 @@ public class VoiceManager {
 
                     @Override
                     public void onError(int error) {
+
+                        if (resultDelivered) {
+                            return;
+                        }
 
                         if (callback != null) {
 
@@ -202,6 +208,7 @@ public class VoiceManager {
                                         "Recognized: " + command
                                 );
 
+                                resultDelivered = true;
                                 callback.onResult(command);
                             }
 
