@@ -14,12 +14,25 @@ public class CommandManager {
         CALL,
         SMS,
         OPEN_CAMERA,
+
         GREETING,
         HOW_ARE_YOU,
         WHO_ARE_YOU,
         WHAT_IS_YOUR_NAME,
         WHO_AM_I,
         WHO_IS_YOUR_OWNER,
+
+        OPEN_ANY_APP,
+        FLASHLIGHT_ON,
+        FLASHLIGHT_OFF,
+        VOLUME_UP,
+        VOLUME_DOWN,
+        OPEN_WIFI_SETTINGS,
+        OPEN_BLUETOOTH_SETTINGS,
+        GET_TIME,
+        GET_DATE,
+        GET_BATTERY,
+
         UNKNOWN
     }
 
@@ -29,78 +42,219 @@ public class CommandManager {
             return CommandType.UNKNOWN;
         }
 
-        String text = command.toLowerCase(Locale.getDefault()).trim();
+        String text =
+                command.toLowerCase(Locale.getDefault()).trim();
 
+        // GREETING
         if (text.contains("hello ultron")
                 || text.contains("hi ultron")
                 || text.equals("hello")
                 || text.equals("hi")
                 || text.contains("हेलो अल्ट्रॉन")
-                || text.contains("हाय अल्ट्रॉन")) {
+                || text.contains("हाय अल्ट्रॉन")
+                || text.contains("नमस्ते अल्ट्रॉन")) {
+
             return CommandType.GREETING;
         }
 
+        // HOW ARE YOU
         if (text.contains("how are you")
-                || text.contains("कैसे हो")) {
+                || text.contains("कैसे हो")
+                || text.contains("कैसे हैं")) {
+
             return CommandType.HOW_ARE_YOU;
         }
 
+        // WHO ARE YOU
         if (text.contains("who are you")
-                || text.contains("तुम कौन हो")) {
+                || text.contains("तुम कौन हो")
+                || text.contains("आप कौन हो")) {
+
             return CommandType.WHO_ARE_YOU;
         }
 
+        // YOUR NAME
         if (text.contains("what is your name")
                 || text.contains("तुम्हारा नाम क्या है")
-                || text.contains("आपका नाम क्या है")) {
+                || text.contains("आपका नाम क्या है")
+                || text.contains("तुम्हारा नाम")) {
+
             return CommandType.WHAT_IS_YOUR_NAME;
         }
 
-        if (text.contains("who am i") || text.contains("मैं कौन हूँ") || text.contains("मेरा नाम क्या है")) {
+        // WHO AM I
+        if (text.contains("who am i")
+                || text.contains("मैं कौन हूँ")
+                || text.contains("मैं कौन हूं")
+                || text.contains("मेरा नाम क्या है")) {
+
             return CommandType.WHO_AM_I;
         }
 
-        if (text.contains("who is your owner") || text.contains("तुम्हारा मालिक कौन है")) {
+        // OWNER
+        if (text.contains("who is your owner")
+                || text.contains("तुम्हारा मालिक कौन है")
+                || text.contains("तुम्हारा ओनर कौन है")) {
+
             return CommandType.WHO_IS_YOUR_OWNER;
         }
 
-        if (text.contains("youtube") || text.contains("यूट्यूब")) {
+        // FLASHLIGHT ON
+        if (text.contains("torch on")
+                || text.contains("flashlight on")
+                || text.contains("torch चालू")
+                || text.contains("टॉर्च चालू")
+                || text.contains("टॉर्च ऑन")) {
+
+            return CommandType.FLASHLIGHT_ON;
+        }
+
+        // FLASHLIGHT OFF
+        if (text.contains("torch off")
+                || text.contains("flashlight off")
+                || text.contains("torch बंद")
+                || text.contains("टॉर्च बंद")
+                || text.contains("टॉर्च ऑफ")) {
+
+            return CommandType.FLASHLIGHT_OFF;
+        }
+
+        // VOLUME UP
+        if (text.contains("volume up")
+                || text.contains("increase volume")
+                || text.contains("आवाज़ बढ़ाओ")
+                || text.contains("वॉल्यूम बढ़ाओ")) {
+
+            return CommandType.VOLUME_UP;
+        }
+
+        // VOLUME DOWN
+        if (text.contains("volume down")
+                || text.contains("decrease volume")
+                || text.contains("आवाज़ कम करो")
+                || text.contains("वॉल्यूम कम करो")) {
+
+            return CommandType.VOLUME_DOWN;
+        }
+
+        // WIFI
+        if (text.contains("wifi")
+                || text.contains("wi-fi")
+                || text.contains("वाईफाई")
+                || text.contains("वाई फाई")) {
+
+            return CommandType.OPEN_WIFI_SETTINGS;
+        }
+
+        // BLUETOOTH
+        if (text.contains("bluetooth")
+                || text.contains("ब्लूटूथ")) {
+
+            return CommandType.OPEN_BLUETOOTH_SETTINGS;
+        }
+
+        // TIME
+        if (text.contains("what time")
+                || text.contains("current time")
+                || text.contains("time now")
+                || text.contains("कितने बजे")
+                || text.contains("समय क्या है")) {
+
+            return CommandType.GET_TIME;
+        }
+
+        // DATE
+        if (text.contains("what is the date")
+                || text.contains("today date")
+                || text.contains("today's date")
+                || text.contains("आज की तारीख")
+                || text.contains("आज कौन सी तारीख है")) {
+
+            return CommandType.GET_DATE;
+        }
+
+        // BATTERY
+        if (text.contains("battery")
+                || text.contains("बैटरी")) {
+
+            return CommandType.GET_BATTERY;
+        }
+
+        // YOUTUBE
+        if (text.contains("youtube")
+                || text.contains("यूट्यूब")) {
+
             return CommandType.OPEN_YOUTUBE;
         }
 
-        if (text.contains("instagram") || text.contains("इंस्टाग्राम")) {
+        // INSTAGRAM
+        if (text.contains("instagram")
+                || text.contains("इंस्टाग्राम")) {
+
             return CommandType.OPEN_INSTAGRAM;
         }
 
+        // PUBG
         if (text.contains("pubg")) {
+
             return CommandType.OPEN_PUBG;
         }
 
-        if (text.contains("settings") || text.contains("सेटिंग")) {
+        // SETTINGS
+        if (text.contains("settings")
+                || text.contains("सेटिंग")) {
+
             return CommandType.OPEN_SETTINGS;
         }
 
-        if (text.contains("home") || text.contains("होम")) {
+        // HOME
+        if (text.contains("go home")
+                || text.equals("home")
+                || text.contains("होम स्क्रीन")
+                || text.equals("होम")) {
+
             return CommandType.GO_HOME;
         }
 
-        if (text.contains("google") || text.contains("गूगल")
-                || text.contains("search") || text.contains("सर्च")) {
+        // GOOGLE SEARCH
+        if (text.contains("google")
+                || text.contains("गूगल")
+                || text.contains("search")
+                || text.contains("सर्च")) {
+
             return CommandType.SEARCH_GOOGLE;
         }
 
-        if (text.contains("call") || text.contains("कॉल")
+        // CALL
+        if (text.contains("call")
+                || text.contains("कॉल")
                 || text.contains("फोन लगाओ")) {
+
             return CommandType.CALL;
         }
 
-        if (text.contains("sms") || text.contains("message")
+        // SMS
+        if (text.contains("sms")
+                || text.contains("message")
                 || text.contains("मैसेज")) {
+
             return CommandType.SMS;
         }
 
-        if (text.contains("camera") || text.contains("कैमरा")) {
+        // CAMERA
+        if (text.contains("camera")
+                || text.contains("कैमरा")) {
+
             return CommandType.OPEN_CAMERA;
+        }
+
+        // OPEN ANY APP
+        if (text.startsWith("open ")
+                || text.startsWith("launch ")
+                || text.contains(" खोलो")
+                || text.contains(" ओपन करो")) {
+
+            return CommandType.OPEN_ANY_APP;
         }
 
         return CommandType.UNKNOWN;

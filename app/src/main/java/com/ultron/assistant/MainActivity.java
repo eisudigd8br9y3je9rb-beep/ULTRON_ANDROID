@@ -7,7 +7,13 @@ import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.media.AudioManager;
 import android.os.Bundle;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
+
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Button;
@@ -326,6 +332,46 @@ public class MainActivity extends Activity {
                 openCamera(true);
                 break;
 
+            case FLASHLIGHT_ON:
+                setFlashlight(true);
+                break;
+
+            case FLASHLIGHT_OFF:
+                setFlashlight(false);
+                break;
+
+            case VOLUME_UP:
+                increaseVolume();
+                break;
+
+            case VOLUME_DOWN:
+                decreaseVolume();
+                break;
+
+            case OPEN_WIFI_SETTINGS:
+                openWifiSettings();
+                break;
+
+            case OPEN_BLUETOOTH_SETTINGS:
+                openBluetoothSettings();
+                break;
+
+            case GET_TIME:
+                tellCurrentTime();
+                break;
+
+            case GET_DATE:
+                tellCurrentDate();
+                break;
+
+            case GET_BATTERY:
+                tellBatteryLevel();
+                break;
+
+            case OPEN_ANY_APP:
+                respond("Trying to open the requested app.");
+                break;
+
             case UNKNOWN:
             default:
                 status.setText(
@@ -334,6 +380,157 @@ public class MainActivity extends Activity {
                 );
                 break;
         }
+    }
+
+
+
+    private void openWifiSettings() {
+
+        try {
+            Intent intent =
+                    new Intent(
+                            android.provider.Settings.ACTION_WIFI_SETTINGS
+                    );
+
+            startActivity(intent);
+
+            respond("Opening Wi-Fi settings.");
+
+        } catch (Exception e) {
+            respond("Sorry, I could not open Wi-Fi settings.");
+        }
+    }
+
+    private void openBluetoothSettings() {
+
+        try {
+            Intent intent =
+                    new Intent(
+                            android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
+                    );
+
+            startActivity(intent);
+
+            respond("Opening Bluetooth settings.");
+
+        } catch (Exception e) {
+            respond("Sorry, I could not open Bluetooth settings.");
+        }
+    }
+
+
+    private void increaseVolume() {
+
+        AudioManager audioManager =
+                (AudioManager) getSystemService(
+                        Context.AUDIO_SERVICE
+                );
+
+        if (audioManager != null) {
+
+            audioManager.adjustVolume(
+                    AudioManager.ADJUST_RAISE,
+                    AudioManager.FLAG_SHOW_UI
+            );
+
+            respond("Increasing volume.");
+
+        } else {
+            respond("Sorry, I could not control the volume.");
+        }
+    }
+
+    private void decreaseVolume() {
+
+        AudioManager audioManager =
+                (AudioManager) getSystemService(
+                        Context.AUDIO_SERVICE
+                );
+
+        if (audioManager != null) {
+
+            audioManager.adjustVolume(
+                    AudioManager.ADJUST_LOWER,
+                    AudioManager.FLAG_SHOW_UI
+            );
+
+            respond("Decreasing volume.");
+
+        } else {
+            respond("Sorry, I could not control the volume.");
+        }
+    }
+
+    private void tellCurrentTime() {
+
+        java.text.SimpleDateFormat format =
+                new java.text.SimpleDateFormat(
+                        "hh:mm a",
+                        java.util.Locale.getDefault()
+                );
+
+        String time =
+                format.format(new java.util.Date());
+
+        respond("The current time is " + time);
+    }
+
+    private void tellCurrentDate() {
+
+        java.text.SimpleDateFormat format =
+                new java.text.SimpleDateFormat(
+                        "EEEE, dd MMMM yyyy",
+                        java.util.Locale.getDefault()
+                );
+
+        String date =
+                format.format(new java.util.Date());
+
+        respond("Today is " + date);
+    }
+
+    private void tellBatteryLevel() {
+
+        IntentFilter filter =
+                new IntentFilter(
+                        Intent.ACTION_BATTERY_CHANGED
+                );
+
+        Intent batteryStatus =
+                registerReceiver(null, filter);
+
+        if (batteryStatus == null) {
+            respond("Sorry, I could not check the battery level.");
+            return;
+        }
+
+        int level =
+                batteryStatus.getIntExtra(
+                        BatteryManager.EXTRA_LEVEL,
+                        -1
+                );
+
+        int scale =
+                batteryStatus.getIntExtra(
+                        BatteryManager.EXTRA_SCALE,
+                        -1
+                );
+
+        if (level < 0 || scale <= 0) {
+            respond("Sorry, I could not read the battery level.");
+            return;
+        }
+
+        int batteryPercent =
+                Math.round(
+                        level * 100f / scale
+                );
+
+        respond(
+                "Battery level is "
+                        + batteryPercent
+                        + " percent."
+        );
     }
 
     private void openYouTube() {
@@ -540,6 +737,91 @@ public class MainActivity extends Activity {
         );
 
         return message.trim();
+    }
+
+
+    private void setFlashlight(boolean enabled) {
+
+        if (checkSelfPermission(
+                Manifest.permission.CAMERA
+        ) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{
+                            Manifest.permission.CAMERA
+                    },
+                    CAMERA_REQUEST
+            );
+
+            respond("Camera permission is required for flashlight.");
+            return;
+        }
+
+        try {
+
+            CameraManager manager =
+                    (CameraManager) getSystemService(
+                            CAMERA_SERVICE
+                    );
+
+            if (manager == null) {
+                respond("Flashlight is not available.");
+                return;
+            }
+
+            String selectedCamera = null;
+
+            for (String id : manager.getCameraIdList()) {
+
+                android.hardware.camera2
+                        .CameraCharacteristics info =
+                        manager.getCameraCharacteristics(id);
+
+                Boolean flashAvailable =
+                        info.get(
+                                android.hardware.camera2
+                                        .CameraCharacteristics
+                                        .FLASH_INFO_AVAILABLE
+                        );
+
+                Integer facing =
+                        info.get(
+                                android.hardware.camera2
+                                        .CameraCharacteristics
+                                        .LENS_FACING
+                        );
+
+                if (Boolean.TRUE.equals(flashAvailable)
+                        && facing != null
+                        && facing ==
+                        android.hardware.camera2
+                                .CameraCharacteristics
+                                .LENS_FACING_BACK) {
+
+                    selectedCamera = id;
+                    break;
+                }
+            }
+
+            if (selectedCamera == null) {
+                respond("This device does not have a flashlight.");
+                return;
+            }
+
+            manager.setTorchMode(
+                    selectedCamera,
+                    enabled
+            );
+
+            if (enabled) {
+                respond("Flashlight turned on.");
+            } else {
+                respond("Flashlight turned off.");
+            }
+
+        } catch (Exception e) {
+            respond("Sorry, I could not control the flashlight.");
+        }
     }
 
     private void openCamera(boolean rear) {
