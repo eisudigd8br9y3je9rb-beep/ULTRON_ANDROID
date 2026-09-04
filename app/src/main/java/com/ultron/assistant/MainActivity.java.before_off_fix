@@ -241,8 +241,6 @@ public class MainActivity extends Activity {
             createVoiceManager();
         }
 
-        ultronActive = true;
-        ultronWaiting = false;
         status.setText("Starting voice recognition...");
         voiceManager.startListening();
     }
@@ -275,7 +273,7 @@ public class MainActivity extends Activity {
                 && commandType != CommandManager.CommandType.ULTRON_WAKE) {
 
             if (!ultronActive) {
-                status.setText("ULTRON is off. Press Start Voice Command to activate.");
+                status.setText("ULTRON is off. Say ULTRON ON to activate.");
                 return;
             }
 
@@ -328,15 +326,12 @@ public class MainActivity extends Activity {
             case ULTRON_OFF:
                 ultronActive = false;
                 ultronWaiting = false;
-                if (voiceManager != null) {
-                    voiceManager.stopListening();
-                }
 
                 if (voiceSpeaker != null) {
                     voiceSpeaker.stop();
                 }
 
-                status.setText("ULTRON is off. Press Start Voice Command to activate.");
+                status.setText("ULTRON is off. Say ULTRON ON to activate.");
                 break;
 
             case ULTRON_WAIT:
