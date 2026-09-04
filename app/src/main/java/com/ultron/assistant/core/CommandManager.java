@@ -38,6 +38,24 @@ public class CommandManager {
         GET_DATE,
         GET_BATTERY,
 
+        OPEN_SECURITY_SETTINGS,
+        BRIGHTNESS_UP,
+        BRIGHTNESS_DOWN,
+        SILENT_MODE,
+        RINGER_MODE,
+        VIBRATE_MODE,
+        OPEN_BATTERY_SAVER,
+        OPEN_MOBILE_NETWORK_SETTINGS,
+        OPEN_AIRPLANE_MODE_SETTINGS,
+        OPEN_LOCATION_SETTINGS,
+        OPEN_NOTIFICATION_SETTINGS,
+        OPEN_DIALER,
+        OPEN_SMS_APP,
+        OPEN_MUSIC_APP,
+        CHECK_WIFI_STATUS,
+        GET_CHARGING_STATUS,
+        OPEN_APP_SETTINGS,
+
         UNKNOWN
     }
 
@@ -304,6 +322,150 @@ public class CommandManager {
 
             return CommandType.OPEN_CAMERA;
         }
+
+
+        // SECURITY SETTINGS
+        if (text.contains("security settings")
+                || text.contains("security setting")
+                || text.contains("security खोलो")
+                || text.contains("सिक्योरिटी सेटिंग")) {
+            return CommandType.OPEN_SECURITY_SETTINGS;
+        }
+
+        // BRIGHTNESS UP
+        if (text.contains("brightness up")
+                || text.contains("increase brightness")
+                || text.contains("brightness बढ़ाओ")
+                || text.contains("ब्राइटनेस बढ़ाओ")) {
+            return CommandType.BRIGHTNESS_UP;
+        }
+
+        // BRIGHTNESS DOWN
+        if (text.contains("brightness down")
+                || text.contains("decrease brightness")
+                || text.contains("brightness कम करो")
+                || text.contains("ब्राइटनेस कम करो")) {
+            return CommandType.BRIGHTNESS_DOWN;
+        }
+
+        // SILENT MODE
+        if (text.contains("silent mode")
+                || text.contains("silent कर दो")
+                || text.contains("phone silent")
+                || text.contains("साइलेंट मोड")
+                || text.contains("फोन साइलेंट")) {
+            return CommandType.SILENT_MODE;
+        }
+
+        // RINGER MODE
+        if (text.contains("ringer mode")
+                || text.contains("normal mode")
+                || text.contains("sound on")
+                || text.contains("रिंगर मोड")
+                || text.contains("नॉर्मल मोड")) {
+            return CommandType.RINGER_MODE;
+        }
+
+        // VIBRATE MODE
+        if (text.contains("vibrate mode")
+                || text.contains("vibration mode")
+                || text.contains("vibrate कर दो")
+                || text.contains("वाइब्रेट मोड")) {
+            return CommandType.VIBRATE_MODE;
+        }
+
+        // BATTERY SAVER
+        if (text.contains("battery saver")
+                || text.contains("battery saving")
+                || text.contains("बैटरी सेवर")
+                || text.contains("बैटरी सेविंग")) {
+            return CommandType.OPEN_BATTERY_SAVER;
+        }
+
+        // MOBILE NETWORK SETTINGS
+        if (text.contains("mobile network")
+                || text.contains("mobile data settings")
+                || text.contains("network settings")
+                || text.contains("मोबाइल नेटवर्क")
+                || text.contains("मोबाइल डेटा")) {
+            return CommandType.OPEN_MOBILE_NETWORK_SETTINGS;
+        }
+
+        // AIRPLANE MODE SETTINGS
+        if (text.contains("airplane mode")
+                || text.contains("flight mode")
+                || text.contains("एयरप्लेन मोड")
+                || text.contains("फ्लाइट मोड")) {
+            return CommandType.OPEN_AIRPLANE_MODE_SETTINGS;
+        }
+
+        // LOCATION SETTINGS
+        if (text.contains("location settings")
+                || text.contains("location on")
+                || text.contains("लोकेशन सेटिंग")
+                || text.contains("लोकेशन ऑन")) {
+            return CommandType.OPEN_LOCATION_SETTINGS;
+        }
+
+        // NOTIFICATION SETTINGS
+        if (text.contains("notification settings")
+                || text.contains("notifications")
+                || text.contains("नोटिफिकेशन सेटिंग")
+                || text.contains("नोटिफिकेशन")) {
+            return CommandType.OPEN_NOTIFICATION_SETTINGS;
+        }
+
+        // OPEN DIALER
+        if (text.contains("open dialer")
+                || text.contains("dialer खोलो")
+                || text.contains("फोन डायलर")
+                || text.contains("डायलर खोलो")) {
+            return CommandType.OPEN_DIALER;
+        }
+
+        // OPEN SMS APP
+        if (text.contains("open sms")
+                || text.contains("sms app")
+                || text.contains("message app")
+                || text.contains("मैसेज ऐप")
+                || text.contains("एसएमएस ऐप")) {
+            return CommandType.OPEN_SMS_APP;
+        }
+
+        // OPEN MUSIC APP
+        if (text.contains("open music")
+                || text.contains("music app")
+                || text.contains("म्यूजिक ऐप")
+                || text.contains("गाना ऐप")) {
+            return CommandType.OPEN_MUSIC_APP;
+        }
+
+        // CHECK WIFI STATUS
+        if (text.contains("wifi status")
+                || text.contains("wi-fi status")
+                || text.contains("wifi connected")
+                || text.contains("वाईफाई स्टेटस")
+                || text.contains("वाईफाई कनेक्ट")) {
+            return CommandType.CHECK_WIFI_STATUS;
+        }
+
+        // CHARGING STATUS
+        if (text.contains("charging status")
+                || text.contains("am i charging")
+                || text.contains("charging")
+                || text.contains("चार्जिंग स्टेटस")
+                || text.contains("चार्ज हो रहा है")) {
+            return CommandType.GET_CHARGING_STATUS;
+        }
+
+        // OPEN APP SETTINGS
+        if (text.contains("app settings")
+                || text.contains("application settings")
+                || text.contains("ऐप सेटिंग")
+                || text.contains("एप्लिकेशन सेटिंग")) {
+            return CommandType.OPEN_APP_SETTINGS;
+        }
+
 
         // OPEN ANY APP
         if (text.startsWith("open ")
