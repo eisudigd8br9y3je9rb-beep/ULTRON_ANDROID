@@ -327,17 +327,27 @@ public class MainActivity extends Activity {
                 ultronActive = false;
                 ultronWaiting = false;
 
+                // Stop continuous voice recognition
+                if (voiceManager != null) {
+                    voiceManager.stopListening();
+                }
+
                 if (voiceSpeaker != null) {
                     voiceSpeaker.stop();
                 }
 
-                status.setText("ULTRON is off. Say ULTRON ON to activate.");
+                status.setText("ULTRON is turned off.");
                 break;
 
             case ULTRON_WAIT:
                 ultronWaiting = true;
 
-                respond("ULTRON is waiting. Say ULTRON WAKE to continue.");
+                // Pause continuous voice recognition
+                if (voiceManager != null) {
+                    voiceManager.stopListening();
+                }
+
+                respond("ULTRON is waiting.");
                 break;
 
             case ULTRON_WAKE:

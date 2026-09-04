@@ -22,11 +22,6 @@ public class CommandManager {
         WHO_AM_I,
         WHO_IS_YOUR_OWNER,
 
-        ULTRON_ON,
-        ULTRON_OFF,
-        ULTRON_WAIT,
-        ULTRON_WAKE,
-
         OPEN_ANY_APP,
         FLASHLIGHT_ON,
         FLASHLIGHT_OFF,
@@ -102,58 +97,6 @@ public class CommandManager {
                 || text.contains("तुम्हारा ओनर कौन है")) {
 
             return CommandType.WHO_IS_YOUR_OWNER;
-        }
-
-        // ULTRON ON
-        if (text.contains("ultron on")
-                || text.contains("ultron start")
-                || text.contains("ultron activate")
-                || text.contains("ultron चालू")
-                || text.contains("ultron चालू हो जाओ")
-                || text.contains("अल्ट्रॉन ऑन")
-                || text.contains("अल्ट्रॉन चालू")
-                || text.contains("अल्ट्रॉन शुरू हो जाओ")) {
-
-            return CommandType.ULTRON_ON;
-        }
-
-        // ULTRON OFF
-        if (text.contains("ultron off")
-                || text.contains("ultron stop")
-                || text.contains("ultron deactivate")
-                || text.contains("ultron बंद")
-                || text.contains("अल्ट्रॉन ऑफ")
-                || text.contains("अल्ट्रॉन बंद")
-                || text.contains("अल्ट्रॉन बंद हो जाओ")) {
-
-            return CommandType.ULTRON_OFF;
-        }
-
-        // ULTRON WAIT / SILENT MODE
-        if (text.contains("ultron wait")
-                || text.contains("wait ultron")
-                || text.contains("be quiet")
-                || text.contains("stay quiet")
-                || text.contains("चुप रहो")
-                || text.contains("रुको")
-                || text.contains("अल्ट्रॉन वेट करो")
-                || text.contains("अल्ट्रॉन चुप रहो")
-                || text.contains("अल्ट्रॉन रुको")) {
-
-            return CommandType.ULTRON_WAIT;
-        }
-
-        // ULTRON WAKE / ACTIVE AGAIN
-        if (text.contains("ultron wake")
-                || text.contains("wake up ultron")
-                || text.contains("ultron listen")
-                || text.contains("start listening")
-                || text.contains("अल्ट्रॉन उठो")
-                || text.contains("अल्ट्रॉन सुनो")
-                || text.contains("फिर से सुनो")
-                || text.contains("वापस चालू हो जाओ")) {
-
-            return CommandType.ULTRON_WAKE;
         }
 
         // FLASHLIGHT ON
@@ -308,11 +251,8 @@ public class CommandManager {
         // OPEN ANY APP
         if (text.startsWith("open ")
                 || text.startsWith("launch ")
-                || text.startsWith("start ")
                 || text.contains(" खोलो")
-                || text.contains(" खोल दो")
-                || text.contains(" ओपन करो")
-                || text.contains(" चालू करो")) {
+                || text.contains(" ओपन करो")) {
 
             return CommandType.OPEN_ANY_APP;
         }

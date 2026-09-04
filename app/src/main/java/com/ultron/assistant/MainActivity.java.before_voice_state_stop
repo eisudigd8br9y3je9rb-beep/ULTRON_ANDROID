@@ -331,13 +331,13 @@ public class MainActivity extends Activity {
                     voiceSpeaker.stop();
                 }
 
-                status.setText("ULTRON is off. Say ULTRON ON to activate.");
+                status.setText("ULTRON is turned off.");
                 break;
 
             case ULTRON_WAIT:
                 ultronWaiting = true;
 
-                respond("ULTRON is waiting. Say ULTRON WAKE to continue.");
+                respond("ULTRON is waiting.");
                 break;
 
             case ULTRON_WAKE:

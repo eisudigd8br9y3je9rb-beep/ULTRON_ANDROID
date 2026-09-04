@@ -46,11 +46,6 @@ public class MainActivity extends Activity {
     private VoiceManager voiceManager;
     private VoiceSpeaker voiceSpeaker;
     private CommandManager commandManager;
-
-    // ULTRON voice states
-    private boolean ultronActive = true;
-    private boolean ultronWaiting = false;
-    private boolean continuousListening = true;
     private AppLauncher appLauncher;
     private PhoneActions phoneActions;
     private CommunicationManager communicationManager;
@@ -266,23 +261,6 @@ public class MainActivity extends Activity {
         CommandManager.CommandType commandType =
                 commandManager.parseCommand(command);
 
-        // Always allow ULTRON state commands
-        if (commandType != CommandManager.CommandType.ULTRON_ON
-                && commandType != CommandManager.CommandType.ULTRON_OFF
-                && commandType != CommandManager.CommandType.ULTRON_WAIT
-                && commandType != CommandManager.CommandType.ULTRON_WAKE) {
-
-            if (!ultronActive) {
-                status.setText("ULTRON is off. Say ULTRON ON to activate.");
-                return;
-            }
-
-            if (ultronWaiting) {
-                status.setText("ULTRON is waiting. Say ULTRON WAKE to continue.");
-                return;
-            }
-        }
-
         switch (commandType) {
 
             case GREETING:
@@ -315,36 +293,6 @@ public class MainActivity extends Activity {
 
             case WHO_IS_YOUR_OWNER:
                 respond("My primary user is Imtiyaz.");
-                break;
-
-            case ULTRON_ON:
-                ultronActive = true;
-                ultronWaiting = false;
-                respond("ULTRON is now active.");
-                break;
-
-            case ULTRON_OFF:
-                ultronActive = false;
-                ultronWaiting = false;
-
-                if (voiceSpeaker != null) {
-                    voiceSpeaker.stop();
-                }
-
-                status.setText("ULTRON is off. Say ULTRON ON to activate.");
-                break;
-
-            case ULTRON_WAIT:
-                ultronWaiting = true;
-
-                respond("ULTRON is waiting. Say ULTRON WAKE to continue.");
-                break;
-
-            case ULTRON_WAKE:
-                ultronActive = true;
-                ultronWaiting = false;
-
-                respond("ULTRON is active again.");
                 break;
 
             case OPEN_YOUTUBE:

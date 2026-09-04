@@ -3,8 +3,6 @@ package com.ultron.assistant.voice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -25,13 +23,6 @@ public class VoiceManager {
     private final VoiceCallback callback;
     private boolean resultDelivered = false;
 
-    // Continuous listening support
-    private final Handler restartHandler =
-            new Handler(Looper.getMainLooper());
-
-    private boolean continuousListening = false;
-    private boolean destroyed = false;
-
     public VoiceManager(Context context, VoiceCallback callback) {
         this.context = context;
         this.callback = callback;
@@ -39,20 +30,7 @@ public class VoiceManager {
 
     public void startListening() {
 
-        continuousListening = true;
-        destroyed = false;
-        restartHandler.removeCallbacksAndMessages(null);
-
-        if (speechRecognizer != null) {
-            try {
-                speechRecognizer.cancel();
-                speechRecognizer.destroy();
-            } catch (Exception ignored) {
-            }
-
-            speechRecognizer = null;
-        }
-
+        destroy();
         resultDelivered = false;
 
         speechRecognizer =
@@ -194,15 +172,6 @@ public class VoiceManager {
 
                             callback.onStatus(message);
                             callback.onError(error);
-
-                            // Restart listening after recoverable errors
-                            if (continuousListening
-                                    && !destroyed
-                                    && error != SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS
-                                    && error != SpeechRecognizer.ERROR_CLIENT) {
-
-                                scheduleRestart();
-                            }
                         }
                     }
 
@@ -241,10 +210,6 @@ public class VoiceManager {
 
                                 resultDelivered = true;
                                 callback.onResult(command);
-
-                                if (continuousListening && !destroyed) {
-                                    scheduleRestart();
-                                }
                             }
 
                         } else {
@@ -318,29 +283,7 @@ public class VoiceManager {
         }
     }
 
-    private void scheduleRestart() {
-
-        if (!continuousListening || destroyed) {
-            return;
-        }
-
-        restartHandler.removeCallbacksAndMessages(null);
-
-        restartHandler.postDelayed(
-                () -> {
-                    if (continuousListening && !destroyed) {
-                        startListening();
-                    }
-                },
-                700
-        );
-    }
-
     public void stopListening() {
-
-        // Completely stop continuous listening
-        continuousListening = false;
-        restartHandler.removeCallbacksAndMessages(null);
 
         if (speechRecognizer != null) {
 
@@ -352,11 +295,6 @@ public class VoiceManager {
     }
 
     public void destroy() {
-
-        // Permanently stop continuous listening
-        destroyed = true;
-        continuousListening = false;
-        restartHandler.removeCallbacksAndMessages(null);
 
         if (speechRecognizer != null) {
 
