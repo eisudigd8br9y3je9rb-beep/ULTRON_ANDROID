@@ -56,12 +56,6 @@ public class CommandManager {
         GET_CHARGING_STATUS,
         OPEN_APP_SETTINGS,
         FEATURE_INFO,
-        UI_CLICK,
-        UI_TYPE,
-        UI_SCROLL_DOWN,
-        UI_SCROLL_UP,
-        UI_BACK,
-        UI_HOME,
 
         UNKNOWN
     }
@@ -488,40 +482,6 @@ public class CommandManager {
                 || text.contains("क्या क्या कर सकते हो")) {
 
             return CommandType.FEATURE_INFO;
-        }
-
-
-        // UI CONTROL
-        if (text.startsWith("click ")
-                || text.contains(" पर क्लिक")
-                || text.contains("पे क्लिक")) {
-            return CommandType.UI_CLICK;
-        }
-
-        if (text.startsWith("type ")
-                || text.startsWith("write ")
-                || text.contains("लिखो ")) {
-            return CommandType.UI_TYPE;
-        }
-
-        if (text.contains("scroll down")
-                || text.contains("नीचे स्क्रॉल")) {
-            return CommandType.UI_SCROLL_DOWN;
-        }
-
-        if (text.contains("scroll up")
-                || text.contains("ऊपर स्क्रॉल")) {
-            return CommandType.UI_SCROLL_UP;
-        }
-
-        if (text.equals("back")
-                || text.contains("पीछे जाओ")) {
-            return CommandType.UI_BACK;
-        }
-
-        if (text.equals("ui home")
-                || text.contains("होम जाओ")) {
-            return CommandType.UI_HOME;
         }
 
         // OPEN ANY APP

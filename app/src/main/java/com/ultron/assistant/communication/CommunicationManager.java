@@ -3,7 +3,11 @@ package com.ultron.assistant.communication;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.ContactsContract;
+
+import java.util.Locale;
 
 public class CommunicationManager {
 
@@ -13,9 +17,99 @@ public class CommunicationManager {
         this.context = context;
     }
 
+    public String findContactNumber(String contactName) {
+
+        if (contactName == null
+                || contactName.trim().isEmpty()) {
+            return "";
+        }
+
+        if (context.checkSelfPermission(
+                android.Manifest.permission.READ_CONTACTS
+        ) != PackageManager.PERMISSION_GRANTED) {
+            return "";
+        }
+
+        String target =
+                normalize(contactName);
+
+        Cursor cursor = null;
+
+        try {
+
+            cursor =
+                    context.getContentResolver().query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            new String[]{
+                                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                            },
+                            null,
+                            null,
+                            null
+                    );
+
+            if (cursor == null) {
+                return "";
+            }
+
+            String partialNumber = "";
+
+            while (cursor.moveToNext()) {
+
+                String name =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                                )
+                        );
+
+                String number =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                                )
+                        );
+
+                if (name == null
+                        || number == null) {
+                    continue;
+                }
+
+                String normalizedName =
+                        normalize(name);
+
+                if (normalizedName.equals(target)) {
+                    return cleanNumber(number);
+                }
+
+                if (normalizedName.contains(target)
+                        || target.contains(normalizedName)) {
+
+                    if (partialNumber.isEmpty()) {
+                        partialNumber =
+                                cleanNumber(number);
+                    }
+                }
+            }
+
+            return partialNumber;
+
+        } catch (Exception e) {
+            return "";
+
+        } finally {
+
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     public boolean call(String phoneNumber) {
 
-        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+        if (phoneNumber == null
+                || phoneNumber.trim().isEmpty()) {
             return false;
         }
 
@@ -26,12 +120,20 @@ public class CommunicationManager {
         }
 
         try {
-            Intent intent = new Intent(
-                    Intent.ACTION_CALL,
-                    Uri.parse("tel:" + Uri.encode(phoneNumber))
+
+            Intent intent =
+                    new Intent(
+                            Intent.ACTION_CALL,
+                            Uri.parse(
+                                    "tel:"
+                                            + Uri.encode(phoneNumber)
+                            )
+                    );
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
             );
 
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
 
             return true;
@@ -41,19 +143,52 @@ public class CommunicationManager {
         }
     }
 
-    public void openDialer(String phoneNumber) {
+    public boolean callContact(String contactName) {
 
-        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
-            return;
+        String number =
+                findContactNumber(contactName);
+
+        if (number.isEmpty()) {
+            return false;
         }
 
-        Intent intent = new Intent(
-                Intent.ACTION_DIAL,
-                Uri.parse("tel:" + Uri.encode(phoneNumber))
-        );
+        return call(number);
+    }
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+    public void openDialer(String phoneNumber) {
+
+        try {
+
+            Intent intent;
+
+            if (phoneNumber == null
+                    || phoneNumber.trim().isEmpty()) {
+
+                intent =
+                        new Intent(
+                                Intent.ACTION_DIAL
+                        );
+
+            } else {
+
+                intent =
+                        new Intent(
+                                Intent.ACTION_DIAL,
+                                Uri.parse(
+                                        "tel:"
+                                                + Uri.encode(phoneNumber)
+                                )
+                        );
+            }
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+            );
+
+            context.startActivity(intent);
+
+        } catch (Exception ignored) {
+        }
     }
 
     public void composeSms(
@@ -61,20 +196,84 @@ public class CommunicationManager {
             String message
     ) {
 
-        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+        if (phoneNumber == null
+                || phoneNumber.trim().isEmpty()) {
             return;
         }
 
-        Intent intent = new Intent(
-                Intent.ACTION_SENDTO,
-                Uri.parse("smsto:" + Uri.encode(phoneNumber))
-        );
+        try {
 
-        if (message != null) {
-            intent.putExtra("sms_body", message);
+            Intent intent =
+                    new Intent(
+                            Intent.ACTION_SENDTO,
+                            Uri.parse(
+                                    "smsto:"
+                                            + Uri.encode(phoneNumber)
+                            )
+                    );
+
+            if (message != null) {
+
+                intent.putExtra(
+                        "sms_body",
+                        message
+                );
+            }
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+            );
+
+            context.startActivity(intent);
+
+        } catch (Exception ignored) {
+        }
+    }
+
+    public boolean composeSmsToContact(
+            String contactName,
+            String message
+    ) {
+
+        String number =
+                findContactNumber(contactName);
+
+        if (number.isEmpty()) {
+            return false;
         }
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        composeSms(
+                number,
+                message
+        );
+
+        return true;
+    }
+
+    private String cleanNumber(String number) {
+
+        if (number == null) {
+            return "";
+        }
+
+        return number.replaceAll(
+                "[^0-9+]",
+                ""
+        );
+    }
+
+    private String normalize(String text) {
+
+        if (text == null) {
+            return "";
+        }
+
+        return text
+                .toLowerCase(Locale.ROOT)
+                .replaceAll(
+                        "[^a-z0-9\\u0900-\\u097F]",
+                        ""
+                )
+                .trim();
     }
 }

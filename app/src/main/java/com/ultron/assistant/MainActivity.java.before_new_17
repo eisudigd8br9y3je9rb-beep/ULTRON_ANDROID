@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.ultron.assistant.accessibility.UltronAccessibilityService;
 import com.ultron.assistant.actions.AppLauncher;
 import com.ultron.assistant.actions.PhoneActions;
 import com.ultron.assistant.communication.CommunicationManager;
@@ -36,7 +35,6 @@ public class MainActivity extends Activity {
 
     private static final int CAMERA_REQUEST = 100;
     private static final int CALL_REQUEST = 103;
-    private static final int CONTACTS_REQUEST = 104;
     private static final int AUDIO_REQUEST = 101;
 
     private TextureView preview;
@@ -215,19 +213,6 @@ public class MainActivity extends Activity {
                             Manifest.permission.CALL_PHONE
                     },
                     CALL_REQUEST
-            );
-        }
-
-
-        if (checkSelfPermission(
-                Manifest.permission.READ_CONTACTS
-        ) != PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(
-                    new String[]{
-                            Manifest.permission.READ_CONTACTS
-                    },
-                    CONTACTS_REQUEST
             );
         }
     }
@@ -440,105 +425,8 @@ public class MainActivity extends Activity {
                 tellBatteryLevel();
                 break;
 
-            case FEATURE_INFO:
-                tellFeatures();
-                break;
-
-            case UI_CLICK:
-                handleUiClick(command);
-                break;
-
-            case UI_TYPE:
-                handleUiType(command);
-                break;
-
-            case UI_SCROLL_DOWN:
-                handleUiScrollDown();
-                break;
-
-            case UI_SCROLL_UP:
-                handleUiScrollUp();
-                break;
-
-            case UI_BACK:
-                handleUiBack();
-                break;
-
-            case UI_HOME:
-                handleUiHome();
-                break;
-
             case OPEN_ANY_APP:
                 openRequestedApp(command);
-                break;
-
-
-            case OPEN_SECURITY_SETTINGS:
-                openSecuritySettings();
-                break;
-
-            case BRIGHTNESS_UP:
-                openBrightnessSettings();
-                break;
-
-            case BRIGHTNESS_DOWN:
-                openBrightnessSettings();
-                break;
-
-            case SILENT_MODE:
-                setRingerMode(AudioManager.RINGER_MODE_SILENT, "Silent mode enabled.");
-                break;
-
-            case RINGER_MODE:
-                setRingerMode(AudioManager.RINGER_MODE_NORMAL, "Normal ringer mode enabled.");
-                break;
-
-            case VIBRATE_MODE:
-                setRingerMode(AudioManager.RINGER_MODE_VIBRATE, "Vibrate mode enabled.");
-                break;
-
-            case OPEN_BATTERY_SAVER:
-                openBatterySaverSettings();
-                break;
-
-            case OPEN_MOBILE_NETWORK_SETTINGS:
-                openMobileNetworkSettings();
-                break;
-
-            case OPEN_AIRPLANE_MODE_SETTINGS:
-                openAirplaneModeSettings();
-                break;
-
-            case OPEN_LOCATION_SETTINGS:
-                openLocationSettings();
-                break;
-
-            case OPEN_NOTIFICATION_SETTINGS:
-                openNotificationSettings();
-                break;
-
-            case OPEN_DIALER:
-                openDialer();
-                break;
-
-            case OPEN_SMS_APP:
-                openSmsApp();
-                break;
-
-            case OPEN_MUSIC_APP:
-                openMusicApp();
-                break;
-
-            case CHECK_WIFI_STATUS:
-                tellWifiStatus();
-                break;
-
-            case GET_CHARGING_STATUS:
-                tellChargingStatus();
-                break;
-
-            case OPEN_APP_SETTINGS:
-                openAppSettings();
                 break;
 
             case UNKNOWN:
@@ -553,379 +441,65 @@ public class MainActivity extends Activity {
 
 
 
-
-
-    private void handleUiClick(String command) {
-
-        if (!UltronAccessibilityService.isRunning()) {
-            respond("ULTRON UI Control is not enabled. Please enable Accessibility Service.");
-            return;
-        }
-
-        String text = command
-                .replaceFirst("(?i)^click\\s+", "")
-                .replaceAll("\\s*(पर क्लिक|पे क्लिक).*", "")
-                .trim();
-
-        if (text.isEmpty()) {
-            respond("Please tell me what to click.");return;
-        }
-
-        boolean clicked =
-                UltronAccessibilityService.clickText(text);
-
-        respond(clicked
-                ? "Clicked " + text
-                : "I could not find " + text + " on the screen.");
-    }
-
-    private void handleUiType(String command) {
-
-        if (!UltronAccessibilityService.isRunning()) {
-            respond("ULTRON UI Control is not enabled. Please enable Accessibility Service.");
-            return;
-        }
-
-        String text = command
-                .replaceFirst("(?i)^(type|write)\\s+", "")
-                .replaceFirst("^लिखो\\s*", "")
-                .trim();
-
-        if (text.isEmpty()) {
-            respond("Please tell me what to type.");
-            return;
-        }
-
-        boolean typed =
-                UltronAccessibilityService.typeText(text);
-
-        respond(typed
-                ? "Text entered."
-                : "Please select a text field first.");
-    }
-
-    private void handleUiScrollDown() {
-
-        if (!UltronAccessibilityService.isRunning()) {
-            respond("Please enable ULTRON UI Control in Accessibility Settings.");
-            return;
-        }
-
-        boolean done =
-                UltronAccessibilityService.scrollDown();
-
-        respond(done
-                ? "Scrolling down."
-                : "I could not scroll this screen.");
-    }
-
-    private void handleUiScrollUp() {
-
-        if (!UltronAccessibilityService.isRunning()) {
-            respond("Please enable ULTRON UI Control in Accessibility Settings.");
-            return;
-        }
-
-        boolean done =
-                UltronAccessibilityService.scrollUp();
-
-        respond(done
-                ? "Scrolling up."
-                : "I could not scroll this screen.");
-    }
-
-    private void handleUiBack() {
-
-        if (!UltronAccessibilityService.isRunning()) {
-            goHome();
-            return;
-        }
-
-        boolean done =
-                UltronAccessibilityService.goBack();
-
-        respond(done
-                ? "Going back."
-                : "I could not go back.");
-    }
-
-    private void handleUiHome() {
-
-        if (!UltronAccessibilityService.isRunning()) {
-            goHome();
-            return;
-        }
-
-        boolean done =
-                UltronAccessibilityService.goHome();
-
-        respond(done
-                ? "Going home."
-                : "I could not open Home.");
-    }
-
-    private void openSecuritySettings() {
-        try {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_SECURITY_SETTINGS
-            ));
-            respond("Opening security settings.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open security settings.");
-        }
-    }
-
-    private void openBrightnessSettings() {
-        try {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_DISPLAY_SETTINGS
-            ));
-            respond("Opening display settings.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open display settings.");
-        }
-    }
-
-    private void setRingerMode(int mode, String message) {
-        AudioManager audioManager =
-                (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-        if (audioManager == null) {
-            respond("Sorry, I could not control ringer mode.");
-            return;
-        }
-
-        try {
-            audioManager.setRingerMode(mode);
-            respond(message);
-        } catch (Exception e) {
-            respond("Sorry, I could not change ringer mode.");
-        }
-    }
-
-    private void openBatterySaverSettings() {
-        try {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS
-            ));
-            respond("Opening battery saver settings.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open battery saver.");
-        }
-    }
-
-    private void openMobileNetworkSettings() {
-        try {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_WIRELESS_SETTINGS
-            ));
-            respond("Opening mobile network settings.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open mobile network settings.");
-        }
-    }
-
-    private void openAirplaneModeSettings() {
-        try {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_AIRPLANE_MODE_SETTINGS
-            ));
-            respond("Opening airplane mode settings.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open airplane mode settings.");
-        }
-    }
-
-    private void openLocationSettings() {
-        try {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
-            ));
-            respond("Opening location settings.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open location settings.");
-        }
-    }
-
-    private void openNotificationSettings() {
-        try {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
-            ));
-            respond("Opening notification settings.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open notification settings.");
-        }
-    }
-
-    private void openDialer() {
-        try {
-            startActivity(new Intent(Intent.ACTION_DIAL));
-            respond("Opening dialer.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open dialer.");
-        }
-    }
-
-    private void openSmsApp() {
-        try {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_APP_MESSAGING);
-            startActivity(intent);
-            respond("Opening messaging app.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open messaging app.");
-        }
-    }
-
-    private void openMusicApp() {
-        try {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_APP_MUSIC);
-            startActivity(intent);
-            respond("Opening music app.");
-        } catch (Exception e) {
-            respond("Sorry, I could not open music app.");
-        }
-    }
-
-    private void tellWifiStatus() {
-        try {
-            android.net.ConnectivityManager cm =
-                    (android.net.ConnectivityManager)
-                            getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            if (cm == null) {
-                respond("Sorry, I could not check Wi-Fi.");
-                return;
-            }
-
-            android.net.Network network = cm.getActiveNetwork();
-
-            android.net.NetworkCapabilities capabilities =
-                    network == null
-                            ? null
-                            : cm.getNetworkCapabilities(network);
-
-            boolean connected =
-                    capabilities != null &&
-                    capabilities.hasTransport(
-                            android.net.NetworkCapabilities.TRANSPORT_WIFI
-                    );
-
-            respond(connected
-                    ? "Wi-Fi is connected."
-                    : "Wi-Fi is not connected.");
-
-        } catch (Exception e) {
-            respond("Sorry, I could not check Wi-Fi status.");
-        }
-    }
-
-    private void tellChargingStatus() {
-        IntentFilter filter =
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-
-        Intent batteryStatus =
-                registerReceiver(null, filter);
-
-        if (batteryStatus == null) {
-            respond("Sorry, I could not check charging status.");
-            return;
-        }
-
-        int batteryState =
-                batteryStatus.getIntExtra(
-                        BatteryManager.EXTRA_STATUS,
-                        -1
-                );
-
-        if (batteryState ==
-                BatteryManager.BATTERY_STATUS_CHARGING) {
-            respond("Your phone is charging.");
-        } else if (batteryState ==
-                BatteryManager.BATTERY_STATUS_FULL) {
-            respond("Battery is fully charged.");
-        } else {
-            respond("Your phone is not charging.");
-        }
-    }
-
-    private void openAppSettings() {
-        try {
-            Intent intent = new Intent(
-                    android.provider.Settings
-                            .ACTION_APPLICATION_DETAILS_SETTINGS
-            );
-
-            intent.setData(
-                    android.net.Uri.parse(
-                            "package:" + getPackageName()
-                    )
-            );
-
-            startActivity(intent);
-            respond("Opening ULTRON app settings.");
-
-        } catch (Exception e) {
-            respond("Sorry, I could not open app settings.");
-        }
-    }
-
     private void openRequestedApp(String command) {
 
-        if (command == null || command.trim().isEmpty()) {
-            respond("Please tell me which app to open.");
+        String text = command.toLowerCase().trim();
+
+        if (text.contains("youtube") || text.contains("यूट्यूब")) {
+            boolean opened = appLauncher.openYouTube();
+            if (opened) respond("Opening YouTube.");
+            else respond("Sorry, I could not open YouTube.");
             return;
         }
 
-        String appName =
-                extractAppName(command);
-
-        if (appName.isEmpty()) {
-            respond("Please tell me the app name.");
+        if (text.contains("instagram") || text.contains("इंस्टाग्राम")) {
+            boolean opened = appLauncher.openInstagram();
+            if (opened) respond("Opening Instagram.");
+            else respond("Instagram is not installed.");
             return;
         }
 
-        boolean opened =
-                appLauncher.openAppByName(appName);
-
-        if (opened) {
-            respond("Opening " + appName + ".");
-        } else {
-            respond(
-                    "Sorry, I could not find "
-                            + appName
-                            + " on this phone."
-            );
-        }
-    }
-
-    private String extractAppName(String command) {
-
-        if (command == null) {
-            return "";
+        if (text.contains("pubg")) {
+            boolean opened = appLauncher.openPUBG();
+            if (opened) respond("Opening PUBG.");
+            else respond("PUBG is not installed.");
+            return;
         }
 
-        String appName =
-                command.trim();
+        if (text.contains("chrome")
+                || text.contains("क्रोम")) {
 
-        appName = appName.replaceFirst(
-                "(?i)^\\s*(open|launch|start)\\s+",
-                ""
+            boolean opened =
+                    appLauncher.openChrome();
+
+            if (opened) {
+                respond("Opening Chrome.");
+            } else {
+                respond("Chrome is not installed.");
+            }
+
+            return;
+        }
+
+        if (text.contains("whatsapp")
+                || text.contains("व्हाट्सएप")
+                || text.contains("वॉट्सऐप")) {
+
+            boolean opened =
+                    appLauncher.openWhatsApp();
+
+            if (opened) {
+                respond("Opening WhatsApp.");
+            } else {
+                respond("WhatsApp is not installed.");
+            }
+
+            return;
+        }
+
+        respond(
+                "Sorry, I do not know which app to open yet."
         );
-
-        appName = appName.replaceFirst(
-                "^\\s*(खोलो|खोल दो|ओपन करो|चालू करो)\\s*",
-                ""
-        );
-
-        appName = appName.replaceFirst(
-                "\\s*(खोलो|खोल दो|ओपन करो|चालू करो)\\s*$",
-                ""
-        );
-
-        return appName.trim();
     }
 
 
@@ -1175,215 +749,55 @@ public class MainActivity extends Activity {
         String phoneNumber =
                 extractPhoneNumber(command);
 
-        if (!phoneNumber.isEmpty()) {
+        if (phoneNumber.isEmpty()) {
 
             status.setText(
-                    "Calling: " + phoneNumber
+                    "No phone number found. Speak digits clearly."
             );
-
-            boolean called =
-                    communicationManager.call(phoneNumber);
-
-            if (!called) {
-                respond(
-                        "Call permission required or call failed."
-                );
-            }
 
             return;
         }
 
-        String contactName =
-                extractContactNameForCall(command);
-
-        if (contactName.isEmpty()) {
-            respond(
-                    "Please tell me a phone number or contact name."
-            );
-            return;
-        }
-
-        String number =
-                communicationManager.findContactNumber(
-                        contactName
-                );
-
-        if (number.isEmpty()) {
-            respond(
-                    "Sorry, I could not find "
-                            + contactName
-                            + " in your contacts."
-            );
-            return;
-        }
+        status.setText(
+                "Calling: " + phoneNumber
+        );
 
         boolean called =
-                communicationManager.call(number);
+                communicationManager.call(phoneNumber);
 
-        if (called) {
-            respond(
-                    "Calling " + contactName + "."
-            );
-        } else {
-            respond(
-                    "I found the contact, but the call could not start."
+        if (!called) {
+            status.setText(
+                    "Call permission required or call failed"
             );
         }
     }
-
 
     private void sendSms(String command) {
 
         String phoneNumber =
                 extractPhoneNumber(command);
 
+        if (phoneNumber.isEmpty()) {
+
+            status.setText(
+                    "No phone number found for SMS."
+            );
+
+            return;
+        }
+
         String message =
                 extractSmsMessage(command);
 
-        if (!phoneNumber.isEmpty()) {
-
-            communicationManager.composeSms(
-                    phoneNumber,
-                    message
-            );
-
-            respond(
-                    "Opening message for "
-                            + phoneNumber
-                            + "."
-            );
-
-            return;
-        }
-
-        String contactName =
-                extractContactNameForSms(command);
-
-        if (contactName.isEmpty()) {
-            respond(
-                    "Please tell me the contact name."
-            );
-            return;
-        }
-
-        String number =
-                communicationManager.findContactNumber(
-                        contactName
-                );
-
-        if (number.isEmpty()) {
-            respond(
-                    "Sorry, I could not find "
-                            + contactName
-                            + " in your contacts."
-            );
-            return;
-        }
+        status.setText(
+                "Opening SMS for: " + phoneNumber
+        );
 
         communicationManager.composeSms(
-                number,
+                phoneNumber,
                 message
         );
-
-        respond(
-                "Opening message for "
-                        + contactName
-                        + "."
-        );
     }
-
-
-    private String extractContactNameForCall(
-            String command
-    ) {
-
-        if (command == null) {
-            return "";
-        }
-
-        String name =
-                command.trim();
-
-        name = name.replaceAll(
-                "(?i)\\b(call|phone)\\b",
-                ""
-        );
-
-        name = name.replace(
-                "कॉल करो",
-                ""
-        );
-
-        name = name.replace(
-                "को कॉल",
-                ""
-        );
-
-        name = name.replace(
-                "कॉल",
-                ""
-        );
-
-        name = name.replace(
-                "फोन लगाओ",
-                ""
-        );
-
-        name = name.replace(
-                "करो",
-                ""
-        );
-
-        return name.trim();
-    }
-
-
-    private String extractContactNameForSms(
-            String command
-    ) {
-
-        if (command == null) {
-            return "";
-        }
-
-        String name =
-                command.trim();
-
-        name = name.replaceAll(
-                "(?i)\\b(sms|message)\\b",
-                ""
-        );
-
-        name = name.replace(
-                "मैसेज भेजो",
-                ""
-        );
-
-        name = name.replace(
-                "को मैसेज",
-                ""
-        );
-
-        name = name.replace(
-                "मैसेज",
-                ""
-        );
-
-        name = name.replace(
-                "भेजो",
-                ""
-        );
-
-        String[] parts =
-                name.trim().split("\\s+");
-
-        if (parts.length > 0) {
-            return parts[0].trim();
-        }
-
-        return "";
-    }
-
 
     private String extractPhoneNumber(String text) {
 
@@ -1442,28 +856,6 @@ public class MainActivity extends Activity {
         );
 
         return message.trim();
-    }
-
-
-    private void tellFeatures() {
-
-        String features =
-                "I am ULTRON. "
-                + "I can open installed apps, "
-                + "call phone numbers and contacts, "
-                + "open messages for numbers and contacts, "
-                + "open camera, settings and home screen, "
-                + "control flashlight and volume, "
-                + "open Wi-Fi and Bluetooth settings, "
-                + "tell time, date and battery information, "
-                + "control silent, vibrate and normal ringer modes, "
-                + "open security, location, notification, "
-                + "mobile network and other phone settings, "
-                + "search Google and handle available commands. "
-                + "Some actions depend on Android permissions "
-                + "and phone security restrictions.";
-
-        respond(features);
     }
 
 
