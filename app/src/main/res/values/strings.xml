@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ULTRON</string>
+    <string name="accessibility_service_description">ULTRON UI Control allows voice commands to interact with supported app interfaces.</string>
+</resources>
