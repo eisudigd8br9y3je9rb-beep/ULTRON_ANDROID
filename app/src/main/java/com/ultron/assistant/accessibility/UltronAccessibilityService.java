@@ -44,6 +44,8 @@ public class UltronAccessibilityService
             return false;
         }
 
+        String target = text.trim().toLowerCase();
+
         AccessibilityNodeInfo root =
                 instance.getRootInActiveWindow();
 
@@ -52,31 +54,95 @@ public class UltronAccessibilityService
         }
 
         try {
+            // First try Android's built-in text search
             List<AccessibilityNodeInfo> nodes =
-                    root.findAccessibilityNodeInfosByText(text);
+                    root.findAccessibilityNodeInfosByText(text.trim());
 
-            if (nodes == null || nodes.isEmpty()) {
-                return false;
-            }
-
-            for (AccessibilityNodeInfo node : nodes) {
-
-                AccessibilityNodeInfo current = node;
-
-                while (current != null) {
-
-                    if (current.isClickable()) {
-                        return current.performAction(
-                                AccessibilityNodeInfo.ACTION_CLICK
-                        );
+            if (nodes != null) {
+                for (AccessibilityNodeInfo node : nodes) {
+                    if (clickNodeOrParent(node)) {
+                        return true;
                     }
-
-                    current = current.getParent();
                 }
             }
 
+            // Fallback: search all visible nodes manually
+            return findAndClickMatchingNode(root, target);
+
         } finally {
             root.recycle();
+        }
+    }
+
+    private static boolean findAndClickMatchingNode(
+            AccessibilityNodeInfo node,
+            String target
+    ) {
+
+        if (node == null) {
+            return false;
+        }
+
+        CharSequence nodeText = node.getText();
+        CharSequence description = node.getContentDescription();
+
+        if (matchesText(nodeText, target)
+                || matchesText(description, target)) {
+
+            if (clickNodeOrParent(node)) {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < node.getChildCount(); i++) {
+
+            AccessibilityNodeInfo child = node.getChild(i);
+
+            if (child != null) {
+                if (findAndClickMatchingNode(child, target)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean matchesText(
+            CharSequence value,
+            String target
+    ) {
+
+        if (value == null || target == null) {
+            return false;
+        }
+
+        String current =
+                value.toString().trim().toLowerCase();
+
+        return current.equals(target)
+                || current.contains(target)
+                || target.contains(current);
+    }
+
+    private static boolean clickNodeOrParent(
+            AccessibilityNodeInfo node
+    ) {
+
+        AccessibilityNodeInfo current = node;
+
+        while (current != null) {
+
+            if (current.isClickable()
+                    && current.isEnabled()
+                    && current.isVisibleToUser()) {
+
+                return current.performAction(
+                        AccessibilityNodeInfo.ACTION_CLICK
+                );
+            }
+
+            current = current.getParent();
         }
 
         return false;
