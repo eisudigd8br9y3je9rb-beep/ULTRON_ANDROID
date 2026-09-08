@@ -24,6 +24,7 @@ import com.ultron.assistant.actions.AppLauncher;
 import com.ultron.assistant.actions.PhoneActions;
 import com.ultron.assistant.communication.CommunicationManager;
 import com.ultron.assistant.core.CommandManager;
+import com.ultron.assistant.core.TechnicianKnowledge;
 import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.voice.VoiceSpeaker;
 
@@ -46,6 +47,7 @@ public class MainActivity extends Activity {
     private VoiceManager voiceManager;
     private VoiceSpeaker voiceSpeaker;
     private CommandManager commandManager;
+    private TechnicianKnowledge technicianKnowledge;
 
     // ULTRON voice states
     private boolean ultronActive = true;
@@ -60,6 +62,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         commandManager = new CommandManager();
+        technicianKnowledge = new TechnicianKnowledge(this);
         appLauncher = new AppLauncher(this);
         phoneActions = new PhoneActions(this);
         communicationManager = new CommunicationManager(this);
@@ -505,10 +508,13 @@ public class MainActivity extends Activity {
 
             case UNKNOWN:
             default:
-                status.setText(
-                        "ULTRON did not understand: "
-                                + command
-                );
+                String knowledgeAnswer = technicianKnowledge.search(command);
+
+                if (knowledgeAnswer != null && !knowledgeAnswer.trim().isEmpty()) {
+                    respond(knowledgeAnswer);
+                } else {
+                    respond("Sorry, I did not understand your question. Please try again.");
+                }
                 break;
         }
     }
