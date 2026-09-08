@@ -55,6 +55,7 @@ public class CommandManager {
         CHECK_WIFI_STATUS,
         GET_CHARGING_STATUS,
         OPEN_APP_SETTINGS,
+        FEATURE_INFO,
 
         UNKNOWN
     }
@@ -466,6 +467,21 @@ public class CommandManager {
             return CommandType.OPEN_APP_SETTINGS;
         }
 
+
+
+        // FEATURE INFORMATION
+        if (text.contains("what can you do")
+                || text.contains("what are your features")
+                || text.contains("tell me your features")
+                || text.contains("your features")
+                || text.contains("तुम क्या कर सकते हो")
+                || text.contains("अपने फीचर बताओ")
+                || text.contains("अपने फीचर्स बताओ")
+                || text.contains("तुम्हारे फीचर क्या हैं")
+                || text.contains("तुम क्या क्या कर सकते हो")) {
+
+            return CommandType.FEATURE_INFO;
+        }
 
         // OPEN ANY APP
         if (text.startsWith("open ")

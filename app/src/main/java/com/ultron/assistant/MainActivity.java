@@ -498,6 +498,11 @@ public class MainActivity extends Activity {
                 openAppSettings();
                 break;
 
+            case FEATURE_INFO:
+                tellFeatures();
+                break;
+
+
             case UNKNOWN:
             default:
                 status.setText(
@@ -510,6 +515,24 @@ public class MainActivity extends Activity {
 
 
 
+
+
+    private void tellFeatures() {
+        String message =
+                "मैं ULTRON हूँ। मेरे वर्तमान फीचर्स हैं: "
+                + "YouTube, Instagram और PUBG खोलना। "
+                + "Settings और Camera खोलना। "
+                + "Google पर search करना। "
+                + "Call और SMS करना। "
+                + "Torch control करना। "
+                + "Volume control करना। "
+                + "WiFi और Bluetooth settings खोलना। "
+                + "Time, Date और Battery की जानकारी देना। "
+                + "Security, Network, Location और Notification settings खोलना। "
+                + "और अन्य installed apps खोलने की कोशिश करना।";
+
+        respond(message);
+    }
 
     private void openSecuritySettings() {
         try {
