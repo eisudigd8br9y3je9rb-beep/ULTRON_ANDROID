@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - test-before-ui
   workflow_dispatch:
 
 jobs:
