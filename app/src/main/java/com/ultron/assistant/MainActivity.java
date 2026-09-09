@@ -25,6 +25,7 @@ import com.ultron.assistant.actions.PhoneActions;
 import com.ultron.assistant.communication.CommunicationManager;
 import com.ultron.assistant.core.CommandManager;
 import com.ultron.assistant.core.TechnicianKnowledge;
+import com.ultron.assistant.memory.MemoryManager;
 import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.voice.VoiceSpeaker;
 
@@ -48,11 +49,13 @@ public class MainActivity extends Activity {
     private VoiceSpeaker voiceSpeaker;
     private CommandManager commandManager;
     private TechnicianKnowledge technicianKnowledge;
+    private MemoryManager memoryManager;
 
     // ULTRON voice states
     private boolean ultronActive = true;
     private boolean ultronWaiting = false;
     private boolean continuousListening = true;
+    private String lastUserCommand = "";
     private AppLauncher appLauncher;
     private PhoneActions phoneActions;
     private CommunicationManager communicationManager;
@@ -63,6 +66,7 @@ public class MainActivity extends Activity {
 
         commandManager = new CommandManager();
         technicianKnowledge = new TechnicianKnowledge(this);
+        memoryManager = new MemoryManager(this);
         appLauncher = new AppLauncher(this);
         phoneActions = new PhoneActions(this);
         communicationManager = new CommunicationManager(this);
@@ -254,6 +258,18 @@ public class MainActivity extends Activity {
 
         status.setText(message);
 
+        if (memoryManager != null
+                && lastUserCommand != null
+                && !lastUserCommand.trim().isEmpty()
+                && message != null
+                && !message.trim().isEmpty()) {
+            memoryManager.addConversation(
+                    lastUserCommand,
+                    message
+            );
+            lastUserCommand = "";
+        }
+
         if (voiceManager != null) {
             voiceManager.stopListening();
         }
@@ -279,6 +295,7 @@ public class MainActivity extends Activity {
         }
 
         status.setText("You said: " + command);
+        lastUserCommand = command.trim();
 
         CommandManager.CommandType commandType =
                 commandManager.parseCommand(command);
