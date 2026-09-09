@@ -10,6 +10,12 @@ public class VoiceSpeaker {
     private TextToSpeech textToSpeech;
     private boolean ready = false;
 
+    private final Locale hindiLocale =
+            new Locale("hi", "IN");
+
+    private final Locale englishLocale =
+            Locale.US;
+
     public VoiceSpeaker(Context context) {
 
         textToSpeech = new TextToSpeech(
@@ -18,14 +24,11 @@ public class VoiceSpeaker {
 
                     if (status == TextToSpeech.SUCCESS) {
 
-                        int result =
-                                textToSpeech.setLanguage(
-                                        Locale.US
-                                );
+                        // Slightly slower and deeper voice style
+                        textToSpeech.setSpeechRate(0.82f);
+                        textToSpeech.setPitch(0.82f);
 
-                        ready =
-                                result != TextToSpeech.LANG_MISSING_DATA
-                                && result != TextToSpeech.LANG_NOT_SUPPORTED;
+                        ready = true;
 
                     } else {
 
@@ -45,12 +48,66 @@ public class VoiceSpeaker {
             return;
         }
 
+        String cleanText = text.trim();
+
+        setBestLanguage(cleanText);
+
+        // Slow, confident ULTRON-style delivery
+        textToSpeech.setSpeechRate(0.82f);
+        textToSpeech.setPitch(0.82f);
+
         textToSpeech.speak(
-                text,
+                cleanText,
                 TextToSpeech.QUEUE_FLUSH,
                 null,
                 "ULTRON_SPEECH"
         );
+    }
+
+    private void setBestLanguage(String text) {
+
+        if (containsHindi(text)) {
+
+            int result =
+                    textToSpeech.setLanguage(
+                            hindiLocale
+                    );
+
+            if (result ==
+                    TextToSpeech.LANG_MISSING_DATA
+                    || result ==
+                    TextToSpeech.LANG_NOT_SUPPORTED) {
+
+                textToSpeech.setLanguage(
+                        englishLocale
+                );
+            }
+
+        } else {
+
+            textToSpeech.setLanguage(
+                    englishLocale
+            );
+        }
+    }
+
+    private boolean containsHindi(String text) {
+
+        for (int i = 0;
+             i < text.length();
+             i++) {
+
+            char character =
+                    text.charAt(i);
+
+            if (character >= '\u0900'
+                    && character <= '\u097F') {
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void stop() {
