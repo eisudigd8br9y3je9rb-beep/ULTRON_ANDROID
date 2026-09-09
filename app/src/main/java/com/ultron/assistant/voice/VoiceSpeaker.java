@@ -2,6 +2,7 @@ package com.ultron.assistant.voice;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 
 import java.util.Locale;
 
@@ -39,6 +40,10 @@ public class VoiceSpeaker {
     }
 
     public void speak(String text) {
+        speak(text, null);
+    }
+
+    public void speak(String text, Runnable onDone) {
 
         if (text == null || text.trim().isEmpty()) {
             return;
@@ -55,6 +60,28 @@ public class VoiceSpeaker {
         // Slow, confident ULTRON-style delivery
         textToSpeech.setSpeechRate(0.82f);
         textToSpeech.setPitch(0.82f);
+
+        textToSpeech.setOnUtteranceProgressListener(
+                new UtteranceProgressListener() {
+                    @Override
+                    public void onStart(String utteranceId) {
+                    }
+
+                    @Override
+                    public void onDone(String utteranceId) {
+                        if (onDone != null) {
+                            onDone.run();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String utteranceId) {
+                        if (onDone != null) {
+                            onDone.run();
+                        }
+                    }
+                }
+        );
 
         textToSpeech.speak(
                 cleanText,

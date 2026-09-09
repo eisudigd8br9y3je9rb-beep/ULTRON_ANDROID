@@ -254,8 +254,20 @@ public class MainActivity extends Activity {
 
         status.setText(message);
 
+        if (voiceManager != null) {
+            voiceManager.stopListening();
+        }
+
         if (voiceSpeaker != null) {
-            voiceSpeaker.speak(message);
+            voiceSpeaker.speak(
+                    message,
+                    () -> runOnUiThread(() -> {
+                        if (ultronActive && !ultronWaiting
+                                && voiceManager != null) {
+                            voiceManager.startListening();
+                        }
+                    })
+            );
         }
     }
 
