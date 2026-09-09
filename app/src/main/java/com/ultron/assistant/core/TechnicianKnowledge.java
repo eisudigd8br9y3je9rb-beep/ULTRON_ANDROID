@@ -54,6 +54,10 @@ public class TechnicianKnowledge {
 
     public String search(String question) {
 
+        if (!isTechnicianQuestion(question)) {
+            return null;
+        }
+
         if (knowledgeText == null
                 || knowledgeText.trim().isEmpty()) {
 
@@ -136,7 +140,20 @@ public class TechnicianKnowledge {
                         .replaceAll(
                                 "\\s+",
                                 " "
-                        );
+                        )
+                        .replaceAll(
+                                "\\.{3,}",
+                                " "
+                        )
+                        .replaceAll(
+                                "…+",
+                                " "
+                        )
+                        .replaceAll(
+                                "\\s{2,}",
+                                " "
+                        )
+                        .trim();
 
         if (bestParagraph.length() > 700) {
 
@@ -148,6 +165,113 @@ public class TechnicianKnowledge {
         }
 
         return bestParagraph;
+    }
+
+    private boolean isTechnicianQuestion(String question) {
+
+        if (question == null || question.trim().isEmpty()) {
+            return false;
+        }
+
+        String text =
+                question.toLowerCase(Locale.getDefault());
+
+        String[] applianceWords = {
+                "ac",
+                "air conditioner",
+                "air conditioning",
+                "fridge",
+                "refrigerator",
+                "freezer",
+                "washing machine",
+                "geyser",
+                "water purifier",
+                "purifier",
+                "ro",
+                "एसी",
+                "एयर कंडीशनर",
+                "फ्रिज",
+                "रेफ्रिजरेटर",
+                "फ्रीजर",
+                "वॉशिंग मशीन",
+                "गीजर",
+                "आरओ",
+                "प्यूरिफायर"
+        };
+
+        String[] technicalWords = {
+                "compressor",
+                "condenser",
+                "evaporator",
+                "refrigerant",
+                "capacitor",
+                "thermostat",
+                "contactor",
+                "relay",
+                "pcb",
+                "inverter",
+                "voltage",
+                "current",
+                "ampere",
+                "pressure",
+                "leak",
+                "leakage",
+                "wiring",
+                "coil",
+                "blower",
+                "fan motor",
+                "thermistor",
+                "defrost",
+                "cooling",
+                "gas charging",
+                "repair",
+                "fault",
+                "error code",
+                "multimeter",
+                "compressor",
+                "कंप्रेसर",
+                "कंडेंसर",
+                "इवैपोरेटर",
+                "रेफ्रिजरेंट",
+                "कैपेसिटर",
+                "थर्मोस्टेट",
+                "कॉन्टैक्टर",
+                "रिले",
+                "पीसीबी",
+                "इन्वर्टर",
+                "वोल्टेज",
+                "करंट",
+                "एम्पियर",
+                "प्रेशर",
+                "लीक",
+                "लीकेज",
+                "वायरिंग",
+                "कॉइल",
+                "ब्लोअर",
+                "फैन मोटर",
+                "थर्मिस्टर",
+                "डिफ्रॉस्ट",
+                "कूलिंग",
+                "गैस चार्जिंग",
+                "रिपेयर",
+                "फॉल्ट",
+                "एरर कोड",
+                "मल्टीमीटर"
+        };
+
+        for (String word : applianceWords) {
+            if (text.contains(word)) {
+                return true;
+            }
+        }
+
+        for (String word : technicalWords) {
+            if (text.contains(word)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean isCommonWord(
