@@ -50,15 +50,19 @@ public class VoiceManager {
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         );
 
-        // Hindi + Indian English friendly recognition.
+        // Let Android's installed speech service choose the best
+        // available language for the device/user.
         intent.putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE,
-                "hi-IN"
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         );
 
+        // Prefer local recognition when the device has an offline
+        // speech language pack. If unavailable, the recognizer may
+        // use its normal network service.
         intent.putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
-                "hi-IN"
+                RecognizerIntent.EXTRA_PREFER_OFFLINE,
+                true
         );
 
         intent.putExtra(
@@ -138,7 +142,7 @@ public class VoiceManager {
                                 case SpeechRecognizer.ERROR_NETWORK:
                                 case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
                                     message =
-                                            "Voice recognition network problem.";
+                                            "Speech service network error. Check Google speech recognition and internet, then tap Start Voice Command again.";
                                     break;
 
                                 case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
