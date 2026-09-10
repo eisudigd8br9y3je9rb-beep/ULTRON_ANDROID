@@ -136,7 +136,9 @@ public class MainActivity extends Activity {
 
         setContentView(root);
 
-        rearCameraButton.setOnClickListener(
+        
+        startDoubleClapDetector();
+rearCameraButton.setOnClickListener(
                 v -> openCamera(true)
         );
 
@@ -1761,6 +1763,8 @@ public class MainActivity extends Activity {
         }
     }
 
+    stopDoubleClapDetector();
+
     @Override
     protected void onDestroy() {
 
@@ -1854,7 +1858,7 @@ public class MainActivity extends Activity {
         try {
             android.content.Intent intent =
                     new android.content.Intent(
-                            android.content.Intent.ACTION_DIAL);
+                            android.content.Intent.ACTION_CALL);
 
             intent.setData(
                     android.net.Uri.parse(
@@ -1863,7 +1867,7 @@ public class MainActivity extends Activity {
             );
 
             startActivity(intent);
-            respond("I found the number and opened the dialer. Please confirm the call.");
+            respond("Calling now.");
         } catch (Exception e) {
             respond("I could not open the phone dialer.");
         }
@@ -2028,5 +2032,198 @@ public class MainActivity extends Activity {
     }
 
 
+
+
+
+    // =========================================================
+    // ULTRON DOUBLE-CLAP ACTIVATION
+    // Two quick claps activate ULTRON.
+    // Works while the ULTRON activity is open.
+    // =========================================================
+
+    private android.media.AudioRecord clapRecorder;
+    private Thread clapThread;
+    private volatile boolean clapRunning = false;
+    private long lastClapTime = 0L;
+    private int clapCount = 0;
+
+    private void startDoubleClapDetector() {
+        if (clapRunning) return;
+
+        try {
+            int sampleRate = 16000;
+            int minBuffer = android.media.AudioRecord.getMinBufferSize(
+                    sampleRate,
+                    android.media.AudioFormat.CHANNEL_IN_MONO,
+                    android.media.AudioFormat.ENCODING_PCM_16BIT
+            );
+
+            if (minBuffer <= 0) return;
+
+            clapRecorder = new android.media.AudioRecord(
+                    android.media.MediaRecorder.AudioSource.MIC,
+                    sampleRate,
+                    android.media.AudioFormat.CHANNEL_IN_MONO,
+                    android.media.AudioFormat.ENCODING_PCM_16BIT,
+                    Math.max(minBuffer * 2, 4096)
+            );
+
+            clapRunning = true;
+
+            clapThread = new Thread(() -> {
+                short[] buffer = new short[1024];
+
+                try {
+                    clapRecorder.startRecording();
+
+                    while (clapRunning && !isFinishing()) {
+                        int read = clapRecorder.read(buffer, 0, buffer.length);
+
+                        if (read <= 0) continue;
+
+                        long energy = 0;
+
+                        for (int i = 0; i < read; i++) {
+                            energy += Math.abs((int) buffer[i]);
+                        }
+
+                        long average = energy / read;
+                        long now = System.currentTimeMillis();
+
+                        // Strong short sound = possible clap
+                        if (average > 3500) {
+
+                            if (now - lastClapTime > 120
+                                    && now - lastClapTime < 1000) {
+
+                                clapCount++;
+
+                                if (clapCount >= 2) {
+                                    clapCount = 0;
+                                    lastClapTime = 0;
+
+                                    runOnUiThread(
+                                            this::activateFromDoubleClap
+                                    );
+
+                                } else {
+                                    lastClapTime = now;
+                                }
+
+                            } else if (now - lastClapTime >= 1000) {
+                                clapCount = 1;
+                                lastClapTime = now;
+                            }
+                        }
+                    }
+
+                } catch (Exception ignored) {
+                }
+            }, "ULTRON-ClapDetector");
+
+            clapThread.start();
+
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void stopDoubleClapDetector() {
+        clapRunning = false;
+
+        if (clapRecorder != null) {
+            try {
+                clapRecorder.stop();
+            } catch (Exception ignored) {
+            }
+
+            try {
+                clapRecorder.release();
+            } catch (Exception ignored) {
+            }
+
+            clapRecorder = null;
+        }
+
+        clapThread = null;
+        clapCount = 0;
+        lastClapTime = 0L;
+    }
+
+    private void activateFromDoubleClap() {
+        try {
+            if (voiceManager != null) {
+                voiceManager.stopListening();
+            }
+        } catch (Exception ignored) {
+        }
+
+        ultronActive = true;
+        ultronWaiting = false;
+
+        respond(
+                "हाँ Imtiyaz, I'm ready. Welcome to ULTRON Assistant. "
+                        + "बताइए, आपकी क्या सेवा करूँ?"
+        );
+    }
+
+    // =========================================================
+    // BETTER BASIC CONVERSATION
+    // =========================================================
+
+    private String getNaturalConversationReply(String command) {
+
+        if (command == null) return "";
+
+        String t = command.toLowerCase(java.util.Locale.getDefault()).trim();
+
+        if (t.equals("hello")
+                || t.equals("hi")
+                || t.contains("hello ultron")
+                || t.contains("हेलो")
+                || t.contains("नमस्ते")
+                || t.contains("सलाम")) {
+
+            return "हाँ Imtiyaz, मैं यहाँ हूँ। बताइए, आपकी क्या सेवा करूँ?";
+        }
+
+        if (t.contains("how are you")
+                || t.contains("कैसे हो")
+                || t.contains("कैसी हो")) {
+
+            return "मैं बढ़िया हूँ Imtiyaz और आपके काम के लिए तैयार हूँ।";
+        }
+
+        if (t.contains("thank you")
+                || t.contains("thanks")
+                || t.contains("धन्यवाद")
+                || t.contains("शुक्रिया")) {
+
+            return "आपका स्वागत है Imtiyaz।";
+        }
+
+        if (t.contains("good morning")
+                || t.contains("सुप्रभात")) {
+
+            return "Good morning Imtiyaz. मैं तैयार हूँ। आज क्या करना है?";
+        }
+
+        if (t.contains("good night")
+                || t.contains("शुभ रात्रि")) {
+
+            return "Good night Imtiyaz. जब जरूरत हो, ULTRON तैयार मिलेगा।";
+        }
+
+        if (t.contains("what can you do")
+                || t.contains("तुम क्या कर सकते हो")
+                || t.contains("अपने फीचर बताओ")) {
+
+            return "मैं voice commands समझ सकता हूँ, apps खोल सकता हूँ, "
+                    + "call और SMS कर सकता हूँ, Google search कर सकता हूँ, "
+                    + "camera और phone settings संभाल सकता हूँ और AC technician "
+                    + "knowledge में आपकी मदद कर सकता हूँ।";
+        }
+
+        return "";
+    }
 
 }

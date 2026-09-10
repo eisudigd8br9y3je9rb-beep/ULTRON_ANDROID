@@ -78,6 +78,18 @@ public class CommandManager {
         String text =
                 command.toLowerCase(Locale.getDefault()).trim();
 
+        // ACTIVATION — check before normal greeting
+        if (text.contains("hello ultron activate")
+                || text.contains("hi ultron activate")
+                || text.contains("ultron activate")
+                || text.contains("activate ultron")
+                || text.equals("activate")
+                || text.contains("अल्ट्रॉन एक्टिवेट")
+                || text.contains("अल्ट्रॉन सक्रिय")
+                || text.contains("हेलो अल्ट्रॉन एक्टिवेट")) {
+            return CommandType.ULTRON_ON;
+        }
+
         // GREETING
         if (text.contains("hello ultron")
                 || text.contains("hi ultron")
