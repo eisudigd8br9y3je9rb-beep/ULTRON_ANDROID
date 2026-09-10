@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="accessibility_service_description">ULTRON UI control service</string>
+    <string name="ultron_accessibility_description">ULTRON Accessibility Service</string>
 </resources>

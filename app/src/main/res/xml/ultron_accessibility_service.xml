@@ -6,4 +6,4 @@
     android:notificationTimeout="100"
     android:canRetrieveWindowContent="true"
     android:canPerformGestures="true"
-    android:description="ULTRON Accessibility Service" />
+    android:description="@string/ultron_accessibility_description" />
