@@ -3,14 +3,11 @@ package com.ultron.assistant.voice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class VoiceManager {
 
@@ -21,55 +18,46 @@ public class VoiceManager {
     }
 
     private final Context context;
-    private SpeechRecognizer speechRecognizer;
     private final VoiceCallback callback;
+
+    private SpeechRecognizer speechRecognizer;
+    private boolean listening = false;
+    private boolean destroyed = false;
     private boolean resultDelivered = false;
 
-    // Continuous listening support
-    private final Handler restartHandler =
-            new Handler(Looper.getMainLooper());
-
-    private boolean continuousListening = false;
-    private boolean destroyed = false;
-
     public VoiceManager(Context context, VoiceCallback callback) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.callback = callback;
     }
 
     public void startListening() {
 
-        continuousListening = true;
-        destroyed = false;
-        restartHandler.removeCallbacksAndMessages(null);
+        if (destroyed) return;
 
-        if (speechRecognizer != null) {
-            try {
-                speechRecognizer.cancel();
-                speechRecognizer.destroy();
-            } catch (Exception ignored) {
-            }
-
-            speechRecognizer = null;
-        }
-
+        listening = true;
         resultDelivered = false;
+
+        destroyRecognizerOnly();
 
         speechRecognizer =
                 SpeechRecognizer.createSpeechRecognizer(context);
 
         Intent intent =
-                new Intent(
-                        RecognizerIntent.ACTION_RECOGNIZE_SPEECH
-                );
+                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
         intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         );
 
+        // Hindi + Indian English friendly recognition.
         intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
+                "hi-IN"
+        );
+
+        intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
                 "hi-IN"
         );
 
@@ -80,31 +68,23 @@ public class VoiceManager {
 
         intent.putExtra(
                 RecognizerIntent.EXTRA_PARTIAL_RESULTS,
-                true
+                false
         );
 
         speechRecognizer.setRecognitionListener(
                 new RecognitionListener() {
 
                     @Override
-                    public void onReadyForSpeech(
-                            Bundle params
-                    ) {
-
-                        if (callback != null) {
-                            callback.onStatus(
-                                    "Listening... Speak now"
-                            );
+                    public void onReadyForSpeech(Bundle params) {
+                        if (listening && callback != null) {
+                            callback.onStatus("Listening... Speak now");
                         }
                     }
 
                     @Override
                     public void onBeginningOfSpeech() {
-
                         if (callback != null) {
-                            callback.onStatus(
-                                    "I can hear you..."
-                            );
+                            callback.onStatus("I can hear you...");
                         }
                     }
 
@@ -113,27 +93,26 @@ public class VoiceManager {
                     }
 
                     @Override
-                    public void onBufferReceived(
-                            byte[] buffer
-                    ) {
+                    public void onBufferReceived(byte[] buffer) {
                     }
 
                     @Override
                     public void onEndOfSpeech() {
-
                         if (callback != null) {
-                            callback.onStatus(
-                                    "Processing voice command..."
-                            );
+                            callback.onStatus("Processing...");
                         }
                     }
 
                     @Override
                     public void onError(int error) {
 
-                        if (resultDelivered) {
-                            return;
-                        }
+                        if (resultDelivered || destroyed) return;
+
+                        // IMPORTANT:
+                        // Never automatically restart here.
+                        // MainActivity starts a new recognition session
+                        // only after ULTRON finishes speaking.
+                        listening = false;
 
                         if (callback != null) {
 
@@ -141,34 +120,25 @@ public class VoiceManager {
 
                             switch (error) {
 
-                                case SpeechRecognizer.ERROR_AUDIO:
+                                case SpeechRecognizer.ERROR_NO_MATCH:
                                     message =
-                                            "Voice error: microphone problem";
+                                            "I could not understand. Tap Start Voice Command and try again.";
                                     break;
 
-                                case SpeechRecognizer.ERROR_CLIENT:
+                                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
                                     message =
-                                            "Voice error: client error";
+                                            "No speech detected. Tap Start Voice Command and try again.";
                                     break;
 
                                 case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
                                     message =
-                                            "Voice error: microphone permission";
+                                            "Microphone permission is required.";
                                     break;
 
                                 case SpeechRecognizer.ERROR_NETWORK:
-                                    message =
-                                            "Voice error: network problem";
-                                    break;
-
                                 case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
                                     message =
-                                            "Voice error: network timeout";
-                                    break;
-
-                                case SpeechRecognizer.ERROR_NO_MATCH:
-                                    message =
-                                            "I could not understand. Try again.";
+                                            "Voice recognition network problem.";
                                     break;
 
                                 case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
@@ -176,54 +146,33 @@ public class VoiceManager {
                                             "Voice recognizer is busy. Try again.";
                                     break;
 
-                                case SpeechRecognizer.ERROR_SERVER:
-                                    message =
-                                            "Voice recognition server error";
-                                    break;
-
-                                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                                    message =
-                                            "No speech detected";
-                                    break;
-
                                 default:
                                     message =
-                                            "Voice error: " + error;
+                                            "Voice recognition error. Try again.";
                                     break;
                             }
 
                             callback.onStatus(message);
                             callback.onError(error);
-
-                            // Restart listening after recoverable errors
-                            if (continuousListening
-                                    && !destroyed
-                                    && error != SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS
-                                    && error != SpeechRecognizer.ERROR_CLIENT) {
-
-                                scheduleRestart();
-                            }
                         }
                     }
 
                     @Override
                     public void onResults(Bundle results) {
 
-                        if (results == null) {
-
-                            if (callback != null) {
-                                callback.onStatus(
-                                        "No voice result received"
-                                );
-                            }
-
+                        if (!listening || destroyed || resultDelivered) {
                             return;
                         }
 
+                        resultDelivered = true;
+                        listening = false;
+
                         ArrayList<String> matches =
-                                results.getStringArrayList(
-                                        SpeechRecognizer.RESULTS_RECOGNITION
-                                );
+                                results == null
+                                        ? null
+                                        : results.getStringArrayList(
+                                                SpeechRecognizer.RESULTS_RECOGNITION
+                                        );
 
                         if (matches != null
                                 && !matches.isEmpty()
@@ -234,25 +183,18 @@ public class VoiceManager {
                                     matches.get(0).trim();
 
                             if (callback != null) {
-
                                 callback.onStatus(
                                         "Recognized: " + command
                                 );
-
-                                resultDelivered = true;
                                 callback.onResult(command);
-                                // MainActivity restarts listening only after TTS finishes.
-                                // Do NOT restart here, otherwise ULTRON hears its own voice.
                             }
 
                         } else {
 
                             if (callback != null) {
-
                                 callback.onStatus(
-                                        "No command recognized"
+                                        "No command recognized. Tap Start Voice Command and try again."
                                 );
-
                                 callback.onError(
                                         SpeechRecognizer.ERROR_NO_MATCH
                                 );
@@ -261,29 +203,7 @@ public class VoiceManager {
                     }
 
                     @Override
-                    public void onPartialResults(
-                            Bundle partialResults
-                    ) {
-
-                        if (partialResults == null
-                                || callback == null) {
-                            return;
-                        }
-
-                        ArrayList<String> partial =
-                                partialResults.getStringArrayList(
-                                        SpeechRecognizer.RESULTS_RECOGNITION
-                                );
-
-                        if (partial != null
-                                && !partial.isEmpty()
-                                && partial.get(0) != null) {
-
-                            callback.onStatus(
-                                    "Hearing: "
-                                            + partial.get(0)
-                            );
-                        }
+                    public void onPartialResults(Bundle partialResults) {
                     }
 
                     @Override
@@ -298,66 +218,41 @@ public class VoiceManager {
         try {
 
             if (callback != null) {
-                callback.onStatus(
-                        "Starting voice recognition..."
-                );
+                callback.onStatus("Starting voice recognition...");
             }
 
             speechRecognizer.startListening(intent);
 
         } catch (Exception e) {
 
-            if (callback != null) {
+            listening = false;
 
+            if (callback != null) {
                 callback.onStatus(
-                        "Could not start voice recognition"
+                        "Could not start voice recognition."
+                );
+                callback.onError(
+                        SpeechRecognizer.ERROR_CLIENT
                 );
             }
         }
     }
 
-    private void scheduleRestart() {
-
-        if (!continuousListening || destroyed) {
-            return;
-        }
-
-        restartHandler.removeCallbacksAndMessages(null);
-
-        restartHandler.postDelayed(
-                () -> {
-                    if (continuousListening && !destroyed) {
-                        startListening();
-                    }
-                },
-                700
-        );
-    }
-
     public void stopListening() {
 
-        // Completely stop continuous listening
-        continuousListening = false;
-        restartHandler.removeCallbacksAndMessages(null);
+        listening = false;
 
         if (speechRecognizer != null) {
-
             try {
-                speechRecognizer.stopListening();
+                speechRecognizer.cancel();
             } catch (Exception ignored) {
             }
         }
     }
 
-    public void destroy() {
-
-        // Permanently stop continuous listening
-        destroyed = true;
-        continuousListening = false;
-        restartHandler.removeCallbacksAndMessages(null);
+    private void destroyRecognizerOnly() {
 
         if (speechRecognizer != null) {
-
             try {
                 speechRecognizer.cancel();
                 speechRecognizer.destroy();
@@ -366,5 +261,12 @@ public class VoiceManager {
 
             speechRecognizer = null;
         }
+    }
+
+    public void destroy() {
+
+        destroyed = true;
+        listening = false;
+        destroyRecognizerOnly();
     }
 }

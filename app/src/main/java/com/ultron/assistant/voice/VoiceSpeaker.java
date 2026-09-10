@@ -5,6 +5,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class VoiceSpeaker {
 
@@ -17,6 +18,8 @@ public class VoiceSpeaker {
     private final Locale englishLocale =
             Locale.US;
 
+    private long speechCounter = 0;
+
     public VoiceSpeaker(Context context) {
 
         textToSpeech = new TextToSpeech(
@@ -25,14 +28,12 @@ public class VoiceSpeaker {
 
                     if (status == TextToSpeech.SUCCESS) {
 
-                        // Slightly slower and deeper voice style
                         textToSpeech.setSpeechRate(0.82f);
                         textToSpeech.setPitch(0.82f);
 
                         ready = true;
 
                     } else {
-
                         ready = false;
                     }
                 }
@@ -46,38 +47,55 @@ public class VoiceSpeaker {
     public void speak(String text, Runnable onDone) {
 
         if (text == null || text.trim().isEmpty()) {
+            if (onDone != null) onDone.run();
             return;
         }
 
         if (!ready || textToSpeech == null) {
+            if (onDone != null) onDone.run();
             return;
         }
 
-        String cleanText = text.trim();
+        final String cleanText = text.trim();
+        final String utteranceId =
+                "ULTRON_" + (++speechCounter);
+
+        final AtomicBoolean callbackCalled =
+                new AtomicBoolean(false);
 
         setBestLanguage(cleanText);
 
-        // Slow, confident ULTRON-style delivery
         textToSpeech.setSpeechRate(0.82f);
         textToSpeech.setPitch(0.82f);
 
         textToSpeech.setOnUtteranceProgressListener(
                 new UtteranceProgressListener() {
+
                     @Override
-                    public void onStart(String utteranceId) {
+                    public void onStart(String id) {
                     }
 
                     @Override
-                    public void onDone(String utteranceId) {
-                        if (onDone != null) {
-                            onDone.run();
+                    public void onDone(String id) {
+
+                        if (utteranceId.equals(id)
+                                && callback != null
+                                && callbackCalled.compareAndSet(
+                                        false, true)) {
+
+                            callback.run();
                         }
                     }
 
                     @Override
-                    public void onError(String utteranceId) {
-                        if (onDone != null) {
-                            onDone.run();
+                    public void onError(String id) {
+
+                        if (utteranceId.equals(id)
+                                && callback != null
+                                && callbackCalled.compareAndSet(
+                                        false, true)) {
+
+                            callback.run();
                         }
                     }
                 }
@@ -87,7 +105,7 @@ public class VoiceSpeaker {
                 cleanText,
                 TextToSpeech.QUEUE_FLUSH,
                 null,
-                "ULTRON_SPEECH"
+                utteranceId
         );
     }
 
@@ -96,36 +114,25 @@ public class VoiceSpeaker {
         if (containsHindi(text)) {
 
             int result =
-                    textToSpeech.setLanguage(
-                            hindiLocale
-                    );
+                    textToSpeech.setLanguage(hindiLocale);
 
-            if (result ==
-                    TextToSpeech.LANG_MISSING_DATA
-                    || result ==
-                    TextToSpeech.LANG_NOT_SUPPORTED) {
+            if (result == TextToSpeech.LANG_MISSING_DATA
+                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
 
-                textToSpeech.setLanguage(
-                        englishLocale
-                );
+                textToSpeech.setLanguage(englishLocale);
             }
 
         } else {
 
-            textToSpeech.setLanguage(
-                    englishLocale
-            );
+            textToSpeech.setLanguage(englishLocale);
         }
     }
 
     private boolean containsHindi(String text) {
 
-        for (int i = 0;
-             i < text.length();
-             i++) {
+        for (int i = 0; i < text.length(); i++) {
 
-            char character =
-                    text.charAt(i);
+            char character = text.charAt(i);
 
             if (character >= '\u0900'
                     && character <= '\u097F') {
@@ -147,7 +154,6 @@ public class VoiceSpeaker {
     public void destroy() {
 
         if (textToSpeech != null) {
-
             textToSpeech.stop();
             textToSpeech.shutdown();
             textToSpeech = null;
