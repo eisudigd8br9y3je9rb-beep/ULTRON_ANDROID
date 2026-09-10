@@ -1763,7 +1763,6 @@ rearCameraButton.setOnClickListener(
         }
     }
 
-    stopDoubleClapDetector();
 
     @Override
     protected void onDestroy() {
