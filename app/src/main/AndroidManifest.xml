@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <queries>
         <package android:name="com.whatsapp.w4b" />
@@ -29,13 +30,10 @@
         android:name="android.hardware.camera.front"
         android:required="false" />
 
-    <uses-permission android:name="android.permission.SEND_SMS" />
-
     <application
         android:allowBackup="true"
         android:label="ULTRON"
         android:supportsRtl="true">
-
 
         <activity
             android:name=".MainActivity"
@@ -48,28 +46,6 @@
 
         </activity>
 
-    
-        <service
-            android:name=".notification.UltronNotificationListener"
-            android:label="ULTRON Notification Reader"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service>
-
-        <service
-            android:name=".accessibility.UltronAccessibilityService"
-            android:label="ULTRON Accessibility"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-        </service>
-</application>
+    </application>
 
 </manifest>
