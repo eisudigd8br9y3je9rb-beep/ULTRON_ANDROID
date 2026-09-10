@@ -79,11 +79,11 @@ public class VoiceSpeaker {
                     public void onDone(String id) {
 
                         if (utteranceId.equals(id)
-                                && callback != null
+                                && onDone != null
                                 && callbackCalled.compareAndSet(
                                         false, true)) {
 
-                            callback.run();
+                            onDone.run();
                         }
                     }
 
@@ -91,11 +91,11 @@ public class VoiceSpeaker {
                     public void onError(String id) {
 
                         if (utteranceId.equals(id)
-                                && callback != null
+                                && onDone != null
                                 && callbackCalled.compareAndSet(
                                         false, true)) {
 
-                            callback.run();
+                            onDone.run();
                         }
                     }
                 }
