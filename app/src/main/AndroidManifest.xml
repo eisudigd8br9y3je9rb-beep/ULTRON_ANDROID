@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <queries>
+        <package android:name="com.whatsapp.w4b" />
         <package android:name="com.google.android.youtube" />
         <package android:name="com.instagram.android" />
         <package android:name="com.tencent.ig" />
@@ -45,6 +46,29 @@
 
         </activity>
 
-    </application>
+    
+        <service
+            android:name=".notification.UltronNotificationListener"
+            android:label="ULTRON Notification Reader"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".accessibility.UltronAccessibilityService"
+            android:label="ULTRON Accessibility"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/ultron_accessibility_service" />
+        </service>
+</application>
 
 </manifest>
