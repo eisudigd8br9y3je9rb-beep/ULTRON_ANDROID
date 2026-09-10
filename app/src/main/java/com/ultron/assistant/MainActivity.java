@@ -137,7 +137,7 @@ public class MainActivity extends Activity {
         setContentView(root);
 
         
-        startDoubleClapDetector();
+        // Double-clap detector disabled: it conflicts with SpeechRecognizer/TTS.
 rearCameraButton.setOnClickListener(
                 v -> openCamera(true)
         );
