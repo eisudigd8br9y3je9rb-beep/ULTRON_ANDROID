@@ -57,12 +57,12 @@ public class VoiceManager {
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         );
 
-        // Prefer local recognition when the device has an offline
-        // speech language pack. If unavailable, the recognizer may
-        // use its normal network service.
+        // Use the normal Android speech service. Do not force
+        // offline recognition because the device may not have
+        // an offline language pack.
         intent.putExtra(
                 RecognizerIntent.EXTRA_PREFER_OFFLINE,
-                true
+                false
         );
 
         intent.putExtra(
