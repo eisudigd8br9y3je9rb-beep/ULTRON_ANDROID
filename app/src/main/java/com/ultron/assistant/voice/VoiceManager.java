@@ -241,10 +241,8 @@ public class VoiceManager {
 
                                 resultDelivered = true;
                                 callback.onResult(command);
-
-                                if (continuousListening && !destroyed) {
-                                    scheduleRestart();
-                                }
+                                // MainActivity restarts listening only after TTS finishes.
+                                // Do NOT restart here, otherwise ULTRON hears its own voice.
                             }
 
                         } else {
