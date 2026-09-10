@@ -51,11 +51,20 @@ public class CommandManager {
         OPEN_NOTIFICATION_SETTINGS,
         OPEN_DIALER,
         OPEN_SMS_APP,
+        OPEN_WHATSAPP,
+        OPEN_WHATSAPP_CHAT,
+        WHATSAPP_MESSAGE,
+        OPEN_PLAY_STORE,
         OPEN_MUSIC_APP,
         CHECK_WIFI_STATUS,
         GET_CHARGING_STATUS,
         OPEN_APP_SETTINGS,
         FEATURE_INFO,
+        MEMORY_LAST,
+        MEMORY_LAST_RESPONSE,
+        MEMORY_CONTEXT,
+        FOLLOW_UP,
+        MEMORY_CLEAR,
 
         UNKNOWN
     }
@@ -469,6 +478,97 @@ public class CommandManager {
 
 
 
+        // MEMORY - LAST RESPONSE
+        if (text.contains("repeat that")
+                || text.contains("repeat your answer")
+                || text.contains("repeat last answer")
+                || text.contains("say that again")
+                || text.contains("what did you say")
+                || text.contains("आपने क्या कहा")
+                || text.contains("फिर से बताओ")
+                || text.contains("फिर से बोलो")
+                || text.contains("दोबारा बताओ")
+                || text.contains("अपना जवाब दोबारा बताओ")) {
+            return CommandType.MEMORY_LAST_RESPONSE;
+        }
+
+        // MEMORY - CONVERSATION CONTEXT
+        if (text.contains("what were we talking about")
+                || text.contains("what are we talking about")
+                || text.contains("what did we talk about")
+                || text.contains("recent conversation")
+                || text.contains("conversation context")
+                || text.contains("हम किस बारे में बात कर रहे थे")
+                || text.contains("हम क्या बात कर रहे थे")
+                || text.contains("हमारी पिछली बातचीत")
+                || text.contains("पिछली बातचीत")) {
+            return CommandType.MEMORY_CONTEXT;
+        }
+
+        // MEMORY - LAST CONVERSATION
+        if (text.contains("remember what i asked")
+                || text.contains("do you remember what i asked")
+                || text.contains("what was my last question")
+                || text.contains("what did i just ask")
+
+                || text.contains("what did i ask")
+                || text.contains("last question")
+                || text.contains("previous question")
+                || text.contains("पिछली बात")
+                || text.contains("पिछला सवाल")
+                || text.contains("मैंने अभी क्या पूछा")
+                || text.contains("मैंने क्या पूछा")
+                || text.contains("मेरी पिछली बात क्या थी")
+                || text.contains("मेरा पिछला सवाल क्या था")
+                || text.contains("क्या तुम्हें याद है मैंने क्या पूछा")) {
+            return CommandType.MEMORY_LAST;
+        }
+
+        // FOLLOW-UP / CONTEXT QUESTION
+        if (text.equals("solution")
+                || text.equals("solution?")
+                || text.equals("fix")
+                || text.equals("fix?")
+                || text.equals("reason")
+                || text.equals("reason?")
+                || text.equals("why")
+                || text.equals("why?")
+                || text.equals("how to fix")
+                || text.equals("how to fix it")
+                || text.equals("what is the solution")
+                || text.contains("iska solution")
+                || text.contains("iska reason")
+                || text.contains("iska fix")
+                || text.contains("iska kya solution")
+                || text.contains("इसका solution")
+                || text.contains("इसका सॉल्यूशन")
+                || text.contains("इसका समाधान")
+                || text.contains("इसका कारण")
+                || text.contains("इसका reason")
+                || text.contains("इसे कैसे ठीक करें")
+                || text.contains("इसे कैसे ठीक करे")
+                || text.contains("इसे कैसे ठीक करें")
+                || text.contains("फिर क्या")
+                || text.contains("और इसका solution")
+                || text.contains("और इसका समाधान")
+                || text.contains("और क्या करना है")) {
+            return CommandType.FOLLOW_UP;
+        }
+
+        // MEMORY - CLEAR
+        if (text.contains("clear memory")
+                || text.contains("forget memory")
+                || text.contains("delete memory")
+                || text.contains("मेमोरी साफ")
+                || text.contains("मेमोरी क्लियर")
+                || text.contains("याददाश्त साफ")
+                || text.contains("सब भूल जाओ")
+                || text.contains("मेरी मेमोरी मिटा दो")
+                || text.contains("मेरी याददाश्त मिटा दो")
+                || text.contains("सारी मेमोरी साफ करो")) {
+            return CommandType.MEMORY_CLEAR;
+        }
+
         // FEATURE INFORMATION
         if (text.contains("what can you do")
                 || text.contains("what are your features")
@@ -481,6 +581,49 @@ public class CommandManager {
                 || text.contains("तुम क्या क्या कर सकते हो")) {
 
             return CommandType.FEATURE_INFO;
+        }
+
+        // OPEN WHATSAPP
+        if (text.contains("open whatsapp")
+                || text.contains("launch whatsapp")
+                || text.contains("start whatsapp")
+                || text.contains("whatsapp खोलो")
+                || text.contains("व्हाट्सऐप खोलो")
+                || text.contains("व्हाट्सएप खोलो")) {
+            return CommandType.OPEN_WHATSAPP;
+        }
+
+        // WHATSAPP MESSAGE BY NUMBER
+        if ((text.contains("whatsapp") || text.contains("व्हाट्सएप") || text.contains("व्हाट्सऐप"))
+                && text.matches(".*[0-9]{7,}.*")
+                && (text.contains("message")
+                    || text.contains("msg")
+                    || text.contains("send")
+                    || text.contains("मैसेज")
+                    || text.contains("संदेश")
+                    || text.contains("भेजो")
+                    || text.contains("भेज"))) {
+            return CommandType.WHATSAPP_MESSAGE;
+        }
+
+        // OPEN WHATSAPP CHAT BY NUMBER
+        if ((text.contains("whatsapp") || text.contains("व्हाट्सएप") || text.contains("व्हाट्सऐप"))
+                && text.matches(".*[0-9]{7,}.*")
+                && (text.contains("chat")
+                    || text.contains("open")
+                    || text.contains("चैट")
+                    || text.contains("खोलो")
+                    || text.contains("ओपन"))) {
+            return CommandType.OPEN_WHATSAPP_CHAT;
+        }
+
+        // OPEN PLAY STORE
+        if (text.contains("open play store")
+                || text.contains("play store खोलो")
+                || text.contains("play store open")
+                || text.contains("प्ले स्टोर खोलो")
+                || text.contains("प्ले स्टोर ओपन करो")) {
+            return CommandType.OPEN_PLAY_STORE;
         }
 
         // OPEN ANY APP

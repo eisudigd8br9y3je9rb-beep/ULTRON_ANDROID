@@ -49,6 +49,42 @@ public class MemoryManager {
         }
     }
 
+    public String getLastUser() {
+        try {
+            JSONArray history = new JSONArray(
+                    preferences.getString(KEY_MEMORY, "[]")
+            );
+
+            if (history.length() == 0) {
+                return "";
+            }
+
+            JSONObject last = history.getJSONObject(history.length() - 1);
+            return last.optString("user", "").trim();
+
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public String getLastAssistant() {
+        try {
+            JSONArray history = new JSONArray(
+                    preferences.getString(KEY_MEMORY, "[]")
+            );
+
+            if (history.length() == 0) {
+                return "";
+            }
+
+            JSONObject last = history.getJSONObject(history.length() - 1);
+            return last.optString("assistant", "").trim();
+
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     public String getRecentContext() {
         try {
             JSONArray history = new JSONArray(

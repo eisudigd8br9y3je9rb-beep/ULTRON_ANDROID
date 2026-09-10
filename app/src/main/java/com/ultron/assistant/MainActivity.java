@@ -26,6 +26,7 @@ import com.ultron.assistant.communication.CommunicationManager;
 import com.ultron.assistant.core.CommandManager;
 import com.ultron.assistant.core.TechnicianKnowledge;
 import com.ultron.assistant.memory.MemoryManager;
+import com.ultron.assistant.contacts.ContactManager;
 import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.voice.VoiceSpeaker;
 
@@ -38,6 +39,7 @@ public class MainActivity extends Activity {
     private static final int CAMERA_REQUEST = 100;
     private static final int CALL_REQUEST = 103;
     private static final int AUDIO_REQUEST = 101;
+    private static final int REQUEST_CONTACTS = 104;
 
     private TextureView preview;
     private TextView status;
@@ -50,6 +52,7 @@ public class MainActivity extends Activity {
     private CommandManager commandManager;
     private TechnicianKnowledge technicianKnowledge;
     private MemoryManager memoryManager;
+    private ContactManager contactManager;
 
     // ULTRON voice states
     private boolean ultronActive = true;
@@ -67,6 +70,7 @@ public class MainActivity extends Activity {
         commandManager = new CommandManager();
         technicianKnowledge = new TechnicianKnowledge(this);
         memoryManager = new MemoryManager(this);
+        contactManager = new ContactManager(this);
         appLauncher = new AppLauncher(this);
         phoneActions = new PhoneActions(this);
         communicationManager = new CommunicationManager(this);
@@ -254,20 +258,28 @@ public class MainActivity extends Activity {
         voiceManager.startListening();
     }
 
+    private String consumeLastUserCommand() {
+        String command = lastUserCommand == null ? "" : lastUserCommand.trim();
+        lastUserCommand = "";
+        return command;
+    }
+
     private void respond(String message) {
 
         status.setText(message);
 
         if (memoryManager != null
-                && lastUserCommand != null
-                && !lastUserCommand.trim().isEmpty()
                 && message != null
                 && !message.trim().isEmpty()) {
-            memoryManager.addConversation(
-                    lastUserCommand,
-                    message
-            );
-            lastUserCommand = "";
+
+            String userCommand = consumeLastUserCommand();
+
+            if (!userCommand.isEmpty()) {
+                memoryManager.addConversation(
+                        userCommand,
+                        message
+                );
+            }
         }
 
         if (voiceManager != null) {
@@ -409,11 +421,11 @@ public class MainActivity extends Activity {
                 break;
 
             case CALL:
-                callNumber(command);
+                handleCallCommand(command);
                 break;
 
             case SMS:
-                sendSms(command);
+                handleSmsCommand(command);
                 break;
 
             case OPEN_CAMERA:
@@ -514,6 +526,30 @@ public class MainActivity extends Activity {
                 openSmsApp();
                 break;
 
+            case OPEN_WHATSAPP:
+                if (appLauncher != null && appLauncher.openWhatsApp()) {
+                    respond("Opening WhatsApp.");
+                } else {
+                    respond("WhatsApp is not installed.");
+                }
+                break;
+
+            case OPEN_PLAY_STORE:
+                if (appLauncher != null && appLauncher.openPlayStore()) {
+                    respond("Opening Google Play.");
+                } else {
+                    respond("I could not open Google Play.");
+                }
+                break;
+
+            case OPEN_WHATSAPP_CHAT:
+                handleWhatsAppNumberCommand(command);
+                break;
+
+            case WHATSAPP_MESSAGE:
+                handleWhatsAppMessageCommand(command);
+                break;
+
             case OPEN_MUSIC_APP:
                 openMusicApp();
                 break;
@@ -528,6 +564,44 @@ public class MainActivity extends Activity {
 
             case OPEN_APP_SETTINGS:
                 openAppSettings();
+                break;
+
+            case FOLLOW_UP:
+                handleFollowUpCommand(command);
+                break;
+
+            case MEMORY_LAST_RESPONSE:
+                String lastAnswer = memoryManager.getLastAssistant();
+                if (lastAnswer == null || lastAnswer.trim().isEmpty()) {
+                    respond("I do not have a previous answer yet.");
+                } else {
+                    respond(lastAnswer);
+                }
+                break;
+
+            case MEMORY_CONTEXT:
+                String recentContext = memoryManager.getRecentContext();
+                if (recentContext == null || recentContext.trim().isEmpty()) {
+                    respond("I do not have enough conversation context yet.");
+                } else {
+                    respond("Here is our recent conversation: " + recentContext);
+                }
+                break;
+
+            case MEMORY_LAST:
+                String lastUser = memoryManager.getLastUser();
+
+                if (lastUser.isEmpty()) {
+                    respond("I do not have any conversation memory yet.");
+                } else {
+                    respond("Your last question was: " + lastUser);
+                }
+                break;
+
+            case MEMORY_CLEAR:
+                memoryManager.clearMemory();
+                lastUserCommand = "";
+                respond("Conversation memory has been cleared.");
                 break;
 
             case FEATURE_INFO:
@@ -1135,32 +1209,56 @@ public class MainActivity extends Activity {
         );
     }
 
-    private String extractPhoneNumber(String text) {
 
-        if (text == null) {
+    private String extractPhoneNumber(String text) {
+        if (text == null) return "";
+
+        Pattern pattern = Pattern.compile(
+                "(?<!\\d)(\\+?\\d[\\d\\s-]{6,}\\d)(?!\\d)"
+        );
+
+        Matcher matcher = pattern.matcher(text);
+
+        if (!matcher.find()) return "";
+
+        String number = matcher.group(1).replaceAll("[\\s-]", "");
+
+        if (number.startsWith("+")) {
+            String digits = number.substring(1);
+            if (digits.length() >= 7 && digits.length() <= 15) {
+                return "+" + digits;
+            }
             return "";
         }
 
-        Pattern pattern =
-                Pattern.compile(
-                        "\\+?[0-9][0-9\\-\\s]{7,20}"
-                );
+        String digits = number.replaceAll("[^0-9]", "");
 
-        Matcher matcher =
-                pattern.matcher(text);
-
-        if (matcher.find()) {
-
-            String number =
-                    matcher.group();
-
-            return number.replaceAll(
-                    "[^0-9+]",
-                    ""
-            );
+        if (digits.length() >= 7 && digits.length() <= 15) {
+            return digits;
         }
 
         return "";
+    }
+
+    private String extractMessageAfterNumber(String command) {
+        if (command == null) return "";
+
+        Matcher matcher = Pattern.compile(
+                "(?<!\\d)(\\+?\\d[\\d\\s-]{6,}\\d)(?!\\d)"
+        ).matcher(command);
+
+        if (!matcher.find()) return "";
+
+        String message = command.substring(matcher.end()).trim();
+
+        message = message
+                .replaceFirst("(?i)^\\s*(message|msg|sms)\\s*", "")
+                .replaceFirst("(?i)^\\s*send\\s*", "")
+                .replaceFirst("^\\s*(मैसेज|संदेश|एसएमएस)\\s*", "")
+                .replaceFirst("^\\s*(भेजो|भेज)\\s*", "")
+                .trim();
+
+        return message;
     }
 
     private String extractSmsMessage(String command) {
@@ -1680,4 +1778,255 @@ public class MainActivity extends Activity {
             voiceSpeaker = null;
         }
     }
+
+    private void requestContactsPermissionIfNeeded() {
+        if (android.os.Build.VERSION.SDK_INT >= 23
+                && checkSelfPermission(
+                android.Manifest.permission.READ_CONTACTS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{
+                            android.Manifest.permission.READ_CONTACTS
+                    },
+                    REQUEST_CONTACTS
+            );
+
+            respond("Contacts permission is required to find a contact.");
+        }
+    }
+
+
+    private void handleCallCommand(String command) {
+        if (command == null || command.trim().isEmpty()) {
+            respond("Please tell me a contact name or phone number.");
+            return;
+        }
+
+        String original = command.trim();
+        String number = extractPhoneNumber(original);
+
+        if (!number.isEmpty()) {
+            openDialerWithNumber(number);
+            return;
+        }
+
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    REQUEST_CONTACTS
+            );
+            respond("I need contacts permission to find that person.");
+            return;
+        }
+
+        String name = original
+                .replaceAll("(?i)\\bplease\\b", "")
+                .replaceAll("(?i)\\bcall\\b", "")
+                .replaceAll("(?i)\\bphone\\b", "")
+                .replaceAll("(?i)\\bdial\\b", "")
+                .replace("कॉल", "")
+                .replace("फोन", "")
+                .replace("डायल", "")
+                .replace("करो", "")
+                .replace("करना है", "")
+                .trim();
+
+        if (name.isEmpty()) {
+            respond("Please tell me the contact name.");
+            return;
+        }
+
+        String contactNumber = contactManager.findPhoneNumber(name);
+
+        if (contactNumber.isEmpty()) {
+            respond("I could not find that contact.");
+        } else {
+            openDialerWithNumber(contactNumber);
+        }
+    }
+
+
+
+    private void openDialerWithNumber(String number) {
+
+        try {
+            android.content.Intent intent =
+                    new android.content.Intent(
+                            android.content.Intent.ACTION_DIAL);
+
+            intent.setData(
+                    android.net.Uri.parse(
+                            "tel:" + android.net.Uri.encode(number)
+                    )
+            );
+
+            startActivity(intent);
+            respond("I found the number and opened the dialer. Please confirm the call.");
+        } catch (Exception e) {
+            respond("I could not open the phone dialer.");
+        }
+    }
+
+
+    private void handleWhatsAppNumberCommand(String command) {
+        if (command == null || command.trim().isEmpty()) {
+            respond("Please tell me the WhatsApp number.");
+            return;
+        }
+
+        String number = extractPhoneNumber(command);
+
+        if (number.isEmpty()) {
+            respond("Please tell me a valid WhatsApp number.");
+            return;
+        }
+
+        if (appLauncher != null
+                && appLauncher.openWhatsAppChat(number, "")) {
+            respond("WhatsApp chat opened. Please review before sending.");
+        } else {
+            respond("I could not open that WhatsApp chat.");
+        }
+    }
+
+    private void handleFollowUpCommand(String command) {
+
+        String current = command == null ? "" : command.trim();
+
+        if (current.isEmpty()) {
+            respond("Please ask your follow-up question.");
+            return;
+        }
+
+        String previous = memoryManager == null
+                ? ""
+                : memoryManager.getLastUser();
+
+        if (previous == null || previous.trim().isEmpty()) {
+            respond("I need your previous question to understand this follow-up.");
+            return;
+        }
+
+        String combined = previous.trim() + " " + current;
+
+        String knowledgeAnswer = technicianKnowledge.search(combined);
+
+        if (knowledgeAnswer != null && !knowledgeAnswer.trim().isEmpty()) {
+            respond(knowledgeAnswer);
+        } else {
+            respond("I understand this is a follow-up, but I need a little more detail.");
+        }
+    }
+
+
+    private void handleWhatsAppMessageCommand(String command) {
+        if (command == null || command.trim().isEmpty()) {
+            respond("Please tell me the WhatsApp number and message.");
+            return;
+        }
+
+        String number = extractPhoneNumber(command);
+
+        if (number.isEmpty()) {
+            respond("Please tell me a valid WhatsApp number.");
+            return;
+        }
+
+        String message = extractMessageAfterNumber(command);
+
+        if (message.isEmpty()) {
+            respond("Please tell me the message after the phone number.");
+            return;
+        }
+
+        if (appLauncher != null
+                && appLauncher.openWhatsAppChat(number, message)) {
+            respond("WhatsApp chat opened. Review the message before sending.");
+        } else {
+            respond("I could not open that WhatsApp chat.");
+        }
+    }
+
+
+    private void handleSmsCommand(String command) {
+        if (command == null || command.trim().isEmpty()) {
+            respond("Please tell me the contact or phone number.");
+            return;
+        }
+
+        String original = command.trim();
+        String number = extractPhoneNumber(original);
+
+        if (!number.isEmpty()) {
+            String message = extractMessageAfterNumber(original);
+            openSmsComposer(number, message);
+            return;
+        }
+
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    REQUEST_CONTACTS
+            );
+            respond("I need contacts permission to find that person.");
+            return;
+        }
+
+        String name = original
+                .replaceAll("(?i)send\\s+(a\\s+)?(sms|message)\\s*", "")
+                .replaceAll("(?i)text\\s*", "")
+                .replaceAll("(?i)\\bmessage\\b.*$", "")
+                .replace("मैसेज", "")
+                .replace("एसएमएस", "")
+                .replace("भेजो", "")
+                .replace("भेज", "")
+                .replace("करो", "")
+                .trim();
+
+        if (name.isEmpty()) {
+            respond("Please tell me the contact name.");
+            return;
+        }
+
+        String contactNumber = contactManager.findPhoneNumber(name);
+
+        if (contactNumber.isEmpty()) {
+            respond("I could not find that contact.");
+        } else {
+            openSmsComposer(contactNumber, "");
+        }
+    }
+
+
+
+    private void openSmsComposer(String number, String body) {
+
+        try {
+            android.content.Intent intent =
+                    new android.content.Intent(
+                            android.content.Intent.ACTION_SENDTO);
+
+            intent.setData(
+                    android.net.Uri.parse(
+                            "smsto:" + android.net.Uri.encode(number)
+                    )
+            );
+
+            if (body != null && !body.isEmpty()) {
+                intent.putExtra("sms_body", body);
+            }
+
+            startActivity(intent);
+
+            respond("SMS composer opened. Review the message and send it yourself.");
+        } catch (Exception e) {
+            respond("I could not open the SMS composer.");
+        }
+    }
+
+
+
 }

@@ -121,6 +121,70 @@ public class AppLauncher {
     }
 
 
+    public boolean openPlayStore() {
+
+        try {
+            Intent intent = new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("market://details?id=com.android.vending")
+            );
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            return true;
+
+        } catch (Exception e) {
+
+            try {
+                Intent webIntent = new Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store")
+                );
+
+                webIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(webIntent);
+                return true;
+
+            } catch (Exception ignored) {
+                return false;
+            }
+        }
+    }
+
+    public boolean openWhatsAppChat(String phoneNumber, String message) {
+
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            String number = phoneNumber.replaceAll("[^0-9]", "");
+
+            if (number.length() < 7) {
+                return false;
+            }
+
+            String url = "https://wa.me/" + number;
+
+            if (message != null && !message.trim().isEmpty()) {
+                url += "?text=" + Uri.encode(message.trim());
+            }
+
+            Intent intent = new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(url)
+            );
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public boolean openPUBG() {
 
         if (openPackage("com.tencent.ig")) {
