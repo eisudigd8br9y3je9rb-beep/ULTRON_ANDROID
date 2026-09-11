@@ -131,6 +131,10 @@ public class CommandManager {
         if (text.contains("who am i")
                 || text.contains("मैं कौन हूँ")
                 || text.contains("मैं कौन हूं")
+                || text.contains("मेरा नाम क्या है?")
+                || text.contains("mera naam kya hai")
+                || text.contains("mera naam kya h")
+                || text.contains("what is my name")
                 || text.contains("मेरा नाम क्या है")) {
 
             return CommandType.WHO_AM_I;
