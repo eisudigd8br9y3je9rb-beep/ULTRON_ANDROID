@@ -28,6 +28,7 @@ import com.ultron.assistant.core.TechnicianKnowledge;
 import com.ultron.assistant.memory.MemoryManager;
 import com.ultron.assistant.contacts.ContactManager;
 import com.ultron.assistant.voice.VoiceManager;
+import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 
 import java.util.Collections;
@@ -301,7 +302,43 @@ rearCameraButton.setOnClickListener(
         }
     }
 
+    private void handleDroneCommand(String command) {
+        String c = command.toLowerCase().trim();
+
+        boolean drone = c.contains("drone");
+        boolean known = c.contains("take off") || c.contains("takeoff")
+                || c.contains("forward") || c.contains("back")
+                || c.contains("left") || c.contains("right")
+                || c.contains("up") || c.contains("down")
+                || c.contains("land") || c.contains("emergency stop")
+                || c.equals("stop") || c.contains("battery");
+
+        if (!drone && !known) return;
+
+        new Thread(() -> {
+            String result = DroneBridge.sendCommand(c);
+            runOnUiThread(() -> respond(result));
+        }).start();
+    }
+
     private void handleVoiceCommand(String command) {
+        if (command == null || command.trim().isEmpty()) {
+            respond("I did not hear a command.");
+            return;
+        }
+
+        handleDroneCommand(command);
+        String droneCheck = command.toLowerCase().trim();
+        if (droneCheck.contains("drone")
+                || droneCheck.contains("take off") || droneCheck.contains("takeoff")
+                || droneCheck.contains("forward") || droneCheck.contains("back")
+                || droneCheck.contains("left") || droneCheck.contains("right")
+                || droneCheck.contains("up") || droneCheck.contains("down")
+                || droneCheck.contains("land") || droneCheck.contains("emergency stop")
+                || droneCheck.equals("stop") || droneCheck.contains("battery")) {
+            return;
+        }
+
 
         if (command == null || command.trim().isEmpty()) {
             status.setText("No voice command received");
