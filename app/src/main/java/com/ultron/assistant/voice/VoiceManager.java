@@ -52,6 +52,13 @@ public class VoiceManager {
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         );
 
+        // Prefer Hindi recognition. Android may still recognize
+        // English words/commands through the installed speech service.
+        intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
+                "hi-IN"
+        );
+
         // Use the normal Android speech service. Do not force
         // offline recognition because the device may not have
         // an offline language pack.
