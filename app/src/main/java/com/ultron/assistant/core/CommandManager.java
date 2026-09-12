@@ -239,11 +239,16 @@ public class CommandManager {
         }
 
         // WIFI
-        if (text.contains("wifi")
+        // Keep WiFi status questions out of the settings command.
+        if ((text.contains("wifi")
                 || text.contains("wi-fi")
                 || text.contains("वाईफाई")
-                || text.contains("वाई फाई")) {
-
+                || text.contains("वाई फाई"))
+                && !text.contains("wifi status")
+                && !text.contains("wi-fi status")
+                && !text.contains("wifi connected")
+                && !text.contains("वाईफाई स्टेटस")
+                && !text.contains("वाईफाई कनेक्ट")) {
             return CommandType.OPEN_WIFI_SETTINGS;
         }
 
@@ -256,27 +261,46 @@ public class CommandManager {
 
         // TIME
         if (text.contains("what time")
+                || text.contains("what is the time")
                 || text.contains("current time")
                 || text.contains("time now")
+                || text.contains("time kya hai")
+                || text.contains("समय क्या है")
+                || text.contains("समय बताओ")
+                || text.contains("टाइम क्या है")
+                || text.contains("टाइम बताओ")
                 || text.contains("कितने बजे")
-                || text.contains("समय क्या है")) {
+                || text.contains("अभी कितने बजे")) {
 
             return CommandType.GET_TIME;
         }
 
         // DATE
         if (text.contains("what is the date")
+                || text.contains("what date is it")
+                || text.contains("what's the date")
+                || text.contains("date today")
                 || text.contains("today date")
                 || text.contains("today's date")
+                || text.contains("today date please")
+                || text.contains("aaj ki date")
+                || text.contains("aaj ki tareekh")
                 || text.contains("आज की तारीख")
-                || text.contains("आज कौन सी तारीख है")) {
+                || text.contains("आज की तारीख क्या है")
+                || text.contains("आज कौन सी तारीख है")
+                || text.contains("आज की डेट")) {
 
             return CommandType.GET_DATE;
         }
 
         // BATTERY
-        if (text.contains("battery")
-                || text.contains("बैटरी")) {
+        // Keep battery-saver phrases out of the generic battery command.
+        if ((text.contains("battery")
+                || text.contains("बैटरी"))
+                && !text.contains("battery saver")
+                && !text.contains("battery saving")
+                && !text.contains("बैटरी सेवर")
+                && !text.contains("बैटरी सेविंग")) {
 
             return CommandType.GET_BATTERY;
         }
@@ -335,10 +359,18 @@ public class CommandManager {
         }
 
         // SMS
-        if (text.contains("sms")
+        // Keep app-opening and WhatsApp message commands out of generic SMS.
+        if ((text.contains("sms")
                 || text.contains("message")
-                || text.contains("मैसेज")) {
-
+                || text.contains("मैसेज"))
+                && !text.contains("open sms")
+                && !text.contains("sms app")
+                && !text.contains("message app")
+                && !text.contains("मैसेज ऐप")
+                && !text.contains("एसएमएस ऐप")
+                && !text.contains("whatsapp")
+                && !text.contains("व्हाट्सऐप")
+                && !text.contains("व्हाट्सएप")) {
             return CommandType.SMS;
         }
 

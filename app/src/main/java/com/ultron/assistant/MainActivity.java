@@ -311,7 +311,9 @@ rearCameraButton.setOnClickListener(
                 || c.contains("left") || c.contains("right")
                 || c.contains("up") || c.contains("down")
                 || c.contains("land") || c.contains("emergency stop")
-                || c.equals("stop") || c.contains("battery");
+                || c.equals("stop")
+                || c.contains("drone battery")
+                || c.contains("drone status");
 
         if (!drone && !known) return;
 
@@ -335,7 +337,9 @@ rearCameraButton.setOnClickListener(
                 || droneCheck.contains("left") || droneCheck.contains("right")
                 || droneCheck.contains("up") || droneCheck.contains("down")
                 || droneCheck.contains("land") || droneCheck.contains("emergency stop")
-                || droneCheck.equals("stop") || droneCheck.contains("battery")) {
+                || droneCheck.equals("stop")
+                || droneCheck.contains("drone battery")
+                || droneCheck.contains("drone status")) {
             return;
         }
 

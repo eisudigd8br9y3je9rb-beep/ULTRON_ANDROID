@@ -45,13 +45,8 @@ public class VoiceManager {
         Intent intent =
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
-        intent.putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        );
-
-        // Let Android's installed speech service choose the best
-        // available language for the device/user.
+        // Use Android's normal free-form speech recognition.
+        // Do not force a specific language here.
         intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
