@@ -269,6 +269,75 @@ public class MainActivity extends Activity {
         );
     }
 
+    private void updateDashboardData() {
+        try {
+            Intent batteryStatus = registerReceiver(
+                    null,
+                    new android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+            );
+
+            int battery = -1;
+            if (batteryStatus != null) {
+                battery = batteryStatus.getIntExtra(
+                        android.os.BatteryManager.EXTRA_LEVEL, -1
+                );
+            }
+
+            int brightness = -1;
+            try {
+                brightness = android.provider.Settings.System.getInt(
+                        getContentResolver(),
+                        android.provider.Settings.System.SCREEN_BRIGHTNESS
+                );
+            } catch (Exception ignored) {
+            }
+
+            int brightnessPercent = brightness >= 0
+                    ? Math.round((brightness / 255f) * 100f)
+                    : -1;
+
+            String network = "OFFLINE";
+            try {
+                android.net.ConnectivityManager cm =
+                        (android.net.ConnectivityManager)
+                                getSystemService(CONNECTIVITY_SERVICE);
+
+                if (cm != null) {
+                    android.net.Network networkObj =
+                            cm.getActiveNetwork();
+
+                    android.net.NetworkCapabilities caps =
+                            cm.getNetworkCapabilities(networkObj);
+
+                    if (caps != null &&
+                            caps.hasCapability(
+                                    android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+                        network = "ONLINE";
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+
+            String time = new java.text.SimpleDateFormat(
+                    "HH:mm:ss",
+                    java.util.Locale.getDefault()
+            ).format(new java.util.Date());
+
+            if (systemData != null) {
+                systemData.setText(
+                        "SYSTEM DATA\n" +
+                        "Battery: " + (battery >= 0 ? battery + "%" : "--%") +
+                        "     Brightness: " +
+                        (brightnessPercent >= 0 ? brightnessPercent + "%" : "--%") +
+                        "\nNetwork: " + network +
+                        "     Time: " + time
+                );
+            }
+        } catch (Exception e) {
+            android.util.Log.e("ULTRON", "Dashboard update failed", e);
+        }
+    }
+
     private void createVoiceManager() {
 
         voiceManager = new VoiceManager(
