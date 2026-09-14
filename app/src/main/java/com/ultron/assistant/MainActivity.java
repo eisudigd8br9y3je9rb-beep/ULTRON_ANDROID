@@ -70,11 +70,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        createUserInterface();
-
-        // CRASH TEST: managers/permissions temporarily skipped.
-        // This checks whether the HUD itself can launch.
-        status.setText("●  ULTRON HUD TEST MODE");
+        android.widget.TextView test = new android.widget.TextView(this);
+        test.setText("ULTRON STARTUP TEST OK");
+        test.setTextSize(24);
+        test.setGravity(android.view.Gravity.CENTER);
+        setContentView(test);
     }
 
     private int dp(float value) {
