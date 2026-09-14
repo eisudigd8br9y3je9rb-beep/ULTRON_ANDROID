@@ -85,45 +85,127 @@ public class MainActivity extends Activity {
         requestRequiredPermissions();
     }
 
+    private int dp(float value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
     private void createUserInterface() {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(20, 20, 20, 20);
+        root.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+        root.setPadding(dp(16), dp(18), dp(16), dp(18));
+        root.setBackgroundColor(android.graphics.Color.rgb(5, 10, 16));
+
+        android.widget.ScrollView scroll =
+                new android.widget.ScrollView(this);
+
+        LinearLayout panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
 
         TextView title = new TextView(this);
-        title.setText("ULTRON AI ASSISTANT");
-        title.setTextSize(24);
+        title.setText("ULTRON");
+        title.setTextSize(30);
+        title.setGravity(android.view.Gravity.CENTER);
+        title.setTextColor(android.graphics.Color.WHITE);
+
+        TextView subtitle = new TextView(this);
+        subtitle.setText("PERSONAL AI COMMAND CENTER");
+        subtitle.setTextSize(13);
+        subtitle.setGravity(android.view.Gravity.CENTER);
+        subtitle.setTextColor(android.graphics.Color.LTGRAY);
+
+        TextView core = new TextView(this);
+        core.setText("◉");
+        core.setTextSize(82);
+        core.setGravity(android.view.Gravity.CENTER);
+        core.setTextColor(android.graphics.Color.WHITE);
+        core.setBackground(
+                new android.graphics.drawable.GradientDrawable(
+                        android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                        new int[]{
+                                android.graphics.Color.rgb(15, 35, 50),
+                                android.graphics.Color.rgb(5, 12, 20)
+                        }
+                )
+        );
 
         status = new TextView(this);
-        status.setText("ULTRON ready");
-        status.setTextSize(18);
+        status.setText("● ULTRON ONLINE");
+        status.setTextSize(17);
+        status.setGravity(android.view.Gravity.CENTER);
+        status.setTextColor(android.graphics.Color.WHITE);
+        status.setPadding(0, dp(10), 0, dp(10));
+
+        TextView info = new TextView(this);
+        info.setText(
+                "VOICE: READY\n" +
+                "SYSTEM: ONLINE\n" +
+                "AI CORE: STANDBY"
+        );
+        info.setTextSize(14);
+        info.setGravity(android.view.Gravity.CENTER);
+        info.setTextColor(android.graphics.Color.LTGRAY);
 
         preview = new TextureView(this);
 
+        Button activate = new Button(this);
+        activate.setText("ACTIVATE");
+
+        Button sleep = new Button(this);
+        sleep.setText("SLEEP");
+
         Button rearCameraButton = new Button(this);
-        rearCameraButton.setText("Open Rear Camera");
+        rearCameraButton.setText("OPEN REAR CAMERA");
 
         Button frontCameraButton = new Button(this);
-        frontCameraButton.setText("Open Front Camera");
+        frontCameraButton.setText("OPEN FRONT CAMERA");
 
         Button voiceButton = new Button(this);
-        voiceButton.setText("Start Voice Command");
+        voiceButton.setText("START VOICE COMMAND");
 
         Button youtubeButton = new Button(this);
-        youtubeButton.setText("Open YouTube");
+        youtubeButton.setText("OPEN YOUTUBE");
 
         Button settingsButton = new Button(this);
-        settingsButton.setText("Open Settings");
+        settingsButton.setText("OPEN SETTINGS");
 
         Button homeButton = new Button(this);
-        homeButton.setText("Go Home");
+        homeButton.setText("GO HOME");
 
-        root.addView(title);
-        root.addView(status);
+        panel.addView(title);
+        panel.addView(subtitle);
+        panel.addView(
+                core,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        dp(150)
+                )
+        );
+        panel.addView(status);
+        panel.addView(info);
 
-        root.addView(
+        panel.addView(
                 preview,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        dp(180)
+                )
+        );
+
+        panel.addView(activate);
+        panel.addView(sleep);
+        panel.addView(rearCameraButton);
+        panel.addView(frontCameraButton);
+        panel.addView(voiceButton);
+        panel.addView(youtubeButton);
+        panel.addView(settingsButton);
+        panel.addView(homeButton);
+
+        scroll.addView(panel);
+        root.addView(
+                scroll,
                 new LinearLayout.LayoutParams(
                         -1,
                         0,
@@ -131,18 +213,31 @@ public class MainActivity extends Activity {
                 )
         );
 
-        root.addView(rearCameraButton);
-        root.addView(frontCameraButton);
-        root.addView(voiceButton);
-        root.addView(youtubeButton);
-        root.addView(settingsButton);
-        root.addView(homeButton);
-
         setContentView(root);
 
+        activate.setOnClickListener(v -> {
+            ultronActive = true;
+            ultronWaiting = false;
+            status.setText("● ULTRON ACTIVE");
+            startVoice();
+        });
 
-        // Double-clap detector disabled: it conflicts with SpeechRecognizer/TTS.
-rearCameraButton.setOnClickListener(
+        sleep.setOnClickListener(v -> {
+            ultronActive = false;
+            ultronWaiting = false;
+
+            if (voiceManager != null) {
+                voiceManager.stopListening();
+            }
+
+            if (voiceSpeaker != null) {
+                voiceSpeaker.stop();
+            }
+
+            status.setText("● ULTRON SLEEPING");
+        });
+
+        rearCameraButton.setOnClickListener(
                 v -> openCamera(true)
         );
 
