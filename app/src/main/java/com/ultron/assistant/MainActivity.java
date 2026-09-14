@@ -103,71 +103,92 @@ public class MainActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
-        root.setPadding(dp(16), dp(18), dp(16), dp(18));
-        root.setBackgroundColor(android.graphics.Color.rgb(5, 10, 16));
+        root.setBackgroundColor(android.graphics.Color.rgb(3, 8, 14));
 
-        android.widget.ScrollView scroll =
-                new android.widget.ScrollView(this);
+        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+        scroll.setFillViewport(true);
 
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+        panel.setPadding(dp(14), dp(14), dp(14), dp(24));
 
         TextView title = new TextView(this);
         title.setText("ULTRON");
-        title.setTextSize(30);
+        title.setTextSize(32);
         title.setGravity(android.view.Gravity.CENTER);
         title.setTextColor(android.graphics.Color.WHITE);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
 
         TextView subtitle = new TextView(this);
         subtitle.setText("PERSONAL AI COMMAND CENTER");
         subtitle.setTextSize(13);
         subtitle.setGravity(android.view.Gravity.CENTER);
         subtitle.setTextColor(android.graphics.Color.LTGRAY);
+        subtitle.setPadding(0, 0, 0, dp(10));
 
         TextView core = new TextView(this);
         core.setText("◉");
-        core.setTextSize(82);
+        core.setTextSize(78);
         core.setGravity(android.view.Gravity.CENTER);
         core.setTextColor(android.graphics.Color.WHITE);
-        core.setBackground(
-                new android.graphics.drawable.GradientDrawable(
-                        android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                        new int[]{
-                                android.graphics.Color.rgb(15, 35, 50),
-                                android.graphics.Color.rgb(5, 12, 20)
-                        }
-                )
-        );
+        core.setBackground(makePanel(
+                android.graphics.Color.rgb(8, 25, 38),
+                android.graphics.Color.rgb(2, 10, 17)
+        ));
 
-        status = new TextView(this);
-        status.setText("● ULTRON ONLINE");
+        TextView coreLabel = new TextView(this);
+        coreLabel.setText("AI CORE  •  STANDBY");
+        coreLabel.setTextSize(14);
+        coreLabel.setGravity(android.view.Gravity.CENTER);
+        coreLabel.setTextColor(android.graphics.Color.LTGRAY);
+        coreLabel.setPadding(0, dp(6), 0, dp(10));
+
+        TextView statusPanel = new TextView(this);
+        statusPanel.setText("●  ULTRON ONLINE");
+        statusPanel.setTextSize(19);
+        statusPanel.setGravity(android.view.Gravity.CENTER);
+        statusPanel.setTextColor(android.graphics.Color.WHITE);
+        statusPanel.setPadding(dp(10), dp(12), dp(10), dp(12));
+        statusPanel.setBackground(makePanel(
+                android.graphics.Color.rgb(10, 30, 43),
+                android.graphics.Color.rgb(4, 13, 21)
+        ));
+        status = statusPanel;
 
         systemData = new TextView(this);
-        systemData.setText("SYSTEM DATA\nBattery: --%   Brightness: --%\nNetwork: CHECKING\nTime: --");
-        systemData.setTextSize(16);
+        systemData.setText(
+                "SYSTEM DATA\n" +
+                "Battery: --%     Brightness: --%\n" +
+                "Network: CHECKING     Time: --"
+        );
+        systemData.setTextSize(15);
         systemData.setTextColor(android.graphics.Color.LTGRAY);
-        systemData.setPadding(dp(12), dp(10), dp(12), dp(10));
-        root.addView(systemData);
-
-
-        status.setTextSize(17);
-        status.setGravity(android.view.Gravity.CENTER);
-        status.setTextColor(android.graphics.Color.WHITE);
-        status.setPadding(0, dp(10), 0, dp(10));
+        systemData.setPadding(dp(14), dp(12), dp(14), dp(12));
+        systemData.setBackground(makePanel(
+                android.graphics.Color.rgb(7, 20, 30),
+                android.graphics.Color.rgb(3, 10, 17)
+        ));
 
         TextView info = new TextView(this);
         info.setText(
-                "VOICE: READY\n" +
-                "SYSTEM: ONLINE\n" +
-                "AI CORE: STANDBY"
+                "VOICE  •  READY\n" +
+                "SYSTEM  •  ONLINE\n" +
+                "AI CORE  •  STANDBY"
         );
         info.setTextSize(14);
         info.setGravity(android.view.Gravity.CENTER);
         info.setTextColor(android.graphics.Color.LTGRAY);
+        info.setPadding(0, dp(12), 0, dp(12));
 
         preview = new TextureView(this);
+        preview.setBackgroundColor(android.graphics.Color.rgb(5, 12, 19));
+
+        TextView cameraLabel = new TextView(this);
+        cameraLabel.setText("CAMERA / VISION");
+        cameraLabel.setTextSize(12);
+        cameraLabel.setGravity(android.view.Gravity.CENTER);
+        cameraLabel.setTextColor(android.graphics.Color.LTGRAY);
+        cameraLabel.setPadding(0, dp(5), 0, dp(8));
 
         Button activate = new Button(this);
         activate.setText("ACTIVATE");
@@ -195,23 +216,13 @@ public class MainActivity extends Activity {
 
         panel.addView(title);
         panel.addView(subtitle);
-        panel.addView(
-                core,
-                new LinearLayout.LayoutParams(
-                        -1,
-                        dp(150)
-                )
-        );
-        panel.addView(status);
+        panel.addView(core, new LinearLayout.LayoutParams(-1, dp(150)));
+        panel.addView(coreLabel);
+        panel.addView(statusPanel);
+        panel.addView(systemData);
         panel.addView(info);
-
-        panel.addView(
-                preview,
-                new LinearLayout.LayoutParams(
-                        -1,
-                        dp(180)
-                )
-        );
+        panel.addView(cameraLabel);
+        panel.addView(preview, new LinearLayout.LayoutParams(-1, dp(180)));
 
         panel.addView(activate);
         panel.addView(sleep);
@@ -223,108 +234,38 @@ public class MainActivity extends Activity {
         panel.addView(homeButton);
 
         scroll.addView(panel);
-        root.addView(
-                scroll,
-                new LinearLayout.LayoutParams(
-                        -1,
-                        0,
-                        1
-                )
-        );
-
+        root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(root);
+
         dashboardHandler.post(dashboardUpdater);
 
         activate.setOnClickListener(v -> {
             ultronActive = true;
             ultronWaiting = false;
-            status.setText("● ULTRON ACTIVE");
+            status.setText("●  ULTRON ACTIVE");
             startVoice();
         });
 
         sleep.setOnClickListener(v -> {
             ultronActive = false;
-            ultronWaiting = false;
-
-            if (voiceManager != null) {
-                voiceManager.stopListening();
-            }
-
-            if (voiceSpeaker != null) {
-                voiceSpeaker.stop();
-            }
-
-            status.setText("● ULTRON SLEEPING");
+            ultronWaiting = true;
+            if (voiceManager != null) voiceManager.stopListening();
+            if (voiceSpeaker != null) voiceSpeaker.stop();
+            status.setText("●  ULTRON SLEEPING");
         });
 
-        rearCameraButton.setOnClickListener(
-                v -> openCamera(true)
-        );
-
-        frontCameraButton.setOnClickListener(
-                v -> openCamera(false)
-        );
-
-        voiceButton.setOnClickListener(
-                v -> startVoice()
-        );
-
-        youtubeButton.setOnClickListener(
-                v -> openYouTube()
-        );
-
-        settingsButton.setOnClickListener(
-                v -> openSettings()
-        );
-
-        homeButton.setOnClickListener(
-                v -> goHome()
-        );
+        rearCameraButton.setOnClickListener(v -> openCamera(false));
+        frontCameraButton.setOnClickListener(v -> openCamera(true));
+        voiceButton.setOnClickListener(v -> startVoice());
+        youtubeButton.setOnClickListener(v -> openYouTube());
+        settingsButton.setOnClickListener(v -> openSettings());
+        homeButton.setOnClickListener(v -> goHome());
     }
 
-
-    private void updateDashboardData() {
-        if (systemData == null) return;
-
-        int battery = -1;
-        try {
-            Intent batteryIntent = registerReceiver(null,
-                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            if (batteryIntent != null) {
-                int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                if (level >= 0 && scale > 0) {
-                    battery = (level * 100) / scale;
-                }
-            }
-        } catch (Exception ignored) {}
-
-        int brightness = -1;
-        try {
-            brightness = android.provider.Settings.System.getInt(
-                    getContentResolver(),
-                    android.provider.Settings.System.SCREEN_BRIGHTNESS);
-            brightness = Math.max(0, Math.min(100, (brightness * 100) / 255));
-        } catch (Exception ignored) {}
-
-        String network = "OFFLINE";
-        try {
-            android.net.ConnectivityManager cm =
-                    (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-            if (cm != null && cm.getActiveNetwork() != null) {
-                network = "ONLINE";
-            }
-        } catch (Exception ignored) {}
-
-        String time = new java.text.SimpleDateFormat(
-                "HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
-
-        systemData.setText(
-                "SYSTEM DATA\n" +
-                "Battery: " + (battery >= 0 ? battery + "%" : "--") +
-                "   Brightness: " + (brightness >= 0 ? brightness + "%" : "--") +
-                "\nNetwork: " + network +
-                "   Time: " + time
+    private android.graphics.drawable.GradientDrawable makePanel(int top, int bottom) {
+        return new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                new int[]{top, bottom}
         );
     }
 
