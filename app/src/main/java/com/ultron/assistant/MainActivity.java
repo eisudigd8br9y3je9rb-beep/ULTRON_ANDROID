@@ -20,15 +20,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.ultron.assistant.accessibility.UltronAccessibilityService;
 import com.ultron.assistant.actions.AppLauncher;
 import com.ultron.assistant.actions.PhoneActions;
 import com.ultron.assistant.communication.CommunicationManager;
 import com.ultron.assistant.core.CommandManager;
-import com.ultron.assistant.core.TechnicianKnowledge;
-import com.ultron.assistant.memory.MemoryManager;
-import com.ultron.assistant.contacts.ContactManager;
+import com.ultron.assistant.memory.OwnerProfile;
 import com.ultron.assistant.voice.VoiceManager;
-import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 
 import java.util.Collections;
@@ -39,8 +37,8 @@ public class MainActivity extends Activity {
 
     private static final int CAMERA_REQUEST = 100;
     private static final int CALL_REQUEST = 103;
+    private static final int CONTACTS_REQUEST = 104;
     private static final int AUDIO_REQUEST = 101;
-    private static final int REQUEST_CONTACTS = 104;
 
     private TextureView preview;
     private TextView status;
@@ -51,30 +49,25 @@ public class MainActivity extends Activity {
     private VoiceManager voiceManager;
     private VoiceSpeaker voiceSpeaker;
     private CommandManager commandManager;
-    private TechnicianKnowledge technicianKnowledge;
-    private MemoryManager memoryManager;
-    private ContactManager contactManager;
 
     // ULTRON voice states
     private boolean ultronActive = true;
     private boolean ultronWaiting = false;
     private boolean continuousListening = true;
-    private String lastUserCommand = "";
     private AppLauncher appLauncher;
     private PhoneActions phoneActions;
     private CommunicationManager communicationManager;
+    private OwnerProfile ownerProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         commandManager = new CommandManager();
-        technicianKnowledge = new TechnicianKnowledge(this);
-        memoryManager = new MemoryManager(this);
-        contactManager = new ContactManager(this);
         appLauncher = new AppLauncher(this);
         phoneActions = new PhoneActions(this);
         communicationManager = new CommunicationManager(this);
+        ownerProfile = new OwnerProfile(this);
 
         createUserInterface();
         createVoiceManager();
@@ -137,9 +130,7 @@ public class MainActivity extends Activity {
 
         setContentView(root);
 
-        
-        // Double-clap detector disabled: it conflicts with SpeechRecognizer/TTS.
-rearCameraButton.setOnClickListener(
+        rearCameraButton.setOnClickListener(
                 v -> openCamera(true)
         );
 
@@ -229,6 +220,19 @@ rearCameraButton.setOnClickListener(
                     CALL_REQUEST
             );
         }
+
+
+        if (checkSelfPermission(
+                Manifest.permission.READ_CONTACTS
+        ) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{
+                            Manifest.permission.READ_CONTACTS
+                    },
+                    CONTACTS_REQUEST
+            );
+        }
     }
 
     private void startVoice() {
@@ -261,88 +265,16 @@ rearCameraButton.setOnClickListener(
         voiceManager.startListening();
     }
 
-    private String consumeLastUserCommand() {
-        String command = lastUserCommand == null ? "" : lastUserCommand.trim();
-        lastUserCommand = "";
-        return command;
-    }
-
     private void respond(String message) {
 
         status.setText(message);
 
-        if (memoryManager != null
-                && message != null
-                && !message.trim().isEmpty()) {
-
-            String userCommand = consumeLastUserCommand();
-
-            if (!userCommand.isEmpty()) {
-                memoryManager.addConversation(
-                        userCommand,
-                        message
-                );
-            }
-        }
-
-        if (voiceManager != null) {
-            voiceManager.stopListening();
-        }
-
         if (voiceSpeaker != null) {
-            voiceSpeaker.speak(
-                    message,
-                    () -> runOnUiThread(() -> {
-                        if (ultronActive && !ultronWaiting
-                                && voiceManager != null) {
-                            voiceManager.startListening();
-                        }
-                    })
-            );
+            voiceSpeaker.speak(message);
         }
-    }
-
-    private void handleDroneCommand(String command) {
-        String c = command.toLowerCase().trim();
-
-        boolean drone = c.contains("drone");
-        boolean known = c.contains("take off") || c.contains("takeoff")
-                || c.contains("forward") || c.contains("back")
-                || c.contains("left") || c.contains("right")
-                || c.contains("up") || c.contains("down")
-                || c.contains("land") || c.contains("emergency stop")
-                || c.equals("stop")
-                || c.contains("drone battery")
-                || c.contains("drone status");
-
-        if (!drone && !known) return;
-
-        new Thread(() -> {
-            String result = DroneBridge.sendCommand(c);
-            runOnUiThread(() -> respond(result));
-        }).start();
     }
 
     private void handleVoiceCommand(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            respond("I did not hear a command.");
-            return;
-        }
-
-        handleDroneCommand(command);
-        String droneCheck = command.toLowerCase().trim();
-        if (droneCheck.contains("drone")
-                || droneCheck.contains("take off") || droneCheck.contains("takeoff")
-                || droneCheck.contains("forward") || droneCheck.contains("back")
-                || droneCheck.contains("left") || droneCheck.contains("right")
-                || droneCheck.contains("up") || droneCheck.contains("down")
-                || droneCheck.contains("land") || droneCheck.contains("emergency stop")
-                || droneCheck.equals("stop")
-                || droneCheck.contains("drone battery")
-                || droneCheck.contains("drone status")) {
-            return;
-        }
-
 
         if (command == null || command.trim().isEmpty()) {
             status.setText("No voice command received");
@@ -350,7 +282,6 @@ rearCameraButton.setOnClickListener(
         }
 
         status.setText("You said: " + command);
-        lastUserCommand = command.trim();
 
         CommandManager.CommandType commandType =
                 commandManager.parseCommand(command);
@@ -399,11 +330,15 @@ rearCameraButton.setOnClickListener(
                 break;
 
             case WHO_AM_I:
-                respond("You are Imtiyaz, my primary user.");
+                respond("You are " + ownerProfile.getOwnerName() + ", my primary user.");
                 break;
 
             case WHO_IS_YOUR_OWNER:
-                respond("My primary user is Imtiyaz.");
+                respond("My primary user is " + ownerProfile.getOwnerName() + ".");
+                break;
+
+            case SET_OWNER_NAME:
+                setOwnerName(command);
                 break;
 
             case ULTRON_ON:
@@ -464,11 +399,11 @@ rearCameraButton.setOnClickListener(
                 break;
 
             case CALL:
-                handleCallCommand(command);
+                callNumber(command);
                 break;
 
             case SMS:
-                handleSmsCommand(command);
+                sendSms(command);
                 break;
 
             case OPEN_CAMERA:
@@ -510,6 +445,34 @@ rearCameraButton.setOnClickListener(
 
             case GET_BATTERY:
                 tellBatteryLevel();
+                break;
+
+            case FEATURE_INFO:
+                tellFeatures();
+                break;
+
+            case UI_CLICK:
+                handleUiClick(command);
+                break;
+
+            case UI_TYPE:
+                handleUiType(command);
+                break;
+
+            case UI_SCROLL_DOWN:
+                handleUiScrollDown();
+                break;
+
+            case UI_SCROLL_UP:
+                handleUiScrollUp();
+                break;
+
+            case UI_BACK:
+                handleUiBack();
+                break;
+
+            case UI_HOME:
+                handleUiHome();
                 break;
 
             case OPEN_ANY_APP:
@@ -569,30 +532,6 @@ rearCameraButton.setOnClickListener(
                 openSmsApp();
                 break;
 
-            case OPEN_WHATSAPP:
-                if (appLauncher != null && appLauncher.openWhatsApp()) {
-                    respond("Opening WhatsApp.");
-                } else {
-                    respond("WhatsApp is not installed.");
-                }
-                break;
-
-            case OPEN_PLAY_STORE:
-                if (appLauncher != null && appLauncher.openPlayStore()) {
-                    respond("Opening Google Play.");
-                } else {
-                    respond("I could not open Google Play.");
-                }
-                break;
-
-            case OPEN_WHATSAPP_CHAT:
-                handleWhatsAppNumberCommand(command);
-                break;
-
-            case WHATSAPP_MESSAGE:
-                handleWhatsAppMessageCommand(command);
-                break;
-
             case OPEN_MUSIC_APP:
                 openMusicApp();
                 break;
@@ -609,58 +548,12 @@ rearCameraButton.setOnClickListener(
                 openAppSettings();
                 break;
 
-            case FOLLOW_UP:
-                handleFollowUpCommand(command);
-                break;
-
-            case MEMORY_LAST_RESPONSE:
-                String lastAnswer = memoryManager.getLastAssistant();
-                if (lastAnswer == null || lastAnswer.trim().isEmpty()) {
-                    respond("I do not have a previous answer yet.");
-                } else {
-                    respond(lastAnswer);
-                }
-                break;
-
-            case MEMORY_CONTEXT:
-                String recentContext = memoryManager.getRecentContext();
-                if (recentContext == null || recentContext.trim().isEmpty()) {
-                    respond("I do not have enough conversation context yet.");
-                } else {
-                    respond("Here is our recent conversation: " + recentContext);
-                }
-                break;
-
-            case MEMORY_LAST:
-                String lastUser = memoryManager.getLastUser();
-
-                if (lastUser.isEmpty()) {
-                    respond("I do not have any conversation memory yet.");
-                } else {
-                    respond("Your last question was: " + lastUser);
-                }
-                break;
-
-            case MEMORY_CLEAR:
-                memoryManager.clearMemory();
-                lastUserCommand = "";
-                respond("Conversation memory has been cleared.");
-                break;
-
-            case FEATURE_INFO:
-                tellFeatures();
-                break;
-
-
             case UNKNOWN:
             default:
-                String knowledgeAnswer = technicianKnowledge.search(command);
-
-                if (knowledgeAnswer != null && !knowledgeAnswer.trim().isEmpty()) {
-                    respond(knowledgeAnswer);
-                } else {
-                    respond("Sorry, I did not understand your question. Please try again.");
-                }
+                status.setText(
+                        "ULTRON did not understand: "
+                                + command
+                );
                 break;
         }
     }
@@ -669,21 +562,113 @@ rearCameraButton.setOnClickListener(
 
 
 
-    private void tellFeatures() {
-        String message =
-                "मैं ULTRON हूँ। मेरे वर्तमान फीचर्स हैं: "
-                + "YouTube, Instagram और PUBG खोलना। "
-                + "Settings और Camera खोलना। "
-                + "Google पर search करना। "
-                + "Call और SMS करना। "
-                + "Torch control करना। "
-                + "Volume control करना। "
-                + "WiFi और Bluetooth settings खोलना। "
-                + "Time, Date और Battery की जानकारी देना। "
-                + "Security, Network, Location और Notification settings खोलना। "
-                + "और अन्य installed apps खोलने की कोशिश करना।";
+    private void handleUiClick(String command) {
 
-        respond(message);
+        if (!UltronAccessibilityService.isRunning()) {
+            respond("ULTRON UI Control is not enabled. Please enable Accessibility Service.");
+            return;
+        }
+
+        String text = command
+                .replaceFirst("(?i)^click\\s+", "")
+                .replaceAll("\\s*(पर क्लिक|पे क्लिक).*", "")
+                .trim();
+
+        if (text.isEmpty()) {
+            respond("Please tell me what to click.");return;
+        }
+
+        boolean clicked =
+                UltronAccessibilityService.clickText(text);
+
+        respond(clicked
+                ? "Clicked " + text
+                : "I could not find " + text + " on the screen.");
+    }
+
+    private void handleUiType(String command) {
+
+        if (!UltronAccessibilityService.isRunning()) {
+            respond("ULTRON UI Control is not enabled. Please enable Accessibility Service.");
+            return;
+        }
+
+        String text = command
+                .replaceFirst("(?i)^(type|write)\\s+", "")
+                .replaceFirst("^लिखो\\s*", "")
+                .trim();
+
+        if (text.isEmpty()) {
+            respond("Please tell me what to type.");
+            return;
+        }
+
+        boolean typed =
+                UltronAccessibilityService.typeText(text);
+
+        respond(typed
+                ? "Text entered."
+                : "Please select a text field first.");
+    }
+
+    private void handleUiScrollDown() {
+
+        if (!UltronAccessibilityService.isRunning()) {
+            respond("Please enable ULTRON UI Control in Accessibility Settings.");
+            return;
+        }
+
+        boolean done =
+                UltronAccessibilityService.scrollDown();
+
+        respond(done
+                ? "Scrolling down."
+                : "I could not scroll this screen.");
+    }
+
+    private void handleUiScrollUp() {
+
+        if (!UltronAccessibilityService.isRunning()) {
+            respond("Please enable ULTRON UI Control in Accessibility Settings.");
+            return;
+        }
+
+        boolean done =
+                UltronAccessibilityService.scrollUp();
+
+        respond(done
+                ? "Scrolling up."
+                : "I could not scroll this screen.");
+    }
+
+    private void handleUiBack() {
+
+        if (!UltronAccessibilityService.isRunning()) {
+            goHome();
+            return;
+        }
+
+        boolean done =
+                UltronAccessibilityService.goBack();
+
+        respond(done
+                ? "Going back."
+                : "I could not go back.");
+    }
+
+    private void handleUiHome() {
+
+        if (!UltronAccessibilityService.isRunning()) {
+            goHome();
+            return;
+        }
+
+        boolean done =
+                UltronAccessibilityService.goHome();
+
+        respond(done
+                ? "Going home."
+                : "I could not open Home.");
     }
 
     private void openSecuritySettings() {
@@ -896,63 +881,120 @@ rearCameraButton.setOnClickListener(
 
     private void openRequestedApp(String command) {
 
-        String text = command.toLowerCase().trim();
-
-        if (text.contains("youtube") || text.contains("यूट्यूब")) {
-            boolean opened = appLauncher.openYouTube();
-            if (opened) respond("Opening YouTube.");
-            else respond("Sorry, I could not open YouTube.");
+        if (command == null || command.trim().isEmpty()) {
+            respond("Please tell me which app to open.");
             return;
         }
 
-        if (text.contains("instagram") || text.contains("इंस्टाग्राम")) {
-            boolean opened = appLauncher.openInstagram();
-            if (opened) respond("Opening Instagram.");
-            else respond("Instagram is not installed.");
+        String appName =
+                extractAppName(command);
+
+        if (appName.isEmpty()) {
+            respond("Please tell me the app name.");
             return;
         }
 
-        if (text.contains("pubg")) {
-            boolean opened = appLauncher.openPUBG();
-            if (opened) respond("Opening PUBG.");
-            else respond("PUBG is not installed.");
-            return;
+        boolean opened =
+                appLauncher.openAppByName(appName);
+
+        if (opened) {
+            respond("Opening " + appName + ".");
+        } else {
+            respond(
+                    "Sorry, I could not find "
+                            + appName
+                            + " on this phone."
+            );
+        }
+    }
+
+    private String extractAppName(String command) {
+
+        if (command == null) {
+            return "";
         }
 
-        if (text.contains("chrome")
-                || text.contains("क्रोम")) {
+        String appName =
+                command.trim();
 
-            boolean opened =
-                    appLauncher.openChrome();
-
-            if (opened) {
-                respond("Opening Chrome.");
-            } else {
-                respond("Chrome is not installed.");
-            }
-
-            return;
-        }
-
-        if (text.contains("whatsapp")
-                || text.contains("व्हाट्सएप")
-                || text.contains("वॉट्सऐप")) {
-
-            boolean opened =
-                    appLauncher.openWhatsApp();
-
-            if (opened) {
-                respond("Opening WhatsApp.");
-            } else {
-                respond("WhatsApp is not installed.");
-            }
-
-            return;
-        }
-
-        respond(
-                "Sorry, I do not know which app to open yet."
+        appName = appName.replaceFirst(
+                "(?i)^\\s*(open|launch|start)\\s+",
+                ""
         );
+
+        appName = appName.replaceFirst(
+                "^\\s*(खोलो|खोल दो|ओपन करो|चालू करो)\\s*",
+                ""
+        );
+
+        appName = appName.replaceFirst(
+                "\\s*(खोलो|खोल दो|ओपन करो|चालू करो)\\s*$",
+                ""
+        );
+
+        return appName.trim();
+    }
+
+    private void setOwnerName(String command) {
+
+        String name = extractOwnerName(command);
+
+        if (name.isEmpty()) {
+            respond("Sorry, I did not catch the name. Please say: my name is <your name>.");
+            return;
+        }
+
+        ownerProfile.setOwnerName(name);
+
+        respond("Okay, I will remember your name as " + name + ".");
+    }
+
+    private String extractOwnerName(String command) {
+
+        if (command == null) {
+            return "";
+        }
+
+        String raw = command.trim();
+
+        // English: "my name is <name>"
+        Matcher englishMatcher =
+                Pattern.compile("(?i)my name is\\s+(.+)").matcher(raw);
+
+        if (englishMatcher.find()) {
+            return cleanExtractedName(englishMatcher.group(1));
+        }
+
+        // Hinglish (Latin script): "mera naam <name> hai"
+        Matcher hinglishMatcher =
+                Pattern.compile("(?i)mera naam\\s+(.+?)\\s+hai").matcher(raw);
+
+        if (hinglishMatcher.find()) {
+            return cleanExtractedName(hinglishMatcher.group(1));
+        }
+
+        // Hindi (Devanagari script): "मेरा नाम <name> है"
+        Matcher hindiMatcher =
+                Pattern.compile("मेरा नाम\\s+(.+?)\\s+है").matcher(raw);
+
+        if (hindiMatcher.find()) {
+            return cleanExtractedName(hindiMatcher.group(1));
+        }
+
+        return "";
+    }
+
+    private String cleanExtractedName(String name) {
+
+        if (name == null) {
+            return "";
+        }
+
+        String cleaned = name.trim();
+
+        cleaned = cleaned.replaceAll("[.!?,]+$", "");
+
+        return cleaned.trim();
     }
 
 
@@ -1202,106 +1244,242 @@ rearCameraButton.setOnClickListener(
         String phoneNumber =
                 extractPhoneNumber(command);
 
-        if (phoneNumber.isEmpty()) {
+        if (!phoneNumber.isEmpty()) {
 
             status.setText(
-                    "No phone number found. Speak digits clearly."
+                    "Calling: " + phoneNumber
             );
+
+            boolean called =
+                    communicationManager.call(phoneNumber);
+
+            if (!called) {
+                respond(
+                        "Call permission required or call failed."
+                );
+            }
 
             return;
         }
 
-        status.setText(
-                "Calling: " + phoneNumber
-        );
+        String contactName =
+                extractContactNameForCall(command);
+
+        if (contactName.isEmpty()) {
+            respond(
+                    "Please tell me a phone number or contact name."
+            );
+            return;
+        }
+
+        String number =
+                communicationManager.findContactNumber(
+                        contactName
+                );
+
+        if (number.isEmpty()) {
+            respond(
+                    "Sorry, I could not find "
+                            + contactName
+                            + " in your contacts."
+            );
+            return;
+        }
 
         boolean called =
-                communicationManager.call(phoneNumber);
+                communicationManager.call(number);
 
-        if (!called) {
-            status.setText(
-                    "Call permission required or call failed"
+        if (called) {
+            respond(
+                    "Calling " + contactName + "."
+            );
+        } else {
+            respond(
+                    "I found the contact, but the call could not start."
             );
         }
     }
+
 
     private void sendSms(String command) {
 
         String phoneNumber =
                 extractPhoneNumber(command);
 
-        if (phoneNumber.isEmpty()) {
+        String message =
+                extractSmsMessage(command);
 
-            status.setText(
-                    "No phone number found for SMS."
+        if (!phoneNumber.isEmpty()) {
+
+            communicationManager.composeSms(
+                    phoneNumber,
+                    message
+            );
+
+            respond(
+                    "Opening message for "
+                            + phoneNumber
+                            + "."
             );
 
             return;
         }
 
-        String message =
-                extractSmsMessage(command);
+        String contactName =
+                extractContactNameForSms(command);
 
-        status.setText(
-                "Opening SMS for: " + phoneNumber
-        );
+        if (contactName.isEmpty()) {
+            respond(
+                    "Please tell me the contact name."
+            );
+            return;
+        }
+
+        String number =
+                communicationManager.findContactNumber(
+                        contactName
+                );
+
+        if (number.isEmpty()) {
+            respond(
+                    "Sorry, I could not find "
+                            + contactName
+                            + " in your contacts."
+            );
+            return;
+        }
 
         communicationManager.composeSms(
-                phoneNumber,
+                number,
                 message
+        );
+
+        respond(
+                "Opening message for "
+                        + contactName
+                        + "."
         );
     }
 
 
-    private String extractPhoneNumber(String text) {
-        if (text == null) return "";
+    private String extractContactNameForCall(
+            String command
+    ) {
 
-        Pattern pattern = Pattern.compile(
-                "(?<!\\d)(\\+?\\d[\\d\\s-]{6,}\\d)(?!\\d)"
-        );
-
-        Matcher matcher = pattern.matcher(text);
-
-        if (!matcher.find()) return "";
-
-        String number = matcher.group(1).replaceAll("[\\s-]", "");
-
-        if (number.startsWith("+")) {
-            String digits = number.substring(1);
-            if (digits.length() >= 7 && digits.length() <= 15) {
-                return "+" + digits;
-            }
+        if (command == null) {
             return "";
         }
 
-        String digits = number.replaceAll("[^0-9]", "");
+        String name =
+                command.trim();
 
-        if (digits.length() >= 7 && digits.length() <= 15) {
-            return digits;
+        name = name.replaceAll(
+                "(?i)\\b(call|phone)\\b",
+                ""
+        );
+
+        name = name.replace(
+                "कॉल करो",
+                ""
+        );
+
+        name = name.replace(
+                "को कॉल",
+                ""
+        );
+
+        name = name.replace(
+                "कॉल",
+                ""
+        );
+
+        name = name.replace(
+                "फोन लगाओ",
+                ""
+        );
+
+        name = name.replace(
+                "करो",
+                ""
+        );
+
+        return name.trim();
+    }
+
+
+    private String extractContactNameForSms(
+            String command
+    ) {
+
+        if (command == null) {
+            return "";
+        }
+
+        String name =
+                command.trim();
+
+        name = name.replaceAll(
+                "(?i)\\b(sms|message)\\b",
+                ""
+        );
+
+        name = name.replace(
+                "मैसेज भेजो",
+                ""
+        );
+
+        name = name.replace(
+                "को मैसेज",
+                ""
+        );
+
+        name = name.replace(
+                "मैसेज",
+                ""
+        );
+
+        name = name.replace(
+                "भेजो",
+                ""
+        );
+
+        String[] parts =
+                name.trim().split("\\s+");
+
+        if (parts.length > 0) {
+            return parts[0].trim();
         }
 
         return "";
     }
 
-    private String extractMessageAfterNumber(String command) {
-        if (command == null) return "";
 
-        Matcher matcher = Pattern.compile(
-                "(?<!\\d)(\\+?\\d[\\d\\s-]{6,}\\d)(?!\\d)"
-        ).matcher(command);
+    private String extractPhoneNumber(String text) {
 
-        if (!matcher.find()) return "";
+        if (text == null) {
+            return "";
+        }
 
-        String message = command.substring(matcher.end()).trim();
+        Pattern pattern =
+                Pattern.compile(
+                        "\\+?[0-9][0-9\\-\\s]{7,20}"
+                );
 
-        message = message
-                .replaceFirst("(?i)^\\s*(message|msg|sms)\\s*", "")
-                .replaceFirst("(?i)^\\s*send\\s*", "")
-                .replaceFirst("^\\s*(मैसेज|संदेश|एसएमएस)\\s*", "")
-                .replaceFirst("^\\s*(भेजो|भेज)\\s*", "")
-                .trim();
+        Matcher matcher =
+                pattern.matcher(text);
 
-        return message;
+        if (matcher.find()) {
+
+            String number =
+                    matcher.group();
+
+            return number.replaceAll(
+                    "[^0-9+]",
+                    ""
+            );
+        }
+
+        return "";
     }
 
     private String extractSmsMessage(String command) {
@@ -1333,6 +1511,28 @@ rearCameraButton.setOnClickListener(
         );
 
         return message.trim();
+    }
+
+
+    private void tellFeatures() {
+
+        String features =
+                "I am ULTRON. "
+                + "I can open installed apps, "
+                + "call phone numbers and contacts, "
+                + "open messages for numbers and contacts, "
+                + "open camera, settings and home screen, "
+                + "control flashlight and volume, "
+                + "open Wi-Fi and Bluetooth settings, "
+                + "tell time, date and battery information, "
+                + "control silent, vibrate and normal ringer modes, "
+                + "open security, location, notification, "
+                + "mobile network and other phone settings, "
+                + "search Google and handle available commands. "
+                + "Some actions depend on Android permissions "
+                + "and phone security restrictions.";
+
+        respond(features);
     }
 
 
@@ -1804,7 +2004,6 @@ rearCameraButton.setOnClickListener(
         }
     }
 
-
     @Override
     protected void onDestroy() {
 
@@ -1822,448 +2021,4 @@ rearCameraButton.setOnClickListener(
             voiceSpeaker = null;
         }
     }
-
-    private void requestContactsPermissionIfNeeded() {
-        if (android.os.Build.VERSION.SDK_INT >= 23
-                && checkSelfPermission(
-                android.Manifest.permission.READ_CONTACTS)
-                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(
-                    new String[]{
-                            android.Manifest.permission.READ_CONTACTS
-                    },
-                    REQUEST_CONTACTS
-            );
-
-            respond("Contacts permission is required to find a contact.");
-        }
-    }
-
-
-    private void handleCallCommand(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            respond("Please tell me a contact name or phone number.");
-            return;
-        }
-
-        String original = command.trim();
-        String number = extractPhoneNumber(original);
-
-        if (!number.isEmpty()) {
-            openDialerWithNumber(number);
-            return;
-        }
-
-        if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                    new String[]{Manifest.permission.READ_CONTACTS},
-                    REQUEST_CONTACTS
-            );
-            respond("I need contacts permission to find that person.");
-            return;
-        }
-
-        String name = original
-                .replaceAll("(?i)\\bplease\\b", "")
-                .replaceAll("(?i)\\bcall\\b", "")
-                .replaceAll("(?i)\\bphone\\b", "")
-                .replaceAll("(?i)\\bdial\\b", "")
-                .replace("कॉल", "")
-                .replace("फोन", "")
-                .replace("डायल", "")
-                .replace("करो", "")
-                .replace("करना है", "")
-                .trim();
-
-        if (name.isEmpty()) {
-            respond("Please tell me the contact name.");
-            return;
-        }
-
-        String contactNumber = contactManager.findPhoneNumber(name);
-
-        if (contactNumber.isEmpty()) {
-            respond("I could not find that contact.");
-        } else {
-            openDialerWithNumber(contactNumber);
-        }
-    }
-
-
-
-    private void openDialerWithNumber(String number) {
-
-        try {
-            android.content.Intent intent =
-                    new android.content.Intent(
-                            android.content.Intent.ACTION_CALL);
-
-            intent.setData(
-                    android.net.Uri.parse(
-                            "tel:" + android.net.Uri.encode(number)
-                    )
-            );
-
-            startActivity(intent);
-            respond("Calling now.");
-        } catch (Exception e) {
-            respond("I could not open the phone dialer.");
-        }
-    }
-
-
-    private void handleWhatsAppNumberCommand(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            respond("Please tell me the WhatsApp number.");
-            return;
-        }
-
-        String number = extractPhoneNumber(command);
-
-        if (number.isEmpty()) {
-            respond("Please tell me a valid WhatsApp number.");
-            return;
-        }
-
-        if (appLauncher != null
-                && appLauncher.openWhatsAppChat(number, "")) {
-            respond("WhatsApp chat opened. Please review before sending.");
-        } else {
-            respond("I could not open that WhatsApp chat.");
-        }
-    }
-
-    private void handleFollowUpCommand(String command) {
-
-        String current = command == null ? "" : command.trim();
-
-        if (current.isEmpty()) {
-            respond("Please ask your follow-up question.");
-            return;
-        }
-
-        String previous = memoryManager == null
-                ? ""
-                : memoryManager.getLastUser();
-
-        if (previous == null || previous.trim().isEmpty()) {
-            respond("I need your previous question to understand this follow-up.");
-            return;
-        }
-
-        String combined = previous.trim() + " " + current;
-
-        String knowledgeAnswer = technicianKnowledge.search(combined);
-
-        if (knowledgeAnswer != null && !knowledgeAnswer.trim().isEmpty()) {
-            respond(knowledgeAnswer);
-        } else {
-            respond("I understand this is a follow-up, but I need a little more detail.");
-        }
-    }
-
-
-    private void handleWhatsAppMessageCommand(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            respond("Please tell me the WhatsApp number and message.");
-            return;
-        }
-
-        String number = extractPhoneNumber(command);
-
-        if (number.isEmpty()) {
-            respond("Please tell me a valid WhatsApp number.");
-            return;
-        }
-
-        String message = extractMessageAfterNumber(command);
-
-        if (message.isEmpty()) {
-            respond("Please tell me the message after the phone number.");
-            return;
-        }
-
-        if (appLauncher != null
-                && appLauncher.openWhatsAppChat(number, message)) {
-            respond("WhatsApp chat opened. Review the message before sending.");
-        } else {
-            respond("I could not open that WhatsApp chat.");
-        }
-    }
-
-
-    private void handleSmsCommand(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            respond("Please tell me the contact or phone number.");
-            return;
-        }
-
-        String original = command.trim();
-        String number = extractPhoneNumber(original);
-
-        if (!number.isEmpty()) {
-            String message = extractMessageAfterNumber(original);
-            openSmsComposer(number, message);
-            return;
-        }
-
-        if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                    new String[]{Manifest.permission.READ_CONTACTS},
-                    REQUEST_CONTACTS
-            );
-            respond("I need contacts permission to find that person.");
-            return;
-        }
-
-        String name = original
-                .replaceAll("(?i)send\\s+(a\\s+)?(sms|message)\\s*", "")
-                .replaceAll("(?i)text\\s*", "")
-                .replaceAll("(?i)\\bmessage\\b.*$", "")
-                .replace("मैसेज", "")
-                .replace("एसएमएस", "")
-                .replace("भेजो", "")
-                .replace("भेज", "")
-                .replace("करो", "")
-                .trim();
-
-        if (name.isEmpty()) {
-            respond("Please tell me the contact name.");
-            return;
-        }
-
-        String contactNumber = contactManager.findPhoneNumber(name);
-
-        if (contactNumber.isEmpty()) {
-            respond("I could not find that contact.");
-        } else {
-            openSmsComposer(contactNumber, "");
-        }
-    }
-
-
-
-    private void openSmsComposer(String number, String body) {
-
-        try {
-            android.content.Intent intent =
-                    new android.content.Intent(
-                            android.content.Intent.ACTION_SENDTO);
-
-            intent.setData(
-                    android.net.Uri.parse(
-                            "smsto:" + android.net.Uri.encode(number)
-                    )
-            );
-
-            if (body != null && !body.isEmpty()) {
-                intent.putExtra("sms_body", body);
-            }
-
-            startActivity(intent);
-
-            respond("SMS composer opened. Review the message and send it yourself.");
-        } catch (Exception e) {
-            respond("I could not open the SMS composer.");
-        }
-    }
-
-
-
-
-
-    // =========================================================
-    // ULTRON DOUBLE-CLAP ACTIVATION
-    // Two quick claps activate ULTRON.
-    // Works while the ULTRON activity is open.
-    // =========================================================
-
-    private android.media.AudioRecord clapRecorder;
-    private Thread clapThread;
-    private volatile boolean clapRunning = false;
-    private long lastClapTime = 0L;
-    private int clapCount = 0;
-
-    private void startDoubleClapDetector() {
-        if (clapRunning) return;
-
-        try {
-            int sampleRate = 16000;
-            int minBuffer = android.media.AudioRecord.getMinBufferSize(
-                    sampleRate,
-                    android.media.AudioFormat.CHANNEL_IN_MONO,
-                    android.media.AudioFormat.ENCODING_PCM_16BIT
-            );
-
-            if (minBuffer <= 0) return;
-
-            clapRecorder = new android.media.AudioRecord(
-                    android.media.MediaRecorder.AudioSource.MIC,
-                    sampleRate,
-                    android.media.AudioFormat.CHANNEL_IN_MONO,
-                    android.media.AudioFormat.ENCODING_PCM_16BIT,
-                    Math.max(minBuffer * 2, 4096)
-            );
-
-            clapRunning = true;
-
-            clapThread = new Thread(() -> {
-                short[] buffer = new short[1024];
-
-                try {
-                    clapRecorder.startRecording();
-
-                    while (clapRunning && !isFinishing()) {
-                        int read = clapRecorder.read(buffer, 0, buffer.length);
-
-                        if (read <= 0) continue;
-
-                        long energy = 0;
-
-                        for (int i = 0; i < read; i++) {
-                            energy += Math.abs((int) buffer[i]);
-                        }
-
-                        long average = energy / read;
-                        long now = System.currentTimeMillis();
-
-                        // Strong short sound = possible clap
-                        if (average > 3500) {
-
-                            if (now - lastClapTime > 120
-                                    && now - lastClapTime < 1000) {
-
-                                clapCount++;
-
-                                if (clapCount >= 2) {
-                                    clapCount = 0;
-                                    lastClapTime = 0;
-
-                                    runOnUiThread(
-                                            this::activateFromDoubleClap
-                                    );
-
-                                } else {
-                                    lastClapTime = now;
-                                }
-
-                            } else if (now - lastClapTime >= 1000) {
-                                clapCount = 1;
-                                lastClapTime = now;
-                            }
-                        }
-                    }
-
-                } catch (Exception ignored) {
-                }
-            }, "ULTRON-ClapDetector");
-
-            clapThread.start();
-
-        } catch (Exception ignored) {
-        }
-    }
-
-    private void stopDoubleClapDetector() {
-        clapRunning = false;
-
-        if (clapRecorder != null) {
-            try {
-                clapRecorder.stop();
-            } catch (Exception ignored) {
-            }
-
-            try {
-                clapRecorder.release();
-            } catch (Exception ignored) {
-            }
-
-            clapRecorder = null;
-        }
-
-        clapThread = null;
-        clapCount = 0;
-        lastClapTime = 0L;
-    }
-
-    private void activateFromDoubleClap() {
-        try {
-            if (voiceManager != null) {
-                voiceManager.stopListening();
-            }
-        } catch (Exception ignored) {
-        }
-
-        ultronActive = true;
-        ultronWaiting = false;
-
-        respond(
-                "हाँ Imtiyaz, I'm ready. Welcome to ULTRON Assistant. "
-                        + "बताइए, आपकी क्या सेवा करूँ?"
-        );
-    }
-
-    // =========================================================
-    // BETTER BASIC CONVERSATION
-    // =========================================================
-
-    private String getNaturalConversationReply(String command) {
-
-        if (command == null) return "";
-
-        String t = command.toLowerCase(java.util.Locale.getDefault()).trim();
-
-        if (t.equals("hello")
-                || t.equals("hi")
-                || t.contains("hello ultron")
-                || t.contains("हेलो")
-                || t.contains("नमस्ते")
-                || t.contains("सलाम")) {
-
-            return "हाँ Imtiyaz, मैं यहाँ हूँ। बताइए, आपकी क्या सेवा करूँ?";
-        }
-
-        if (t.contains("how are you")
-                || t.contains("कैसे हो")
-                || t.contains("कैसी हो")) {
-
-            return "मैं बढ़िया हूँ Imtiyaz और आपके काम के लिए तैयार हूँ।";
-        }
-
-        if (t.contains("thank you")
-                || t.contains("thanks")
-                || t.contains("धन्यवाद")
-                || t.contains("शुक्रिया")) {
-
-            return "आपका स्वागत है Imtiyaz।";
-        }
-
-        if (t.contains("good morning")
-                || t.contains("सुप्रभात")) {
-
-            return "Good morning Imtiyaz. मैं तैयार हूँ। आज क्या करना है?";
-        }
-
-        if (t.contains("good night")
-                || t.contains("शुभ रात्रि")) {
-
-            return "Good night Imtiyaz. जब जरूरत हो, ULTRON तैयार मिलेगा।";
-        }
-
-        if (t.contains("what can you do")
-                || t.contains("तुम क्या कर सकते हो")
-                || t.contains("अपने फीचर बताओ")) {
-
-            return "मैं voice commands समझ सकता हूँ, apps खोल सकता हूँ, "
-                    + "call और SMS कर सकता हूँ, Google search कर सकता हूँ, "
-                    + "camera और phone settings संभाल सकता हूँ और AC technician "
-                    + "knowledge में आपकी मदद कर सकता हूँ।";
-        }
-
-        return "";
-    }
-
 }
