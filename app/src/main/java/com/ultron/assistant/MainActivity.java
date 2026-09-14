@@ -89,6 +89,16 @@ public class MainActivity extends Activity {
         return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
 
+    private android.os.Handler dashboardHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private TextView systemData;
+    private final Runnable dashboardUpdater = new Runnable() {
+        @Override
+        public void run() {
+            updateDashboardData();
+            dashboardHandler.postDelayed(this, 3000);
+        }
+    };
+
     private void createUserInterface() {
 
         LinearLayout root = new LinearLayout(this);
@@ -133,6 +143,15 @@ public class MainActivity extends Activity {
 
         status = new TextView(this);
         status.setText("● ULTRON ONLINE");
+
+        systemData = new TextView(this);
+        systemData.setText("SYSTEM DATA\nBattery: --%   Brightness: --%\nNetwork: CHECKING\nTime: --");
+        systemData.setTextSize(16);
+        systemData.setTextColor(android.graphics.Color.LTGRAY);
+        systemData.setPadding(dp(12), dp(10), dp(12), dp(10));
+        root.addView(systemData);
+
+
         status.setTextSize(17);
         status.setGravity(android.view.Gravity.CENTER);
         status.setTextColor(android.graphics.Color.WHITE);
@@ -214,6 +233,7 @@ public class MainActivity extends Activity {
         );
 
         setContentView(root);
+        dashboardHandler.post(dashboardUpdater);
 
         activate.setOnClickListener(v -> {
             ultronActive = true;
@@ -259,6 +279,52 @@ public class MainActivity extends Activity {
 
         homeButton.setOnClickListener(
                 v -> goHome()
+        );
+    }
+
+
+    private void updateDashboardData() {
+        if (systemData == null) return;
+
+        int battery = -1;
+        try {
+            Intent batteryIntent = registerReceiver(null,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            if (batteryIntent != null) {
+                int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                if (level >= 0 && scale > 0) {
+                    battery = (level * 100) / scale;
+                }
+            }
+        } catch (Exception ignored) {}
+
+        int brightness = -1;
+        try {
+            brightness = android.provider.Settings.System.getInt(
+                    getContentResolver(),
+                    android.provider.Settings.System.SCREEN_BRIGHTNESS);
+            brightness = Math.max(0, Math.min(100, (brightness * 100) / 255));
+        } catch (Exception ignored) {}
+
+        String network = "OFFLINE";
+        try {
+            android.net.ConnectivityManager cm =
+                    (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            if (cm != null && cm.getActiveNetwork() != null) {
+                network = "ONLINE";
+            }
+        } catch (Exception ignored) {}
+
+        String time = new java.text.SimpleDateFormat(
+                "HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+
+        systemData.setText(
+                "SYSTEM DATA\n" +
+                "Battery: " + (battery >= 0 ? battery + "%" : "--") +
+                "   Brightness: " + (brightness >= 0 ? brightness + "%" : "--") +
+                "\nNetwork: " + network +
+                "   Time: " + time
         );
     }
 
@@ -1971,6 +2037,8 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        dashboardHandler.removeCallbacks(dashboardUpdater);
+
 
         super.onDestroy();
 
