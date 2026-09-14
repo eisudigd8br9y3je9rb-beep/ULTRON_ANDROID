@@ -87,194 +87,71 @@ public class MainActivity extends Activity {
 
     private void createUserInterface() {
 
-        final int BG = android.graphics.Color.rgb(5, 8, 18);
-        final int PANEL = android.graphics.Color.rgb(12, 18, 32);
-        final int CYAN = android.graphics.Color.rgb(0, 220, 255);
-        final int WHITE = android.graphics.Color.WHITE;
-        final int GREEN = android.graphics.Color.rgb(40, 255, 150);
-        final int RED = android.graphics.Color.rgb(255, 70, 90);
-
-        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
-        scroll.setBackgroundColor(BG);
-
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(22, 22, 22, 28);
+        root.setPadding(20, 20, 20, 20);
 
-        android.widget.TextView header = new android.widget.TextView(this);
-        header.setText("◈  U L T R O N");
-        header.setTextColor(CYAN);
-        header.setTextSize(30);
-        header.setGravity(android.view.Gravity.CENTER);
-        header.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        root.addView(header,
-                new LinearLayout.LayoutParams(-1, -2));
+        TextView title = new TextView(this);
+        title.setText("ULTRON AI ASSISTANT");
+        title.setTextSize(24);
 
-        android.widget.TextView subtitle = new android.widget.TextView(this);
-        subtitle.setText("PERSONAL AI COMMAND CENTER");
-        subtitle.setTextColor(android.graphics.Color.LTGRAY);
-        subtitle.setTextSize(11);
-        subtitle.setGravity(android.view.Gravity.CENTER);
-        root.addView(subtitle);
-
-        android.widget.TextView core = new android.widget.TextView(this);
-        core.setText("◉\n\nULTRON\nONLINE");
-        core.setTextColor(CYAN);
-        core.setTextSize(22);
-        core.setGravity(android.view.Gravity.CENTER);
-        core.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-
-        android.graphics.drawable.GradientDrawable coreBg =
-                new android.graphics.drawable.GradientDrawable();
-        coreBg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-        coreBg.setColor(android.graphics.Color.rgb(8, 25, 42));
-        coreBg.setStroke(3, CYAN);
-        core.setBackground(coreBg);
-
-        LinearLayout.LayoutParams coreParams =
-                new LinearLayout.LayoutParams(230, 230);
-        coreParams.gravity = android.view.Gravity.CENTER;
-        coreParams.setMargins(0, 25, 0, 20);
-        root.addView(core, coreParams);
-
-        status = new android.widget.TextView(this);
+        status = new TextView(this);
         status.setText("ULTRON ready");
-        status.setTextColor(GREEN);
-        status.setTextSize(17);
-        status.setGravity(android.view.Gravity.CENTER);
-        status.setPadding(12, 12, 12, 12);
-
-        android.graphics.drawable.GradientDrawable statusBg =
-                new android.graphics.drawable.GradientDrawable();
-        statusBg.setColor(PANEL);
-        statusBg.setCornerRadius(18);
-        statusBg.setStroke(1, CYAN);
-        status.setBackground(statusBg);
-
-        root.addView(status,
-                new LinearLayout.LayoutParams(-1, -2));
-
-        android.widget.TextView systemInfo = new android.widget.TextView(this);
-        systemInfo.setTextColor(WHITE);
-        systemInfo.setTextSize(15);
-        systemInfo.setGravity(android.view.Gravity.CENTER);
-        systemInfo.setPadding(18, 18, 18, 18);
-
-        android.graphics.drawable.GradientDrawable infoBg =
-                new android.graphics.drawable.GradientDrawable();
-        infoBg.setColor(PANEL);
-        infoBg.setCornerRadius(18);
-        infoBg.setStroke(1, android.graphics.Color.rgb(50, 80, 110));
-        systemInfo.setBackground(infoBg);
-
-        LinearLayout.LayoutParams infoParams =
-                new LinearLayout.LayoutParams(-1, -2);
-        infoParams.setMargins(0, 16, 0, 16);
-        root.addView(systemInfo, infoParams);
-
-        android.widget.LinearLayout controls =
-                new android.widget.LinearLayout(this);
-        controls.setOrientation(LinearLayout.HORIZONTAL);
-        controls.setGravity(android.view.Gravity.CENTER);
-
-        Button activate = new Button(this);
-        activate.setText("ACTIVATE");
-        activate.setTextColor(GREEN);
-
-        Button sleep = new Button(this);
-        sleep.setText("SLEEP");
-        sleep.setTextColor(RED);
-
-        controls.addView(activate,
-                new LinearLayout.LayoutParams(0, 60, 1));
-        controls.addView(sleep,
-                new LinearLayout.LayoutParams(0, 60, 1));
-
-        root.addView(controls);
-
-        Button voiceButton = new Button(this);
-        voiceButton.setText("🎙  START VOICE COMMAND");
-        voiceButton.setTextColor(CYAN);
-        root.addView(voiceButton,
-                new LinearLayout.LayoutParams(-1, 60));
-
-        Button rearCameraButton = new Button(this);
-        rearCameraButton.setText("◉  REAR CAMERA");
-        rearCameraButton.setTextColor(WHITE);
-        root.addView(rearCameraButton,
-                new LinearLayout.LayoutParams(-1, 58));
-
-        Button frontCameraButton = new Button(this);
-        frontCameraButton.setText("◎  FRONT CAMERA");
-        frontCameraButton.setTextColor(WHITE);
-        root.addView(frontCameraButton,
-                new LinearLayout.LayoutParams(-1, 58));
-
-        Button youtubeButton = new Button(this);
-        youtubeButton.setText("▶  YOUTUBE");
-        root.addView(youtubeButton,
-                new LinearLayout.LayoutParams(-1, 58));
-
-        Button settingsButton = new Button(this);
-        settingsButton.setText("⚙  SETTINGS");
-        root.addView(settingsButton,
-                new LinearLayout.LayoutParams(-1, 58));
-
-        Button homeButton = new Button(this);
-        homeButton.setText("⌂  HOME");
-        root.addView(homeButton,
-                new LinearLayout.LayoutParams(-1, 58));
+        status.setTextSize(18);
 
         preview = new TextureView(this);
-        preview.setBackgroundColor(android.graphics.Color.BLACK);
 
-        LinearLayout.LayoutParams previewParams =
-                new LinearLayout.LayoutParams(-1, 240);
-        previewParams.setMargins(0, 18, 0, 0);
-        root.addView(preview, previewParams);
+        Button rearCameraButton = new Button(this);
+        rearCameraButton.setText("Open Rear Camera");
 
-        android.widget.TextView footer = new android.widget.TextView(this);
-        footer.setText("ULTRON SYSTEM • VOICE • VISION • CONTROL");
-        footer.setTextColor(android.graphics.Color.GRAY);
-        footer.setTextSize(10);
-        footer.setGravity(android.view.Gravity.CENTER);
-        footer.setPadding(0, 20, 0, 5);
-        root.addView(footer);
+        Button frontCameraButton = new Button(this);
+        frontCameraButton.setText("Open Front Camera");
 
-        scroll.addView(root);
-        setContentView(scroll);
+        Button voiceButton = new Button(this);
+        voiceButton.setText("Start Voice Command");
 
-        activate.setOnClickListener(v -> {
-            ultronActive = true;
-            ultronWaiting = false;
-            status.setText("● ULTRON ACTIVE");
-            status.setTextColor(GREEN);
-            if (voiceManager != null) {
-                startVoice();
-            }
-        });
+        Button youtubeButton = new Button(this);
+        youtubeButton.setText("Open YouTube");
 
-        sleep.setOnClickListener(v -> {
-            ultronActive = false;
-            ultronWaiting = false;
-            if (voiceManager != null) {
-                voiceManager.stopListening();
-            }
-            if (voiceSpeaker != null) {
-                voiceSpeaker.stop();
-            }
-            status.setText("● ULTRON SLEEPING");
-            status.setTextColor(RED);
-        });
+        Button settingsButton = new Button(this);
+        settingsButton.setText("Open Settings");
 
-        voiceButton.setOnClickListener(v -> startVoice());
+        Button homeButton = new Button(this);
+        homeButton.setText("Go Home");
 
-        rearCameraButton.setOnClickListener(
+        root.addView(title);
+        root.addView(status);
+
+        root.addView(
+                preview,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        0,
+                        1
+                )
+        );
+
+        root.addView(rearCameraButton);
+        root.addView(frontCameraButton);
+        root.addView(voiceButton);
+        root.addView(youtubeButton);
+        root.addView(settingsButton);
+        root.addView(homeButton);
+
+        setContentView(root);
+
+
+        // Double-clap detector disabled: it conflicts with SpeechRecognizer/TTS.
+rearCameraButton.setOnClickListener(
                 v -> openCamera(true)
         );
 
         frontCameraButton.setOnClickListener(
                 v -> openCamera(false)
+        );
+
+        voiceButton.setOnClickListener(
+                v -> startVoice()
         );
 
         youtubeButton.setOnClickListener(
@@ -288,112 +165,6 @@ public class MainActivity extends Activity {
         homeButton.setOnClickListener(
                 v -> goHome()
         );
-
-        final android.os.Handler dashboardHandler =
-                new android.os.Handler(android.os.Looper.getMainLooper());
-
-        final Runnable dashboardUpdater = new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    android.content.Intent batteryIntent =
-                            registerReceiver(
-                                    null,
-                                    new android.content.IntentFilter(
-                                            android.content.Intent.ACTION_BATTERY_CHANGED
-                                    )
-                            );
-
-                    int battery = 0;
-
-                    if (batteryIntent != null) {
-                        int level = batteryIntent.getIntExtra(
-                                android.os.BatteryManager.EXTRA_LEVEL, -1);
-                        int scale = batteryIntent.getIntExtra(
-                                android.os.BatteryManager.EXTRA_SCALE, -1);
-
-                        if (level >= 0 && scale > 0) {
-                            battery = (int) ((level * 100f) / scale);
-                        }
-                    }
-
-                    int brightness = 0;
-
-                    try {
-                        int rawBrightness =
-                                android.provider.Settings.System.getInt(
-                                        getContentResolver(),
-                                        android.provider.Settings.System.SCREEN_BRIGHTNESS
-                                );
-                        brightness = (int) ((rawBrightness / 255f) * 100f);
-                    } catch (Exception ignored) {
-                    }
-
-                    String network = "OFFLINE";
-
-                    android.net.ConnectivityManager cm =
-                            (android.net.ConnectivityManager)
-                                    getSystemService(CONNECTIVITY_SERVICE);
-
-                    if (cm != null) {
-                        android.net.Network networkObj =
-                                cm.getActiveNetwork();
-
-                        if (networkObj != null) {
-                            android.net.NetworkCapabilities caps =
-                                    cm.getNetworkCapabilities(networkObj);
-
-                            if (caps != null) {
-                                if (caps.hasTransport(
-                                        android.net.NetworkCapabilities.TRANSPORT_WIFI)) {
-                                    network = "Wi-Fi";
-                                } else if (caps.hasTransport(
-                                        android.net.NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                                    network = "Mobile Data";
-                                } else {
-                                    network = "Connected";
-                                }
-                            }
-                        }
-                    }
-
-                    String time =
-                            new java.text.SimpleDateFormat(
-                                    "hh:mm:ss a",
-                                    java.util.Locale.getDefault()
-                            ).format(new java.util.Date());
-
-                    String date =
-                            new java.text.SimpleDateFormat(
-                                    "EEE, dd MMM yyyy",
-                                    java.util.Locale.getDefault()
-                            ).format(new java.util.Date());
-
-                    String state = ultronActive
-                            ? "ACTIVE"
-                            : "SLEEP";
-
-                    systemInfo.setText(
-                            "BATTERY     " + battery + "%\n" +
-                            "BRIGHTNESS  " + brightness + "%\n" +
-                            "NETWORK     " + network + "\n" +
-                            "VOICE       " + state + "\n" +
-                            "TIME        " + time + "\n" +
-                            "DATE        " + date
-                    );
-
-                    dashboardHandler.postDelayed(this, 1000);
-
-                } catch (Exception e) {
-                    dashboardHandler.postDelayed(this, 2000);
-                }
-            }
-        };
-
-        dashboardHandler.post(dashboardUpdater);
-
-        // Double-clap detector disabled: it conflicts with SpeechRecognizer/TTS.
     }
 
     private void createVoiceManager() {
