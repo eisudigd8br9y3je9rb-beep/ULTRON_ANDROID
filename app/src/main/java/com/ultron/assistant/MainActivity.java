@@ -70,19 +70,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        commandManager = new CommandManager();
-        technicianKnowledge = new TechnicianKnowledge(this);
-        memoryManager = new MemoryManager(this);
-        contactManager = new ContactManager(this);
-        appLauncher = new AppLauncher(this);
-        phoneActions = new PhoneActions(this);
-        communicationManager = new CommunicationManager(this);
-        ownerProfile = new OwnerProfile(this);
-
         createUserInterface();
-        createVoiceManager();
-        voiceSpeaker = new VoiceSpeaker(this);
-        requestRequiredPermissions();
+
+        // CRASH TEST: managers/permissions temporarily skipped.
+        // This checks whether the HUD itself can launch.
+        status.setText("●  ULTRON HUD TEST MODE");
     }
 
     private int dp(float value) {
