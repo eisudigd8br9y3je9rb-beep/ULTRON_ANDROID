@@ -229,7 +229,7 @@ public class MainActivity extends Activity {
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(root);
 
-        dashboardHandler.post(dashboardUpdater);
+// DASHBOARD TEST DISABLED
 
         activate.setOnClickListener(v -> {
             ultronActive = true;
