@@ -233,6 +233,12 @@ public class MainActivity extends Activity {
         Button homeButton = new Button(this);
         homeButton.setText("GO HOME");
 
+        Button flashlightOnButton = new Button(this);
+        flashlightOnButton.setText("FLASHLIGHT ON");
+
+        Button flashlightOffButton = new Button(this);
+        flashlightOffButton.setText("FLASHLIGHT OFF");
+
         panel.addView(title);
         panel.addView(subtitle);
         panel.addView(core, new LinearLayout.LayoutParams(-1, dp(150)));
@@ -251,12 +257,14 @@ public class MainActivity extends Activity {
         panel.addView(youtubeButton);
         panel.addView(settingsButton);
         panel.addView(homeButton);
+        panel.addView(flashlightOnButton);
+        panel.addView(flashlightOffButton);
 
         scroll.addView(panel);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(root);
 
-// DASHBOARD TEST DISABLED
+        dashboardHandler.post(dashboardUpdater);
 
         activate.setOnClickListener(v -> {
             ultronActive = true;
@@ -279,6 +287,8 @@ public class MainActivity extends Activity {
         youtubeButton.setOnClickListener(v -> openYouTube());
         settingsButton.setOnClickListener(v -> openSettings());
         homeButton.setOnClickListener(v -> goHome());
+        flashlightOnButton.setOnClickListener(v -> setFlashlight(true));
+        flashlightOffButton.setOnClickListener(v -> setFlashlight(false));
     }
 
     private android.graphics.drawable.GradientDrawable makePanel(int top, int bottom) {
@@ -315,6 +325,21 @@ public class MainActivity extends Activity {
                     ? Math.round((brightness / 255f) * 100f)
                     : -1;
 
+            String charging = "NOT CHARGING";
+            if (batteryStatus != null) {
+                int chargeStatus = batteryStatus.getIntExtra(
+                        android.os.BatteryManager.EXTRA_STATUS, -1
+                );
+
+                if (chargeStatus ==
+                        android.os.BatteryManager.BATTERY_STATUS_CHARGING) {
+                    charging = "CHARGING";
+                } else if (chargeStatus ==
+                        android.os.BatteryManager.BATTERY_STATUS_FULL) {
+                    charging = "FULL";
+                }
+            }
+
             String network = "OFFLINE";
             try {
                 android.net.ConnectivityManager cm =
@@ -349,7 +374,8 @@ public class MainActivity extends Activity {
                         "     Brightness: " +
                         (brightnessPercent >= 0 ? brightnessPercent + "%" : "--%") +
                         "\nNetwork: " + network +
-                        "     Time: " + time
+                        "     Charging: " + charging +
+                        "\nTime: " + time
                 );
             }
         } catch (Exception e) {
