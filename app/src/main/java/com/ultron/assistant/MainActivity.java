@@ -71,11 +71,25 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         try {
+            commandManager = new CommandManager();
+            technicianKnowledge = new TechnicianKnowledge(this);
+            memoryManager = new MemoryManager(this);
+            contactManager = new ContactManager(this);
+            appLauncher = new AppLauncher(this);
+            phoneActions = new PhoneActions(this);
+            communicationManager = new CommunicationManager(this);
+            ownerProfile = new OwnerProfile(this);
+
             createUserInterface();
 
             if (status != null) {
-                status.setText("●  ULTRON HUD TEST MODE");
+                status.setText("●  ULTRON READY");
             }
+
+            createVoiceManager();
+            voiceSpeaker = new VoiceSpeaker(this);
+            requestRequiredPermissions();
+
         } catch (Throwable e) {
             android.widget.TextView error = new android.widget.TextView(this);
             error.setText(
