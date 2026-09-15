@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - test-before-ui
+      - hud-debug
   workflow_dispatch:
 
 permissions:
