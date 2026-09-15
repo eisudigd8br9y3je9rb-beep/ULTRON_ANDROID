@@ -70,11 +70,25 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        android.widget.TextView test = new android.widget.TextView(this);
-        test.setText("ULTRON STARTUP TEST OK");
-        test.setTextSize(24);
-        test.setGravity(android.view.Gravity.CENTER);
-        setContentView(test);
+        try {
+            createUserInterface();
+
+            if (status != null) {
+                status.setText("●  ULTRON HUD TEST MODE");
+            }
+        } catch (Throwable e) {
+            android.widget.TextView error = new android.widget.TextView(this);
+            error.setText(
+                    "ULTRON HUD ERROR\\n\\n" +
+                    e.getClass().getName() + "\\n\\n" +
+                    String.valueOf(e.getMessage())
+            );
+            error.setTextSize(16);
+            error.setPadding(24, 24, 24, 24);
+            setContentView(error);
+
+            android.util.Log.e("ULTRON_HUD_TEST", "HUD startup failed", e);
+        }
     }
 
     private int dp(float value) {
