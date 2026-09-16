@@ -285,10 +285,7 @@ public class MainActivity extends Activity {
         info.setPadding(0, dp(12), 0, dp(12));
 
         preview = new TextureView(this);
-        preview.setBackground(makePanel(
-                android.graphics.Color.rgb(3, 14, 22),
-                android.graphics.Color.rgb(1, 7, 12)
-        ));
+        preview.setBackgroundColor(android.graphics.Color.rgb(3, 14, 22));
 
         TextView cameraLabel = new TextView(this);
         cameraLabel.setText("CAMERA / VISION");
