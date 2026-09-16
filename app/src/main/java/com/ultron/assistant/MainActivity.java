@@ -31,12 +31,17 @@ import com.ultron.assistant.contacts.ContactManager;
 import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
+import com.ultron.assistant.vision.VisionManager;
 
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MainActivity extends Activity {
+    private void initVisionManager() {
+        visionManager = new VisionManager();
+    }
+
 
     private static final int CAMERA_REQUEST = 100;
     private static final int CALL_REQUEST = 103;
@@ -65,6 +70,43 @@ public class MainActivity extends Activity {
     private PhoneActions phoneActions;
     private CommunicationManager communicationManager;
     private OwnerProfile ownerProfile;
+    private VisionManager visionManager;
+    private final android.os.Handler visionHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
+    private boolean visionCaptureRunning = false;
+
+    private final Runnable visionCaptureRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!visionCaptureRunning || preview == null ||
+                    !preview.isAvailable() || visionManager == null) {
+                return;
+            }
+
+            try {
+                android.graphics.Bitmap frame = preview.getBitmap(640, 360);
+                if (frame != null && !frame.isRecycled()) {
+                    visionManager.setFrame(frame);
+                }
+            } catch (Throwable ignored) {
+            }
+
+            if (visionCaptureRunning) {
+                visionHandler.postDelayed(this, 1000);
+            }
+        }
+    };
+
+    private void startVisionCapture() {
+        if (visionCaptureRunning) return;
+        visionCaptureRunning = true;
+        visionHandler.post(visionCaptureRunnable);
+    }
+
+    private void stopVisionCapture() {
+        visionCaptureRunning = false;
+        visionHandler.removeCallbacks(visionCaptureRunnable);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +121,7 @@ public class MainActivity extends Activity {
             phoneActions = new PhoneActions(this);
             communicationManager = new CommunicationManager(this);
             ownerProfile = new OwnerProfile(this);
+            initVisionManager();
 
             createUserInterface();
 
@@ -1955,6 +1998,8 @@ public class MainActivity extends Activity {
                                         null
                                 );
 
+                                startVisionCapture();
+
                                 runOnUiThread(
                                         () -> status.setText(
                                                 "Camera preview ON"
@@ -1995,6 +2040,8 @@ public class MainActivity extends Activity {
     }
 
     private void closeCamera() {
+        stopVisionCapture();
+
 
         if (cameraSession != null) {
 
