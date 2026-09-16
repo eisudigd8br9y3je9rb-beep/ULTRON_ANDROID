@@ -33,6 +33,7 @@ import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 import com.ultron.assistant.vision.VisionManager;
 import com.ultron.assistant.ui.UltronHudDrawable;
+import com.ultron.assistant.service.UltronBackgroundService;
 
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -365,6 +366,21 @@ public class MainActivity extends Activity {
             ultronActive = true;
             ultronWaiting = false;
             status.setText("●  ULTRON ACTIVE");
+
+            try {
+                Intent serviceIntent =
+                        new Intent(this, UltronBackgroundService.class);
+
+                if (android.os.Build.VERSION.SDK_INT >=
+                        android.os.Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
+                } else {
+                    startService(serviceIntent);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             startVoice();
         });
 
