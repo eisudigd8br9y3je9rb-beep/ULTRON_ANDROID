@@ -32,6 +32,7 @@ import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 import com.ultron.assistant.vision.VisionManager;
+import com.ultron.assistant.ui.UltronHudDrawable;
 
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -162,38 +163,78 @@ public class MainActivity extends Activity {
         }
     };
 
+    private void styleHudButton(Button button) {
+        android.graphics.drawable.GradientDrawable bg =
+                new android.graphics.drawable.GradientDrawable();
+
+        bg.setColor(android.graphics.Color.argb(28, 0, 255, 255));
+        bg.setStroke(dp(1), android.graphics.Color.rgb(0, 220, 235));
+        bg.setCornerRadius(dp(4));
+
+        button.setBackground(bg);
+        button.setTextColor(android.graphics.Color.rgb(0, 245, 255));
+        button.setTextSize(12);
+        button.setAllCaps(false);
+        button.setTypeface(android.graphics.Typeface.MONOSPACE);
+        button.setPadding(dp(12), dp(10), dp(12), dp(10));
+        button.setMinHeight(dp(48));
+        button.setElevation(dp(2));
+
+        android.view.ViewGroup.LayoutParams lp = button.getLayoutParams();
+        if (lp instanceof LinearLayout.LayoutParams) {
+            LinearLayout.LayoutParams params =
+                    (LinearLayout.LayoutParams) lp;
+            params.setMargins(0, dp(4), 0, dp(4));
+            button.setLayoutParams(params);
+        }
+    }
+
     private void createUserInterface() {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(android.graphics.Color.rgb(3, 8, 14));
+        root.setBackground(new UltronHudDrawable());
 
         android.widget.ScrollView scroll = new android.widget.ScrollView(this);
         scroll.setFillViewport(true);
+        scroll.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(dp(14), dp(14), dp(14), dp(24));
+        panel.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 
         TextView title = new TextView(this);
         title.setText("ULTRON");
         title.setTextSize(32);
         title.setGravity(android.view.Gravity.CENTER);
-        title.setTextColor(android.graphics.Color.WHITE);
+        title.setTextColor(android.graphics.Color.rgb(0, 245, 255));
         title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setShadowLayer(
+                dp(8),
+                0,
+                0,
+                android.graphics.Color.argb(180, 0, 220, 235)
+        );
 
         TextView subtitle = new TextView(this);
         subtitle.setText("PERSONAL AI COMMAND CENTER");
         subtitle.setTextSize(13);
         subtitle.setGravity(android.view.Gravity.CENTER);
-        subtitle.setTextColor(android.graphics.Color.LTGRAY);
+        subtitle.setTextColor(android.graphics.Color.rgb(100, 220, 230));
         subtitle.setPadding(0, 0, 0, dp(10));
 
         TextView core = new TextView(this);
         core.setText("◉");
         core.setTextSize(78);
         core.setGravity(android.view.Gravity.CENTER);
-        core.setTextColor(android.graphics.Color.WHITE);
+        core.setTextColor(android.graphics.Color.rgb(0, 245, 255));
+        core.setShadowLayer(
+                dp(12),
+                0,
+                0,
+                android.graphics.Color.argb(180, 0, 220, 235)
+        );
         core.setBackground(makePanel(
                 android.graphics.Color.rgb(8, 25, 38),
                 android.graphics.Color.rgb(2, 10, 17)
@@ -203,14 +244,14 @@ public class MainActivity extends Activity {
         coreLabel.setText("AI CORE  •  STANDBY");
         coreLabel.setTextSize(14);
         coreLabel.setGravity(android.view.Gravity.CENTER);
-        coreLabel.setTextColor(android.graphics.Color.LTGRAY);
+        coreLabel.setTextColor(android.graphics.Color.rgb(0, 220, 235));
         coreLabel.setPadding(0, dp(6), 0, dp(10));
 
         TextView statusPanel = new TextView(this);
         statusPanel.setText("●  ULTRON ONLINE");
         statusPanel.setTextSize(19);
         statusPanel.setGravity(android.view.Gravity.CENTER);
-        statusPanel.setTextColor(android.graphics.Color.WHITE);
+        statusPanel.setTextColor(android.graphics.Color.rgb(0, 245, 255));
         statusPanel.setPadding(dp(10), dp(12), dp(10), dp(12));
         statusPanel.setBackground(makePanel(
                 android.graphics.Color.rgb(10, 30, 43),
@@ -225,7 +266,7 @@ public class MainActivity extends Activity {
                 "Network: CHECKING     Time: --"
         );
         systemData.setTextSize(15);
-        systemData.setTextColor(android.graphics.Color.LTGRAY);
+        systemData.setTextColor(android.graphics.Color.rgb(120, 230, 240));
         systemData.setPadding(dp(14), dp(12), dp(14), dp(12));
         systemData.setBackground(makePanel(
                 android.graphics.Color.rgb(7, 20, 30),
@@ -240,16 +281,20 @@ public class MainActivity extends Activity {
         );
         info.setTextSize(14);
         info.setGravity(android.view.Gravity.CENTER);
-        info.setTextColor(android.graphics.Color.LTGRAY);
+        info.setTextColor(android.graphics.Color.rgb(100, 210, 225));
         info.setPadding(0, dp(12), 0, dp(12));
 
         preview = new TextureView(this);
+        preview.setBackground(makePanel(
+                android.graphics.Color.rgb(3, 14, 22),
+                android.graphics.Color.rgb(1, 7, 12)
+        ));
 
         TextView cameraLabel = new TextView(this);
         cameraLabel.setText("CAMERA / VISION");
         cameraLabel.setTextSize(12);
         cameraLabel.setGravity(android.view.Gravity.CENTER);
-        cameraLabel.setTextColor(android.graphics.Color.LTGRAY);
+        cameraLabel.setTextColor(android.graphics.Color.rgb(0, 220, 235));
         cameraLabel.setPadding(0, dp(5), 0, dp(8));
 
         Button activate = new Button(this);
@@ -281,6 +326,17 @@ public class MainActivity extends Activity {
 
         Button flashlightOffButton = new Button(this);
         flashlightOffButton.setText("FLASHLIGHT OFF");
+
+        styleHudButton(activate);
+        styleHudButton(sleep);
+        styleHudButton(rearCameraButton);
+        styleHudButton(frontCameraButton);
+        styleHudButton(voiceButton);
+        styleHudButton(youtubeButton);
+        styleHudButton(settingsButton);
+        styleHudButton(homeButton);
+        styleHudButton(flashlightOnButton);
+        styleHudButton(flashlightOffButton);
 
         panel.addView(title);
         panel.addView(subtitle);
@@ -335,10 +391,19 @@ public class MainActivity extends Activity {
     }
 
     private android.graphics.drawable.GradientDrawable makePanel(int top, int bottom) {
-        return new android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                new int[]{top, bottom}
+        android.graphics.drawable.GradientDrawable panel =
+                new android.graphics.drawable.GradientDrawable(
+                        android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                        new int[]{top, bottom}
+                );
+
+        panel.setCornerRadius(dp(6));
+        panel.setStroke(
+                dp(1),
+                android.graphics.Color.argb(150, 0, 220, 235)
         );
+
+        return panel;
     }
 
     private void updateDashboardData() {
