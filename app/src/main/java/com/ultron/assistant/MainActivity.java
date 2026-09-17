@@ -32,6 +32,7 @@ import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 import com.ultron.assistant.vision.VisionManager;
+import com.ultron.assistant.ui.UltronCoreView;
 import com.ultron.assistant.ai.AIClient;
 import com.ultron.assistant.ui.UltronHudDrawable;
 import com.ultron.assistant.service.UltronBackgroundService;
@@ -101,6 +102,11 @@ public class MainActivity extends Activity {
 
     private CameraDevice camera;
     private CameraCaptureSession cameraSession;
+    private Surface previewSurface;
+
+    // Camera request state
+    private boolean pendingRearCamera = true;
+    private int cameraGeneration = 0;
 
     private VoiceManager voiceManager;
     private VoiceSpeaker voiceSpeaker;
@@ -120,6 +126,7 @@ public class MainActivity extends Activity {
     private OwnerProfile ownerProfile;
     private VisionManager visionManager;
     private AIClient aiClient;
+    private UltronCoreView ultronCoreView;
     private final android.os.Handler visionHandler =
             new android.os.Handler(android.os.Looper.getMainLooper());
     private boolean visionCaptureRunning = false;
@@ -272,22 +279,8 @@ public class MainActivity extends Activity {
         subtitle.setGravity(android.view.Gravity.CENTER);
         subtitle.setTextColor(android.graphics.Color.rgb(100, 220, 230));
         subtitle.setPadding(0, 0, 0, dp(10));
-
-        TextView core = new TextView(this);
-        core.setText("◉");
-        core.setTextSize(78);
-        core.setGravity(android.view.Gravity.CENTER);
-        core.setTextColor(android.graphics.Color.rgb(0, 245, 255));
-        core.setShadowLayer(
-                dp(12),
-                0,
-                0,
-                android.graphics.Color.argb(180, 0, 220, 235)
-        );
-        core.setBackground(makePanel(
-                android.graphics.Color.rgb(8, 25, 38),
-                android.graphics.Color.rgb(2, 10, 17)
-        ));
+        ultronCoreView = new UltronCoreView(this);
+        ultronCoreView.setMode(0);
 
         TextView coreLabel = new TextView(this);
         coreLabel.setText("AI CORE  •  STANDBY");
@@ -390,7 +383,7 @@ public class MainActivity extends Activity {
 
         panel.addView(title);
         panel.addView(subtitle);
-        panel.addView(core, new LinearLayout.LayoutParams(-1, dp(150)));
+        panel.addView(ultronCoreView, new LinearLayout.LayoutParams(-1, dp(230)));
         panel.addView(coreLabel);
         panel.addView(statusPanel);
         panel.addView(systemData);
@@ -441,6 +434,7 @@ public class MainActivity extends Activity {
         sleep.setOnClickListener(v -> {
             ultronActive = false;
             ultronWaiting = true;
+            if (ultronCoreView != null) ultronCoreView.sleep();
             if (voiceManager != null) voiceManager.stopListening();
             if (voiceSpeaker != null) voiceSpeaker.stop();
             status.setText("●  ULTRON SLEEPING");
@@ -675,6 +669,7 @@ public class MainActivity extends Activity {
     }
 
     private void startVoice() {
+        if (ultronCoreView != null) ultronCoreView.setMode(1);
 
         if (checkSelfPermission(
                 Manifest.permission.RECORD_AUDIO
@@ -767,6 +762,7 @@ public class MainActivity extends Activity {
     }
 
     private void handleVoiceCommand(String command) {
+        if (ultronCoreView != null) ultronCoreView.setMode(0);
         if (command == null || command.trim().isEmpty()) {
             respond("I did not hear a command.");
             return;
@@ -1117,6 +1113,7 @@ public class MainActivity extends Activity {
 
 
     private void askAI(String command) {
+        if (ultronCoreView != null) ultronCoreView.setMode(2);
         if (command == null || command.trim().isEmpty()) {
             respond("Please say that again.");
             return;
@@ -1979,56 +1976,58 @@ public class MainActivity extends Activity {
 
     private void openCamera(boolean rear) {
 
+        closeCamera();
+
+        pendingRearCamera = rear;
+        final int requestGeneration = cameraGeneration;
+
         if (checkSelfPermission(
                 Manifest.permission.CAMERA
         ) != PackageManager.PERMISSION_GRANTED) {
 
             requestPermissions(
-                    new String[]{
-                            Manifest.permission.CAMERA
-                    },
+                    new String[]{Manifest.permission.CAMERA},
                     CAMERA_REQUEST
             );
 
             status.setText(
-                    "Camera permission required"
+                    rear
+                            ? "Rear camera permission required"
+                            : "Front camera permission required"
             );
 
             return;
         }
 
-        closeCamera();
+
 
         try {
 
             CameraManager manager =
-                    (CameraManager)
-                            getSystemService(
-                                    CAMERA_SERVICE
-                            );
+                    (CameraManager) getSystemService(
+                            CAMERA_SERVICE
+                    );
+
+            if (manager == null) {
+                status.setText("Camera service unavailable");
+                return;
+            }
 
             String selectedCamera = null;
 
-            for (String id :
-                    manager.getCameraIdList()) {
+            for (String id : manager.getCameraIdList()) {
 
-                android.hardware.camera2
-                        .CameraCharacteristics info =
-                        manager.getCameraCharacteristics(
-                                id
-                        );
+                android.hardware.camera2.CameraCharacteristics info =
+                        manager.getCameraCharacteristics(id);
 
-                Integer facing =
-                        info.get(
-                                android.hardware.camera2
-                                        .CameraCharacteristics
-                                        .LENS_FACING
-                        );
+                Integer facing = info.get(
+                        android.hardware.camera2.CameraCharacteristics
+                                .LENS_FACING
+                );
 
                 if (rear
                         && facing != null
-                        && facing ==
-                        android.hardware.camera2
+                        && facing == android.hardware.camera2
                                 .CameraCharacteristics
                                 .LENS_FACING_BACK) {
 
@@ -2038,8 +2037,7 @@ public class MainActivity extends Activity {
 
                 if (!rear
                         && facing != null
-                        && facing ==
-                        android.hardware.camera2
+                        && facing == android.hardware.camera2
                                 .CameraCharacteristics
                                 .LENS_FACING_FRONT) {
 
@@ -2049,16 +2047,21 @@ public class MainActivity extends Activity {
             }
 
             if (selectedCamera == null) {
-
                 status.setText(
-                        "Requested camera not available"
+                        rear
+                                ? "Rear camera not available"
+                                : "Front camera not available"
                 );
-
                 return;
             }
 
-            final String cameraId =
-                    selectedCamera;
+            final String cameraId = selectedCamera;
+
+            status.setText(
+                    rear
+                            ? "Rear camera: opening..."
+                            : "Front camera: opening..."
+            );
 
             manager.openCamera(
                     cameraId,
@@ -2069,10 +2072,22 @@ public class MainActivity extends Activity {
                                 CameraDevice device
                         ) {
 
+                            if (requestGeneration != cameraGeneration) {
+                                device.close();
+                                return;
+                            }
+
                             camera = device;
 
                             runOnUiThread(
-                                    () -> startPreview()
+                                    () -> {
+                                        if (requestGeneration
+                                                == cameraGeneration) {
+                                            startPreview();
+                                        } else {
+                                            device.close();
+                                        }
+                                    }
                             );
                         }
 
@@ -2086,6 +2101,16 @@ public class MainActivity extends Activity {
                             if (camera == device) {
                                 camera = null;
                             }
+
+                            runOnUiThread(
+                                    () -> {
+                                        if (status != null) {
+                                            status.setText(
+                                                    "Camera disconnected"
+                                            );
+                                        }
+                                    }
+                            );
                         }
 
                         @Override
@@ -2100,21 +2125,52 @@ public class MainActivity extends Activity {
                                 camera = null;
                             }
 
+                            android.util.Log.e(
+                                    "ULTRON_CAMERA",
+                                    "CameraDevice error="
+                                            + error
+                                            + " id="
+                                            + cameraId
+                            );
+
                             runOnUiThread(
-                                    () -> status.setText(
-                                            "Camera error: "
-                                                    + error
-                                    )
+                                    () -> {
+                                        if (status != null) {
+                                            status.setText(
+                                                    "Camera error: "
+                                                            + error
+                                            );
+                                        }
+                                    }
                             );
                         }
                     },
                     null
             );
 
-        } catch (Exception e) {
+        } catch (SecurityException e) {
+
+            android.util.Log.e(
+                    "ULTRON_CAMERA",
+                    "Camera permission/security error",
+                    e
+            );
 
             status.setText(
-                    "Camera access failed"
+                    "Camera permission/security error"
+            );
+
+        } catch (Exception e) {
+
+            android.util.Log.e(
+                    "ULTRON_CAMERA",
+                    "Camera access failed",
+                    e
+            );
+
+            status.setText(
+                    "Camera access failed: "
+                            + e.getClass().getSimpleName()
             );
         }
     }
@@ -2122,11 +2178,7 @@ public class MainActivity extends Activity {
     private void startPreview() {
 
         if (camera == null) {
-
-            status.setText(
-                    "Camera not ready"
-            );
-
+            status.setText("Camera not ready");
             return;
         }
 
@@ -2141,7 +2193,6 @@ public class MainActivity extends Activity {
                                 int width,
                                 int height
                         ) {
-
                             startPreview();
                         }
 
@@ -2157,6 +2208,18 @@ public class MainActivity extends Activity {
                         public boolean onSurfaceTextureDestroyed(
                                 SurfaceTexture surface
                         ) {
+
+                            stopVisionCapture();
+
+                            if (cameraSession != null) {
+                                cameraSession.close();
+                                cameraSession = null;
+                            }
+
+                            if (previewSurface != null) {
+                                previewSurface.release();
+                                previewSurface = null;
+                            }
 
                             return true;
                         }
@@ -2182,40 +2245,61 @@ public class MainActivity extends Activity {
                     preview.getSurfaceTexture();
 
             if (texture == null) {
-
                 status.setText(
                         "Preview texture unavailable"
                 );
+                return;
+            }
 
+            int width = preview.getWidth();
+            int height = preview.getHeight();
+
+            if (width <= 0 || height <= 0) {
+                status.setText(
+                        "Preview size unavailable"
+                );
                 return;
             }
 
             texture.setDefaultBufferSize(
-                    preview.getWidth(),
-                    preview.getHeight()
+                    width,
+                    height
             );
 
-            Surface surface =
-                    new Surface(texture);
+            if (previewSurface != null) {
+                previewSurface.release();
+                previewSurface = null;
+            }
 
-            android.hardware.camera2
-                    .CaptureRequest.Builder request =
+            previewSurface = new Surface(texture);
+
+            android.hardware.camera2.CaptureRequest.Builder request =
                     camera.createCaptureRequest(
                             CameraDevice.TEMPLATE_PREVIEW
                     );
 
-            request.addTarget(surface);
+            request.addTarget(previewSurface);
 
-            camera.createCaptureSession(
-                    Collections.singletonList(
-                            surface
-                    ),
+            final CameraDevice activeCamera = camera;
+            final int activeGeneration = cameraGeneration;
+            final Surface activeSurface = previewSurface;
+
+            activeCamera.createCaptureSession(
+                    Collections.singletonList(activeSurface),
                     new CameraCaptureSession.StateCallback() {
 
                         @Override
                         public void onConfigured(
                                 CameraCaptureSession session
                         ) {
+
+                            if (activeGeneration != cameraGeneration
+                                    || camera != activeCamera
+                                    || activeSurface != previewSurface) {
+
+                                session.close();
+                                return;
+                            }
 
                             try {
 
@@ -2231,11 +2315,21 @@ public class MainActivity extends Activity {
 
                                 runOnUiThread(
                                         () -> status.setText(
-                                                "Camera preview ON"
+                                                pendingRearCamera
+                                                        ? "● REAR CAMERA LIVE"
+                                                        : "● FRONT CAMERA LIVE"
                                         )
                                 );
 
                             } catch (Exception e) {
+
+                                android.util.Log.e(
+                                        "ULTRON_CAMERA",
+                                        "Preview request failed",
+                                        e
+                                );
+
+                                session.close();
 
                                 runOnUiThread(
                                         () -> status.setText(
@@ -2250,6 +2344,13 @@ public class MainActivity extends Activity {
                                 CameraCaptureSession session
                         ) {
 
+                            session.close();
+
+                            android.util.Log.e(
+                                    "ULTRON_CAMERA",
+                                    "Camera configuration failed"
+                            );
+
                             runOnUiThread(
                                     () -> status.setText(
                                             "Camera configuration failed"
@@ -2262,24 +2363,46 @@ public class MainActivity extends Activity {
 
         } catch (Exception e) {
 
+            android.util.Log.e(
+                    "ULTRON_CAMERA",
+                    "Preview error",
+                    e
+            );
+
             status.setText(
-                    "Preview error"
+                    "Preview error: "
+                            + e.getClass().getSimpleName()
             );
         }
     }
 
     private void closeCamera() {
+
+        cameraGeneration++;
+
         stopVisionCapture();
 
-
         if (cameraSession != null) {
+            try {
+                cameraSession.stopRepeating();
+            } catch (Exception ignored) {
+            }
+
+            try {
+                cameraSession.abortCaptures();
+            } catch (Exception ignored) {
+            }
 
             cameraSession.close();
             cameraSession = null;
         }
 
-        if (camera != null) {
+        if (previewSurface != null) {
+            previewSurface.release();
+            previewSurface = null;
+        }
 
+        if (camera != null) {
             camera.close();
             camera = null;
         }
@@ -2341,9 +2464,11 @@ public class MainActivity extends Activity {
                     == PackageManager.PERMISSION_GRANTED) {
 
                 status.setText(
-                        "Camera permission granted"
+                        pendingRearCamera
+                                ? "Rear camera permission granted"
+                                : "Front camera permission granted"
                 );
-                openCamera(true);
+                openCamera(pendingRearCamera);
 
             } else {
 
