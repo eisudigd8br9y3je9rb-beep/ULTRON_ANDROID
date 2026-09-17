@@ -67,7 +67,7 @@ public class UltronCoreView extends View {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(android.graphics.Color.rgb(3, 12, 20));
         paint.setShadowLayer(dp(18), 0, 0,
-                android.graphics.Color.argb(150, 0, 220, 235));
+                android.graphics.Color.argb(150, 255, 110, 20));
         canvas.drawCircle(cx, cy, r * 1.08f, paint);
         paint.clearShadowLayer();
 
@@ -80,9 +80,9 @@ public class UltronCoreView extends View {
         // Segmented scanning arcs
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(dp(7));
-        paint.setColor(android.graphics.Color.rgb(0, 235, 255));
+        paint.setColor(android.graphics.Color.rgb(255, 145, 35));
         paint.setShadowLayer(dp(12), 0, 0,
-                android.graphics.Color.argb(210, 0, 230, 255));
+                android.graphics.Color.argb(210, 255, 130, 25));
 
         oval.set(cx - r * 1.48f, cy - r * 1.48f,
                 cx + r * 1.48f, cy + r * 1.48f);
@@ -104,23 +104,23 @@ public class UltronCoreView extends View {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(android.graphics.Color.rgb(4, 28, 40));
         paint.setShadowLayer(dp(24), 0, 0,
-                android.graphics.Color.argb((int) glow + 100, 0, 235, 255));
+                android.graphics.Color.argb((int) glow + 100, 255, 125, 25));
         canvas.drawCircle(cx, cy, coreR, paint);
         paint.clearShadowLayer();
 
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(dp(3));
-        paint.setColor(android.graphics.Color.rgb(0, 245, 255));
+        paint.setColor(android.graphics.Color.rgb(255, 175, 55));
         paint.setShadowLayer(dp(10), 0, 0,
-                android.graphics.Color.argb(230, 0, 230, 255));
+                android.graphics.Color.argb(230, 255, 130, 25));
         canvas.drawCircle(cx, cy, coreR, paint);
         paint.clearShadowLayer();
 
         // ULTRON energy symbol
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(android.graphics.Color.rgb(0, 245, 255));
+        paint.setColor(android.graphics.Color.rgb(255, 175, 55));
         paint.setShadowLayer(dp(18), 0, 0,
-                android.graphics.Color.argb(230, 0, 230, 255));
+                android.graphics.Color.argb(230, 255, 130, 25));
 
         canvas.drawCircle(cx, cy, coreR * 0.17f, paint);
 
@@ -147,9 +147,9 @@ public class UltronCoreView extends View {
             float nx = cx + (float) Math.cos(a) * r * 0.62f;
             float ny = cy + (float) Math.sin(a) * r * 0.62f;
 
-            paint.setColor(android.graphics.Color.rgb(0, 235, 255));
+            paint.setColor(android.graphics.Color.rgb(255, 145, 35));
             paint.setShadowLayer(dp(10), 0, 0,
-                    android.graphics.Color.argb(220, 0, 230, 255));
+                    android.graphics.Color.argb(220, 255, 130, 25));
             canvas.drawCircle(nx, ny, nodeR, paint);
             paint.clearShadowLayer();
         }
