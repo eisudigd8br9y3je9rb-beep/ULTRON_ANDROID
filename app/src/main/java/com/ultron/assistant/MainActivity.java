@@ -126,7 +126,7 @@ public class MainActivity extends Activity {
             communicationManager = new CommunicationManager(this);
             ownerProfile = new OwnerProfile(this);
             initVisionManager();
-            aiClient = new AIClient();
+            aiClient = new AIClient(this);
 
             createUserInterface();
 

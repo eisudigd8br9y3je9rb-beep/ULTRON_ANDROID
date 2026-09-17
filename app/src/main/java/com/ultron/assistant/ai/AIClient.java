@@ -1,5 +1,6 @@
 package com.ultron.assistant.ai;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -31,6 +32,20 @@ public class AIClient {
 
     private String endpoint = AIConfig.DEFAULT_ENDPOINT;
     private String apiKey = "";
+
+    public AIClient() {
+    }
+
+    public AIClient(Context context) {
+        configure(context);
+    }
+
+    public void configure(Context context) {
+        if (context == null) return;
+
+        setEndpoint(AISettings.getEndpoint(context));
+        setApiKey(AISettings.getApiKey(context));
+    }
 
     public void setEndpoint(String endpoint) {
         if (endpoint != null && !endpoint.trim().isEmpty()) {
