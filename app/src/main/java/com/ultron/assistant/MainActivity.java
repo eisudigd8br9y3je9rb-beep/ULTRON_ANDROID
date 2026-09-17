@@ -544,7 +544,6 @@ public class MainActivity extends Activity {
         right.addView(status, statusLp);
 
         preview = new TextureView(this);
-        preview.setBackgroundColor(android.graphics.Color.BLACK);
 
         right.addView(
                 preview,
