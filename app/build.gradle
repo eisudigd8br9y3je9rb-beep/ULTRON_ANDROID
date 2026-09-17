@@ -14,3 +14,8 @@ android {
         versionName '1.0.1'
     }
 }
+
+
+dependencies {
+    implementation "com.google.mlkit:object-detection:17.0.2"
+}
