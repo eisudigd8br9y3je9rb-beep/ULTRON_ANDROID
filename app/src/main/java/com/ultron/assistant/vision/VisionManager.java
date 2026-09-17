@@ -20,6 +20,7 @@ public class VisionManager {
 
     private Bitmap lastFrame;
     private VisionCallback callback;
+    private boolean processingFrame = false;
 
     private final ObjectDetector detector;
 
@@ -50,17 +51,26 @@ public class VisionManager {
         Bitmap oldFrame = lastFrame;
         lastFrame = bitmap;
 
+        if (callback != null) {
+            callback.onImageReady(bitmap);
+        }
+
+        if (!processingFrame) {
+            Bitmap detectionFrame = bitmap.copy(
+                    Bitmap.Config.ARGB_8888,
+                    false
+            );
+
+            if (detectionFrame != null) {
+                analyzeFrame(detectionFrame);
+            }
+        }
+
         if (oldFrame != null
                 && !oldFrame.isRecycled()
                 && oldFrame != bitmap) {
             oldFrame.recycle();
         }
-
-        if (callback != null) {
-            callback.onImageReady(bitmap);
-        }
-
-        analyzeFrame(bitmap);
     }
 
     private void analyzeFrame(Bitmap bitmap) {
@@ -68,15 +78,29 @@ public class VisionManager {
             return;
         }
 
+        processingFrame = true;
+
         InputImage image = InputImage.fromBitmap(bitmap, 0);
 
         detector.process(image)
                 .addOnSuccessListener(objects -> {
+                    processingFrame = false;
+
+                    if (!bitmap.isRecycled()) {
+                        bitmap.recycle();
+                    }
+
                     if (callback != null) {
                         callback.onObjectsDetected(objects);
                     }
                 })
                 .addOnFailureListener(error -> {
+                    processingFrame = false;
+
+                    if (!bitmap.isRecycled()) {
+                        bitmap.recycle();
+                    }
+
                     if (callback != null) {
                         callback.onError(
                                 "Vision detection error: "

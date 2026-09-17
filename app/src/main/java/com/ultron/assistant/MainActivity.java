@@ -61,9 +61,29 @@ public class MainActivity extends Activity {
 
                 final int count = objects == null ? 0 : objects.size();
 
+                StringBuilder labels = new StringBuilder();
+
+                if (objects != null) {
+                    for (com.google.mlkit.vision.objects.DetectedObject object : objects) {
+                        for (com.google.mlkit.vision.objects.DetectedObject.Label label
+                                : object.getLabels()) {
+
+                            if (labels.length() > 0) {
+                                labels.append(", ");
+                            }
+
+                            labels.append(label.getText());
+                        }
+                    }
+                }
+
+                final String result = labels.length() > 0
+                        ? "VISION: " + labels
+                        : "VISION: " + count + " OBJECT(S) DETECTED";
+
                 runOnUiThread(() -> {
                     if (status != null) {
-                        status.setText("VISION: " + count + " OBJECT(S) DETECTED");
+                        status.setText(result);
                     }
                 });
             }
@@ -331,6 +351,12 @@ public class MainActivity extends Activity {
         Button cameraLiveButton = new Button(this);
         cameraLiveButton.setText("CAMERA LIVE");
 
+        Button frontCameraButton = new Button(this);
+        frontCameraButton.setText("OPEN FRONT CAMERA");
+
+        Button rearCameraButton = new Button(this);
+        rearCameraButton.setText("OPEN REAR CAMERA");
+
 
         Button voiceButton = new Button(this);
         voiceButton.setText("START VOICE COMMAND");
@@ -353,6 +379,8 @@ public class MainActivity extends Activity {
         styleHudButton(activate);
         styleHudButton(sleep);
         styleHudButton(cameraLiveButton);
+        styleHudButton(frontCameraButton);
+        styleHudButton(rearCameraButton);
         styleHudButton(voiceButton);
         styleHudButton(youtubeButton);
         styleHudButton(settingsButton);
@@ -373,6 +401,8 @@ public class MainActivity extends Activity {
         panel.addView(activate);
         panel.addView(sleep);
         panel.addView(cameraLiveButton);
+        panel.addView(frontCameraButton);
+        panel.addView(rearCameraButton);
         panel.addView(voiceButton);
         panel.addView(youtubeButton);
         panel.addView(settingsButton);
@@ -438,6 +468,36 @@ public class MainActivity extends Activity {
             cameraLiveButton.setText("CAMERA LIVE: ON");
             openCamera(true);
         });
+        frontCameraButton.setOnClickListener(v -> {
+            if (checkSelfPermission(Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.CAMERA},
+                        CAMERA_REQUEST
+                );
+                status.setText("Camera permission required");
+                return;
+            }
+
+            status.setText("● FRONT CAMERA: STARTING...");
+            openCamera(false);
+        });
+
+        rearCameraButton.setOnClickListener(v -> {
+            if (checkSelfPermission(Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.CAMERA},
+                        CAMERA_REQUEST
+                );
+                status.setText("Camera permission required");
+                return;
+            }
+
+            status.setText("● REAR CAMERA: STARTING...");
+            openCamera(true);
+        });
+
         voiceButton.setOnClickListener(v -> startVoice());
         youtubeButton.setOnClickListener(v -> openYouTube());
         settingsButton.setOnClickListener(v -> openSettings());
