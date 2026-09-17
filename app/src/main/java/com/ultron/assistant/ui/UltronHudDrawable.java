@@ -377,7 +377,7 @@ public class UltronHudDrawable extends Drawable {
 
         if (scanY <= h) {
             paint.setShader(new LinearGradient(
-                    0, scany- 18f,
+                    0, scanY - 18f,
                     0, scanY + 18f,
                     Color.TRANSPARENT,
                     Color.argb(48, 0, 255, 255),
