@@ -2523,6 +2523,7 @@ public class MainActivity extends Activity {
             final CameraDevice activeCamera = camera;
             final int activeGeneration = cameraGeneration;
             final Surface activeSurface = previewSurface;
+            final boolean requestedRear = pendingRearCamera;
 
             activeCamera.createCaptureSession(
                     Collections.singletonList(activeSurface),
@@ -2535,9 +2536,13 @@ public class MainActivity extends Activity {
 
                             if (activeGeneration != cameraGeneration
                                     || camera != activeCamera
-                                    || activeSurface != previewSurface) {
+                                    || activeSurface != previewSurface
+                                    || activeSurface == null) {
 
-                                session.close();
+                                try {
+                                    session.close();
+                                } catch (Exception ignored) {
+                                }
                                 return;
                             }
 
@@ -2555,7 +2560,7 @@ public class MainActivity extends Activity {
 
                                 runOnUiThread(
                                         () -> status.setText(
-                                                pendingRearCamera
+                                                requestedRear
                                                         ? "● REAR CAMERA LIVE"
                                                         : "● FRONT CAMERA LIVE"
                                         )
