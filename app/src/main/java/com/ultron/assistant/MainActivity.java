@@ -32,6 +32,7 @@ import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 import com.ultron.assistant.vision.VisionManager;
+import com.ultron.assistant.ai.AIClient;
 import com.ultron.assistant.ui.UltronHudDrawable;
 import com.ultron.assistant.service.UltronBackgroundService;
 
@@ -73,6 +74,7 @@ public class MainActivity extends Activity {
     private CommunicationManager communicationManager;
     private OwnerProfile ownerProfile;
     private VisionManager visionManager;
+    private AIClient aiClient;
     private final android.os.Handler visionHandler =
             new android.os.Handler(android.os.Looper.getMainLooper());
     private boolean visionCaptureRunning = false;
@@ -124,6 +126,7 @@ public class MainActivity extends Activity {
             communicationManager = new CommunicationManager(this);
             ownerProfile = new OwnerProfile(this);
             initVisionManager();
+            aiClient = new AIClient();
 
             createUserInterface();
 
@@ -1018,7 +1021,7 @@ public class MainActivity extends Activity {
                 if (knowledgeAnswer != null && !knowledgeAnswer.trim().isEmpty()) {
                     respond(knowledgeAnswer);
                 } else {
-                    respond("Sorry, I did not understand your question. Please try again.");
+                    askAI(command);
                 }
                 break;
         }
@@ -1027,6 +1030,54 @@ public class MainActivity extends Activity {
 
 
 
+
+    private void askAI(String command) {
+        if (command == null || command.trim().isEmpty()) {
+            respond("Please say that again.");
+            return;
+        }
+
+        if (aiClient == null) {
+            respond("AI brain is not available right now.");
+            return;
+        }
+
+        String memoryContext = memoryManager == null
+                ? ""
+                : memoryManager.getRecentContext();
+
+        String systemPrompt =
+                "You are ULTRON, a personal Android assistant for Imtiyaz. "
+                + "Reply naturally and briefly, usually in 1 to 3 sentences. "
+                + "Adapt to the user's language: Hindi, English, or Hinglish. "
+                + "Do not claim to have performed phone actions unless the app actually performed them. "
+                + "If you do not know something, say so clearly.";
+
+        aiClient.ask(
+                systemPrompt,
+                command.trim(),
+                memoryContext,
+                new AIClient.Callback() {
+                    @Override
+                    public void onSuccess(String answer) {
+                        respond(answer);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        android.util.Log.w(
+                                "ULTRON_AI",
+                                "AI unavailable: " + error
+                        );
+
+                        respond(
+                                "AI brain is not configured yet. "
+                                        + "I can still handle my built-in commands."
+                        );
+                    }
+                }
+        );
+    }
 
     private void tellFeatures() {
         String message =
