@@ -35,6 +35,13 @@ jobs:
         run: |
           gradle assembleDebug --no-daemon
 
+      - name: Verify APK
+        run: |
+          APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          echo "APK=$APK"
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)
+          "$AAPT" dump badging "$APK" | grep -E "package:|application-label:"
+
       - name: Upload ULTRON APK
         uses: actions/upload-artifact@v4
         with:
