@@ -43,6 +43,31 @@ import java.util.regex.Pattern;
 public class MainActivity extends Activity {
     private void initVisionManager() {
         visionManager = new VisionManager();
+
+        visionManager.setCallback(new VisionManager.VisionCallback() {
+            @Override
+            public void onImageReady(android.graphics.Bitmap bitmap) {
+                // Live frame received.
+            }
+
+            @Override
+            public void onError(String error) {
+                android.util.Log.e("ULTRON_VISION", String.valueOf(error));
+            }
+
+            @Override
+            public void onObjectsDetected(
+                    java.util.List<com.google.mlkit.vision.objects.DetectedObject> objects) {
+
+                final int count = objects == null ? 0 : objects.size();
+
+                runOnUiThread(() -> {
+                    if (status != null) {
+                        status.setText("VISION: " + count + " OBJECT(S) DETECTED");
+                    }
+                });
+            }
+        });
     }
 
 
