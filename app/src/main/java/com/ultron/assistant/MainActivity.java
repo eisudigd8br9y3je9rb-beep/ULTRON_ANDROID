@@ -211,11 +211,21 @@ private WebView ultronWebView;
 
     private void initUltronWebView() {
         ultronWebView = new WebView(this);
+        ultronWebView.setBackgroundColor(android.graphics.Color.BLACK);
+        ultronWebView.setVerticalScrollBarEnabled(false);
+        ultronWebView.setHorizontalScrollBarEnabled(false);
 
         WebSettings settings = ultronWebView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
+
+        // ULTRON reference HUD: native pinch zoom / pan support.
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
 
         UltronWebBridge bridge = new UltronWebBridge(
                 this,
@@ -749,9 +759,6 @@ private WebView ultronWebView;
         });
 
         root.addView(main,
-                new android.widget.FrameLayout.LayoutParams(-1, -1));
-
-        root.addView(referenceDesignView,
                 new android.widget.FrameLayout.LayoutParams(-1, -1));
 
         if (ultronWebView != null) {
