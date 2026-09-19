@@ -221,11 +221,13 @@ private WebView ultronWebView;
         settings.setAllowFileAccess(true);
 
         // ULTRON reference HUD: native pinch zoom / pan support.
-        settings.setSupportZoom(true);
-        settings.setBuiltInZoomControls(true);
+        // ULTRON HUD uses its own fixed 1536x1025 canvas.
+        // Keep WebView from forcing an additional page-scale layer.
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
-        settings.setUseWideViewPort(true);
-        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(false);
+        settings.setLoadWithOverviewMode(false);
 
         UltronWebBridge bridge = new UltronWebBridge(
                 this,
