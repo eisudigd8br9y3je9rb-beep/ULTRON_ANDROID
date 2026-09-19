@@ -223,8 +223,8 @@ private WebView ultronWebView;
         // ULTRON reference HUD: native pinch zoom / pan support.
         // ULTRON HUD uses its own fixed 1536x1025 canvas.
         // Keep WebView from forcing an additional page-scale layer.
-        settings.setSupportZoom(false);
-        settings.setBuiltInZoomControls(false);
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
         settings.setUseWideViewPort(false);
         settings.setLoadWithOverviewMode(false);
