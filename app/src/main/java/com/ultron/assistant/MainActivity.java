@@ -19,6 +19,8 @@ import android.view.TextureView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import com.ultron.assistant.actions.AppLauncher;
 import com.ultron.assistant.actions.PhoneActions;
@@ -35,6 +37,7 @@ import com.ultron.assistant.vision.VisionManager;
 import com.ultron.assistant.ui.UltronReferenceDesignView;
 import com.ultron.assistant.ai.AIClient;
 import com.ultron.assistant.service.UltronBackgroundService;
+import com.ultron.assistant.web.UltronWebBridge;
 
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -126,6 +129,7 @@ public class MainActivity extends Activity {
     private VisionManager visionManager;
     private AIClient aiClient;
     private UltronReferenceDesignView referenceDesignView;
+private WebView ultronWebView;
     private final android.os.Handler visionHandler =
             new android.os.Handler(android.os.Looper.getMainLooper());
     private boolean visionCaptureRunning = false;
@@ -179,6 +183,7 @@ public class MainActivity extends Activity {
             initVisionManager();
             aiClient = new AIClient(this);
 
+            initUltronWebView();
             createUserInterface();
 
             if (status != null) {
@@ -204,6 +209,37 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void initUltronWebView() {
+        ultronWebView = new WebView(this);
+
+        WebSettings settings = ultronWebView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(true);
+
+        UltronWebBridge bridge = new UltronWebBridge(
+                this,
+                new UltronWebBridge.CommandListener() {
+                    @Override
+                    public void onCommand(String command) {
+                        if (command != null && !command.trim().isEmpty()) {
+                            handleCommand(command.trim());
+                        }
+                    }
+
+                    @Override
+                    public void onAsk(String text) {
+                        if (text != null && !text.trim().isEmpty()) {
+                            askAI(text.trim());
+                        }
+                    }
+                }
+        );
+
+        ultronWebView.addJavascriptInterface(bridge, "Android");
+        ultronWebView.loadUrl("file:///android_asset/ultron_hud.html");
+    }
+
     private int dp(float value) {
         return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
@@ -214,6 +250,7 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             updateDashboardData();
+            updateWebSystemData();
             dashboardHandler.postDelayed(this, 3000);
         }
     };
@@ -717,6 +754,12 @@ public class MainActivity extends Activity {
         root.addView(referenceDesignView,
                 new android.widget.FrameLayout.LayoutParams(-1, -1));
 
+        if (ultronWebView != null) {
+            android.widget.FrameLayout.LayoutParams webLp =
+                    new android.widget.FrameLayout.LayoutParams(-1, -1);
+            root.addView(ultronWebView, webLp);
+        }
+
         setContentView(root);
         dashboardHandler.post(dashboardUpdater);
 
@@ -848,6 +891,29 @@ public class MainActivity extends Activity {
 
             return panel;
         }
+
+    private void updateWebSystemData() {
+        if (ultronWebView == null) return;
+
+        UltronWebBridge bridge = new UltronWebBridge(this, null);
+
+        String battery = bridge.getBattery();
+        String brightness = bridge.getBrightness();
+        String network = bridge.getNetwork();
+        String time = bridge.getTime();
+
+        String js = "javascript:setSystemData("
+                + JSONObjectQuote(battery) + ","
+                + JSONObjectQuote(brightness) + ","
+                + JSONObjectQuote(network) + ","
+                + JSONObjectQuote(time) + ")";
+
+        ultronWebView.evaluateJavascript(js, null);
+    }
+
+    private String JSONObjectQuote(String value) {
+        return org.json.JSONObject.quote(value == null ? "" : value);
+    }
 
     private void updateDashboardData() {
             try {
