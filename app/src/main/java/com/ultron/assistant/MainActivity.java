@@ -32,10 +32,8 @@ import com.ultron.assistant.voice.VoiceManager;
 import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 import com.ultron.assistant.vision.VisionManager;
-import com.ultron.assistant.ui.UltronCoreView;
 import com.ultron.assistant.ui.UltronReferenceDesignView;
 import com.ultron.assistant.ai.AIClient;
-import com.ultron.assistant.ui.UltronHudDrawable;
 import com.ultron.assistant.service.UltronBackgroundService;
 
 import java.util.Collections;
@@ -127,7 +125,6 @@ public class MainActivity extends Activity {
     private OwnerProfile ownerProfile;
     private VisionManager visionManager;
     private AIClient aiClient;
-    private UltronCoreView ultronCoreView;
     private UltronReferenceDesignView referenceDesignView;
     private final android.os.Handler visionHandler =
             new android.os.Handler(android.os.Looper.getMainLooper());
@@ -402,11 +399,6 @@ public class MainActivity extends Activity {
                 new android.widget.LinearLayout.LayoutParams(-1, dp(23)));
 
         // Existing ULTRON reactor/core is preserved.
-        ultronCoreView = new com.ultron.assistant.ui.UltronCoreView(this);
-        ultronCoreView.setMode(0);
-
-        center.addView(ultronCoreView,
-                new android.widget.LinearLayout.LayoutParams(-1, 0, 1f));
 
         TextView coreLabel = new TextView(this);
         coreLabel.setText("●  AI CORE  •  STANDBY");
@@ -756,9 +748,6 @@ public class MainActivity extends Activity {
             ultronActive = false;
             ultronWaiting = true;
 
-            if (ultronCoreView != null) {
-                ultronCoreView.sleep();
-            }
 
             if (voiceManager != null) {
                 voiceManager.stopListening();
@@ -1013,7 +1002,6 @@ public class MainActivity extends Activity {
     }
 
     private void startVoice() {
-        if (ultronCoreView != null) ultronCoreView.setMode(1);
 
         if (checkSelfPermission(
                 Manifest.permission.RECORD_AUDIO
@@ -1106,7 +1094,6 @@ public class MainActivity extends Activity {
     }
 
     private void handleVoiceCommand(String command) {
-        if (ultronCoreView != null) ultronCoreView.setMode(0);
         if (command == null || command.trim().isEmpty()) {
             respond("I did not hear a command.");
             return;
@@ -1457,7 +1444,6 @@ public class MainActivity extends Activity {
 
 
     private void askAI(String command) {
-        if (ultronCoreView != null) ultronCoreView.setMode(2);
         if (command == null || command.trim().isEmpty()) {
             respond("Please say that again.");
             return;
