@@ -357,7 +357,7 @@ public class UltronReferenceDesignView extends View {
                 X(18), Y(18), p
         );
 
-        drawHeader();
+        drawHeader(c);
 
         // Left navigation
         navButton(c, 125, "HOME", "HOME");
