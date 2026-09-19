@@ -33,6 +33,7 @@ import com.ultron.assistant.drone.DroneBridge;
 import com.ultron.assistant.voice.VoiceSpeaker;
 import com.ultron.assistant.vision.VisionManager;
 import com.ultron.assistant.ui.UltronCoreView;
+import com.ultron.assistant.ui.UltronReferenceDesignView;
 import com.ultron.assistant.ai.AIClient;
 import com.ultron.assistant.ui.UltronHudDrawable;
 import com.ultron.assistant.service.UltronBackgroundService;
@@ -127,6 +128,7 @@ public class MainActivity extends Activity {
     private VisionManager visionManager;
     private AIClient aiClient;
     private UltronCoreView ultronCoreView;
+    private UltronReferenceDesignView referenceDesignView;
     private final android.os.Handler visionHandler =
             new android.os.Handler(android.os.Looper.getMainLooper());
     private boolean visionCaptureRunning = false;
@@ -666,7 +668,61 @@ public class MainActivity extends Activity {
         main.addView(actions,
                 new android.widget.LinearLayout.LayoutParams(-1, dp(34)));
 
+        referenceDesignView = new UltronReferenceDesignView(this);
+
+        referenceDesignView.setActionListener(action -> {
+            switch (action) {
+                case "HOME":
+                    goHome();
+                    break;
+                case "CHAT":
+                    status.setText("● ULTRON CHAT READY");
+                    break;
+                case "CREATE":
+                    status.setText("● CREATE MODULE READY");
+                    break;
+                case "ANALYSE":
+                    status.setText("● ANALYSE MODULE READY");
+                    break;
+                case "SETTINGS":
+                    openSettings();
+                    break;
+                case "HELP":
+                    tellFeatures();
+                    break;
+                case "VOICE":
+                    startVoice();
+                    break;
+                case "MUSIC":
+                    openMusicApp();
+                    break;
+                case "CAMERA":
+                    status.setText("● CAMERA / VISION");
+                    break;
+                case "FILE":
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType("*/*");
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        status.setText("● FILE PICKER UNAVAILABLE");
+                    }
+                    break;
+                case "POWER":
+                case "CLOSE":
+                    finish();
+                    break;
+                default:
+                    status.setText("● " + action + " MODULE READY");
+                    break;
+            }
+        });
+
         root.addView(main,
+                new android.widget.FrameLayout.LayoutParams(-1, -1));
+
+        root.addView(referenceDesignView,
                 new android.widget.FrameLayout.LayoutParams(-1, -1));
 
         setContentView(root);
