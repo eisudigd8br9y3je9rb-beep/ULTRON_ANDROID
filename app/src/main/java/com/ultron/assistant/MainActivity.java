@@ -223,7 +223,7 @@ private WebView ultronWebView;
                     @Override
                     public void onCommand(String command) {
                         if (command != null && !command.trim().isEmpty()) {
-                            handleCommand(command.trim());
+                            handleVoiceCommand(command.trim());
                         }
                     }
 
