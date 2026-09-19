@@ -251,79 +251,82 @@ public class MainActivity extends Activity {
                 android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         );
 
+        final int BG = android.graphics.Color.rgb(3, 6, 9);
+        final int PANEL = android.graphics.Color.rgb(12, 10, 8);
+        final int PANEL2 = android.graphics.Color.rgb(20, 15, 10);
+        final int BRONZE = android.graphics.Color.rgb(105, 67, 30);
         final int AMBER = android.graphics.Color.rgb(235, 135, 45);
         final int GOLD = android.graphics.Color.rgb(244, 190, 120);
         final int TEXT = android.graphics.Color.rgb(190, 174, 155);
+        final int MUTED = android.graphics.Color.rgb(125, 112, 98);
 
-        android.widget.FrameLayout root =
-                new android.widget.FrameLayout(this);
-        root.setBackground(new com.ultron.assistant.ui.UltronDashboardDrawable());
+        android.widget.FrameLayout root = new android.widget.FrameLayout(this);
+        root.setBackgroundColor(BG);
 
-        android.widget.LinearLayout frame =
+        android.widget.LinearLayout main =
                 new android.widget.LinearLayout(this);
-        frame.setOrientation(android.widget.LinearLayout.VERTICAL);
-        frame.setPadding(dp(12), dp(5), dp(12), dp(6));
+        main.setOrientation(android.widget.LinearLayout.VERTICAL);
+        main.setPadding(dp(10), dp(6), dp(10), dp(6));
 
-        TextView header = new TextView(this);
-        header.setText("△  ULTRON");
-        header.setTextColor(GOLD);
-        header.setTextSize(25);
+        // ================= HEADER =================
+        android.widget.LinearLayout header =
+                new android.widget.LinearLayout(this);
+        header.setOrientation(android.widget.LinearLayout.VERTICAL);
         header.setGravity(android.view.Gravity.CENTER);
-        header.setTypeface(
-                android.graphics.Typeface.DEFAULT,
-                android.graphics.Typeface.BOLD
-        );
-        header.setShadowLayer(
-                dp(9), 0, 0,
-                android.graphics.Color.argb(210, 230, 105, 25)
-        );
 
-        frame.addView(
-                header,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(36))
-        );
+        TextView title = new TextView(this);
+        title.setText("ULTRON");
+        title.setTextColor(GOLD);
+        title.setTextSize(25);
+        title.setGravity(android.view.Gravity.CENTER);
+        title.setTypeface(android.graphics.Typeface.MONOSPACE,
+                android.graphics.Typeface.BOLD);
+        title.setLetterSpacing(0.18f);
+        title.setShadowLayer(dp(10), 0, 0,
+                android.graphics.Color.rgb(210, 85, 15));
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("PERSONAL AI COMMAND CENTER");
-        subtitle.setTextColor(TEXT);
-        subtitle.setTextSize(8);
+        subtitle.setText("PERSONAL AI ASSISTANT");
+        subtitle.setTextColor(MUTED);
+        subtitle.setTextSize(7);
         subtitle.setGravity(android.view.Gravity.CENTER);
+        subtitle.setTypeface(android.graphics.Typeface.MONOSPACE);
 
-        frame.addView(
-                subtitle,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(18))
-        );
+        header.addView(title,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(30)));
+        header.addView(subtitle,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(15)));
 
+        main.addView(header,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(48)));
+
+        // ================= THREE COLUMN BODY =================
         android.widget.LinearLayout body =
                 new android.widget.LinearLayout(this);
         body.setOrientation(android.widget.LinearLayout.HORIZONTAL);
 
-        frame.addView(
-                body,
-                new android.widget.LinearLayout.LayoutParams(-1, 0, 1f)
-        );
+        main.addView(body,
+                new android.widget.LinearLayout.LayoutParams(-1, 0, 1f));
 
-        // LEFT COMMAND RAIL
+        // ================= LEFT NAV =================
         android.widget.LinearLayout left =
                 new android.widget.LinearLayout(this);
         left.setOrientation(android.widget.LinearLayout.VERTICAL);
-        left.setPadding(dp(4), dp(4), dp(5), dp(4));
-        left.setBackground(makePanel(
-                android.graphics.Color.rgb(25, 22, 19),
-                android.graphics.Color.rgb(7, 7, 7)
-        ));
+        left.setPadding(dp(5), dp(5), dp(5), dp(5));
+        left.setBackground(makePanel(PANEL2, android.graphics.Color.rgb(6, 7, 8)));
 
-        body.addView(
-                left,
-                new android.widget.LinearLayout.LayoutParams(0, -1, 18f)
-        );
+        body.addView(left,
+                new android.widget.LinearLayout.LayoutParams(0, -1, 18f));
 
-        TextView navTitle = new TextView(this);
-        navTitle.setText("COMMAND");
-        navTitle.setTextColor(AMBER);
-        navTitle.setTextSize(8);
-        navTitle.setPadding(dp(5), dp(2), dp(5), dp(4));
-        left.addView(navTitle);
+        TextView commandTitle = new TextView(this);
+        commandTitle.setText("COMMAND");
+        commandTitle.setTextColor(AMBER);
+        commandTitle.setTextSize(8);
+        commandTitle.setTypeface(android.graphics.Typeface.MONOSPACE,
+                android.graphics.Typeface.BOLD);
+        commandTitle.setPadding(dp(5), dp(2), dp(5), dp(5));
+        left.addView(commandTitle,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(24)));
 
         Button homeButton = new Button(this);
         homeButton.setText("⌂   HOME");
@@ -350,85 +353,82 @@ public class MainActivity extends Activity {
 
         for (Button b : navButtons) {
             styleHudButton(b);
+            b.setTextSize(7);
             android.widget.LinearLayout.LayoutParams lp =
-                    new android.widget.LinearLayout.LayoutParams(
-                            -1, dp(34)
-                    );
+                    new android.widget.LinearLayout.LayoutParams(-1, dp(32));
             lp.setMargins(0, dp(2), 0, dp(2));
             left.addView(b, lp);
         }
 
-        TextView profile = new TextView(this);
-        profile.setText(
+        TextView leftInfo = new TextView(this);
+        leftInfo.setText(
                 "\nULTRON\n" +
                 "ONLINE\n\n" +
-                "SYSTEM STATUS\n" +
-                "CPU       23%\n" +
-                "MEMORY    45%\n" +
-                "NETWORK   ONLINE"
+                "AI CORE\n" +
+                "READY\n\n" +
+                "VISION\n" +
+                "READY\n\n" +
+                "VOICE LINK\n" +
+                "READY"
         );
-        profile.setTextColor(TEXT);
-        profile.setTextSize(7);
-        profile.setPadding(dp(7), dp(4), dp(4), dp(4));
-        left.addView(
-                profile,
-                new android.widget.LinearLayout.LayoutParams(-1, 0, 1f)
-        );
+        leftInfo.setTextColor(TEXT);
+        leftInfo.setTextSize(7);
+        leftInfo.setTypeface(android.graphics.Typeface.MONOSPACE);
+        leftInfo.setPadding(dp(7), dp(5), dp(4), dp(4));
 
-        // CENTER CORE
+        left.addView(leftInfo,
+                new android.widget.LinearLayout.LayoutParams(-1, 0, 1f));
+
+        // ================= CENTER =================
         android.widget.LinearLayout center =
                 new android.widget.LinearLayout(this);
         center.setOrientation(android.widget.LinearLayout.VERTICAL);
         center.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
-        center.setPadding(dp(7), 0, dp(7), 0);
+        center.setPadding(dp(8), 0, dp(8), 0);
 
-        body.addView(
-                center,
-                new android.widget.LinearLayout.LayoutParams(0, -1, 58f)
-        );
+        body.addView(center,
+                new android.widget.LinearLayout.LayoutParams(0, -1, 58f));
 
-        TextView conversation = new TextView(this);
-        conversation.setText("＋   NEW CONVERSATION");
-        conversation.setTextColor(TEXT);
-        conversation.setTextSize(8);
-        conversation.setGravity(android.view.Gravity.CENTER);
+        TextView newConversation = new TextView(this);
+        newConversation.setText("＋   NEW CONVERSATION");
+        newConversation.setTextColor(TEXT);
+        newConversation.setTextSize(8);
+        newConversation.setGravity(android.view.Gravity.CENTER);
+        newConversation.setTypeface(android.graphics.Typeface.MONOSPACE);
 
-        center.addView(
-                conversation,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(22))
-        );
+        center.addView(newConversation,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(23)));
 
+        // Existing ULTRON reactor/core is preserved.
         ultronCoreView = new com.ultron.assistant.ui.UltronCoreView(this);
         ultronCoreView.setMode(0);
 
-        center.addView(
-                ultronCoreView,
-                new android.widget.LinearLayout.LayoutParams(-1, 0, 1f)
-        );
+        center.addView(ultronCoreView,
+                new android.widget.LinearLayout.LayoutParams(-1, 0, 1f));
 
         TextView coreLabel = new TextView(this);
-        coreLabel.setText("AI CORE  •  STANDBY");
+        coreLabel.setText("●  AI CORE  •  STANDBY");
         coreLabel.setTextColor(AMBER);
-        coreLabel.setTextSize(9);
+        coreLabel.setTextSize(8);
         coreLabel.setGravity(android.view.Gravity.CENTER);
+        coreLabel.setTypeface(android.graphics.Typeface.MONOSPACE);
 
-        center.addView(
-                coreLabel,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(19))
-        );
+        center.addView(coreLabel,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(20)));
 
-        android.widget.LinearLayout tools =
+        // ================= ACTION GRID =================
+        android.widget.LinearLayout row1 =
                 new android.widget.LinearLayout(this);
-        tools.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-        tools.setGravity(android.view.Gravity.CENTER);
+        row1.setOrientation(android.widget.LinearLayout.HORIZONTAL);
 
-        String[] names = {
-                "VOICE", "GENERATE", "RESEARCH",
-                "CHAT", "SUMMARIZE", "ANALYSE",
-                "OPTIMIZE", "IDEATE"
-        };
+        android.widget.LinearLayout row2 =
+                new android.widget.LinearLayout(this);
+        row2.setOrientation(android.widget.LinearLayout.HORIZONTAL);
 
-        for (String name : names) {
+        String[] names1 = {"VOICE", "GENERATE", "RESEARCH", "CHAT"};
+        String[] names2 = {"ANALYSE", "OPTIMIZE", "IDEATE", "FILE"};
+
+        for (String name : names1) {
             Button b = new Button(this);
             b.setText("◉\n" + name);
             styleHudButton(b);
@@ -436,107 +436,156 @@ public class MainActivity extends Activity {
 
             if ("VOICE".equals(name)) {
                 b.setOnClickListener(v -> startVoice());
+            } else {
+                b.setOnClickListener(v ->
+                        status.setText("● " + name + " MODULE READY"));
             }
 
             android.widget.LinearLayout.LayoutParams lp =
-                    new android.widget.LinearLayout.LayoutParams(
-                            0, dp(39), 1f
-                    );
-            lp.setMargins(dp(1), 0, dp(1), 0);
-            tools.addView(b, lp);
+                    new android.widget.LinearLayout.LayoutParams(0, dp(38), 1f);
+            lp.setMargins(dp(1), dp(1), dp(1), dp(1));
+            row1.addView(b, lp);
         }
 
-        center.addView(
-                tools,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(41))
-        );
+        for (String name : names2) {
+            Button b = new Button(this);
+            b.setText("◉\n" + name);
+            styleHudButton(b);
+            b.setTextSize(6);
 
+            if ("FILE".equals(name)) {
+                b.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType("*/*");
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        status.setText("● FILE PICKER UNAVAILABLE");
+                    }
+                });
+            } else {
+                b.setOnClickListener(v ->
+                        status.setText("● " + name + " MODULE READY"));
+            }
+
+            android.widget.LinearLayout.LayoutParams lp =
+                    new android.widget.LinearLayout.LayoutParams(0, dp(38), 1f);
+            lp.setMargins(dp(1), dp(1), dp(1), dp(1));
+            row2.addView(b, lp);
+        }
+
+        center.addView(row1,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(40)));
+        center.addView(row2,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(40)));
+
+        // ================= COMMAND BAR =================
         android.widget.LinearLayout command =
                 new android.widget.LinearLayout(this);
         command.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        command.setPadding(0, dp(3), 0, 0);
 
         TextView mode = new TextView(this);
         mode.setText("◎ STANDARD");
         mode.setTextColor(TEXT);
         mode.setTextSize(7);
         mode.setGravity(android.view.Gravity.CENTER);
+        mode.setTypeface(android.graphics.Typeface.MONOSPACE);
         mode.setBackground(makePanel(
-                android.graphics.Color.rgb(30, 26, 22),
-                android.graphics.Color.rgb(8, 8, 8)
-        ));
+                android.graphics.Color.rgb(35, 25, 17),
+                android.graphics.Color.rgb(9, 8, 7)));
 
-        command.addView(
-                mode,
-                new android.widget.LinearLayout.LayoutParams(
-                        dp(78), dp(31)
-                )
-        );
+        command.addView(mode,
+                new android.widget.LinearLayout.LayoutParams(dp(78), dp(32)));
 
-        TextView ask = new TextView(this);
-        ask.setText("   Ask anything...");
-        ask.setTextColor(
-                android.graphics.Color.rgb(130, 120, 110)
-        );
+        android.widget.EditText ask = new android.widget.EditText(this);
+        ask.setHint("Ask anything...");
+        ask.setHintTextColor(MUTED);
+        ask.setTextColor(GOLD);
         ask.setTextSize(9);
-        ask.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        ask.setSingleLine(true);
+        ask.setPadding(dp(10), 0, dp(10), 0);
+        ask.setTypeface(android.graphics.Typeface.MONOSPACE);
         ask.setBackground(makePanel(
-                android.graphics.Color.rgb(27, 24, 21),
-                android.graphics.Color.rgb(7, 7, 7)
-        ));
+                android.graphics.Color.rgb(27, 20, 14),
+                android.graphics.Color.rgb(7, 7, 7)));
 
         android.widget.LinearLayout.LayoutParams askLp =
-                new android.widget.LinearLayout.LayoutParams(
-                        0, dp(31), 1f
-                );
+                new android.widget.LinearLayout.LayoutParams(0, dp(32), 1f);
         askLp.setMargins(dp(4), 0, 0, 0);
         command.addView(ask, askLp);
 
-        center.addView(
-                command,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(35))
-        );
+        Button send = new Button(this);
+        send.setText("➤");
+        styleHudButton(send);
+        send.setTextSize(9);
 
-        // RIGHT STATUS DECK
+        android.widget.LinearLayout.LayoutParams sendLp =
+                new android.widget.LinearLayout.LayoutParams(dp(45), dp(32));
+        sendLp.setMargins(dp(4), 0, 0, 0);
+        command.addView(send, sendLp);
+
+        send.setOnClickListener(v -> {
+            String q = ask.getText().toString().trim();
+            if (!q.isEmpty()) {
+                status.setText("● ULTRON THINKING...");
+                askAI(q);
+                ask.setText("");
+            }
+        });
+
+        ask.setOnEditorActionListener((v, actionId, event) -> {
+            String q = ask.getText().toString().trim();
+            if (!q.isEmpty()) {
+                status.setText("● ULTRON THINKING...");
+                askAI(q);
+                ask.setText("");
+                return true;
+            }
+            return false;
+        });
+
+        center.addView(command,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(37)));
+
+        // ================= RIGHT STATUS =================
         android.widget.LinearLayout right =
                 new android.widget.LinearLayout(this);
         right.setOrientation(android.widget.LinearLayout.VERTICAL);
-        right.setPadding(dp(5), dp(4), dp(4), dp(4));
+        right.setPadding(dp(5), dp(5), dp(5), dp(5));
 
-        body.addView(
-                right,
-                new android.widget.LinearLayout.LayoutParams(0, -1, 24f)
-        );
+        body.addView(right,
+                new android.widget.LinearLayout.LayoutParams(0, -1, 24f));
 
-        TextView metrics = new TextView(this);
-        metrics.setText(
-                "SYSTEM MONITOR\n\n" +
-                "CPU       ▰▰▰▱  23%\n" +
-                "MEMORY    ▰▰▱▱  45%\n" +
-                "NETWORK   ▰▰▰▱  ONLINE\n" +
-                "SECURITY  ✓  ACTIVE"
+        systemData = new TextView(this);
+        systemData.setText(
+                "SYSTEM DATA\n\n" +
+                "BATTERY     --%\n" +
+                "BRIGHTNESS  --%\n" +
+                "NETWORK     --\n" +
+                "CHARGING    --\n" +
+                "TIME        --:--:--"
         );
-        metrics.setTextColor(TEXT);
-        metrics.setTextSize(7);
-        metrics.setPadding(dp(8), dp(5), dp(5), dp(5));
-        metrics.setBackground(makePanel(
-                android.graphics.Color.rgb(27, 24, 21),
-                android.graphics.Color.rgb(7, 7, 7)
-        ));
+        systemData.setTextColor(TEXT);
+        systemData.setTextSize(7);
+        systemData.setTypeface(android.graphics.Typeface.MONOSPACE);
+        systemData.setPadding(dp(8), dp(6), dp(5), dp(6));
+        systemData.setBackground(makePanel(
+                PANEL2, android.graphics.Color.rgb(7, 7, 7)));
 
-        right.addView(
-                metrics,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(78))
-        );
+        right.addView(systemData,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(92)));
 
         status = new TextView(this);
         status.setText("●  ULTRON ONLINE");
         status.setTextColor(GOLD);
-        status.setTextSize(10);
+        status.setTextSize(9);
         status.setGravity(android.view.Gravity.CENTER);
+        status.setTypeface(android.graphics.Typeface.MONOSPACE);
         status.setBackground(makePanel(
-                android.graphics.Color.rgb(28, 24, 20),
-                android.graphics.Color.rgb(7, 7, 7)
-        ));
+                android.graphics.Color.rgb(29, 21, 14),
+                android.graphics.Color.rgb(7, 7, 7)));
 
         android.widget.LinearLayout.LayoutParams statusLp =
                 new android.widget.LinearLayout.LayoutParams(-1, 0, 1f);
@@ -544,11 +593,10 @@ public class MainActivity extends Activity {
         right.addView(status, statusLp);
 
         preview = new TextureView(this);
+        preview.setBackgroundColor(android.graphics.Color.BLACK);
 
-        right.addView(
-                preview,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(82))
-        );
+        right.addView(preview,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(88)));
 
         TextView insights = new TextView(this);
         insights.setText(
@@ -560,21 +608,19 @@ public class MainActivity extends Activity {
         );
         insights.setTextColor(TEXT);
         insights.setTextSize(7);
-        insights.setPadding(dp(8), dp(5), dp(5), dp(5));
+        insights.setTypeface(android.graphics.Typeface.MONOSPACE);
+        insights.setPadding(dp(8), dp(6), dp(5), dp(5));
         insights.setBackground(makePanel(
-                android.graphics.Color.rgb(27, 24, 21),
-                android.graphics.Color.rgb(7, 7, 7)
-        ));
+                PANEL2, android.graphics.Color.rgb(7, 7, 7)));
 
-        right.addView(
-                insights,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(80))
-        );
+        right.addView(insights,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(82)));
 
-        // ACTION DECK
+        // ================= BOTTOM CONTROL BAR =================
         android.widget.LinearLayout actions =
                 new android.widget.LinearLayout(this);
         actions.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        actions.setGravity(android.view.Gravity.CENTER);
 
         Button cameraLiveButton = new Button(this);
         cameraLiveButton.setText("CAMERA");
@@ -612,31 +658,26 @@ public class MainActivity extends Activity {
         for (Button b : actionButtons) {
             styleHudButton(b);
             b.setTextSize(6);
-
             android.widget.LinearLayout.LayoutParams lp =
-                    new android.widget.LinearLayout.LayoutParams(
-                            0, dp(31), 1f
-                    );
+                    new android.widget.LinearLayout.LayoutParams(0, dp(31), 1f);
             lp.setMargins(dp(1), 0, dp(1), 0);
             actions.addView(b, lp);
         }
 
-        frame.addView(
-                actions,
-                new android.widget.LinearLayout.LayoutParams(-1, dp(35))
-        );
+        main.addView(actions,
+                new android.widget.LinearLayout.LayoutParams(-1, dp(34)));
 
-        root.addView(
-                frame,
-                new android.widget.FrameLayout.LayoutParams(-1, -1)
-        );
+        root.addView(main,
+                new android.widget.FrameLayout.LayoutParams(-1, -1));
 
         setContentView(root);
         dashboardHandler.post(dashboardUpdater);
 
+        // ================= EXISTING WORKING ACTIONS =================
         activate.setOnClickListener(v -> {
             ultronActive = true;
             ultronWaiting = false;
+
             status.setText("● ULTRON ACTIVE");
 
             try {
@@ -650,7 +691,7 @@ public class MainActivity extends Activity {
                     startService(serviceIntent);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                android.util.Log.e("ULTRON", "Service start failed", e);
             }
 
             startVoice();
@@ -683,13 +724,11 @@ public class MainActivity extends Activity {
                 return;
             }
 
-            if (checkSelfPermission(
-                    Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(
                         new String[]{Manifest.permission.CAMERA},
-                        CAMERA_REQUEST
-                );
+                        CAMERA_REQUEST);
                 status.setText("Camera permission required");
                 return;
             }
@@ -700,13 +739,11 @@ public class MainActivity extends Activity {
         });
 
         frontCameraButton.setOnClickListener(v -> {
-            if (checkSelfPermission(
-                    Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(
                         new String[]{Manifest.permission.CAMERA},
-                        CAMERA_REQUEST
-                );
+                        CAMERA_REQUEST);
                 status.setText("Camera permission required");
                 return;
             }
@@ -716,13 +753,11 @@ public class MainActivity extends Activity {
         });
 
         rearCameraButton.setOnClickListener(v -> {
-            if (checkSelfPermission(
-                    Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(
                         new String[]{Manifest.permission.CAMERA},
-                        CAMERA_REQUEST
-                );
+                        CAMERA_REQUEST);
                 status.setText("Camera permission required");
                 return;
             }
@@ -735,110 +770,21 @@ public class MainActivity extends Activity {
         youtubeButton.setOnClickListener(v -> openYouTube());
         settingsButton.setOnClickListener(v -> openSettings());
         homeButton.setOnClickListener(v -> goHome());
+
         flashlightOnButton.setOnClickListener(v -> setFlashlight(true));
         flashlightOffButton.setOnClickListener(v -> setFlashlight(false));
-    }
 
+        chatNav.setOnClickListener(v ->
+                status.setText("● CHAT MODULE READY"));
 
-    private android.graphics.drawable.GradientDrawable makePanel(int top, int bottom) {
-        android.graphics.drawable.GradientDrawable panel =
-                new android.graphics.drawable.GradientDrawable(
-                        android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                        new int[]{top, bottom}
-                );
+        createNav.setOnClickListener(v ->
+                status.setText("● CREATE MODULE READY"));
 
-        panel.setCornerRadius(dp(5));
-        panel.setStroke(
-                dp(1),
-                android.graphics.Color.argb(175, 218, 122, 38)
-        );
+        analyseNav.setOnClickListener(v ->
+                status.setText("● ANALYSE MODULE READY"));
 
-        return panel;
-    }
-
-    private void updateDashboardData() {
-        try {
-            Intent batteryStatus = registerReceiver(
-                    null,
-                    new android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            );
-
-            int battery = -1;
-            if (batteryStatus != null) {
-                battery = batteryStatus.getIntExtra(
-                        android.os.BatteryManager.EXTRA_LEVEL, -1
-                );
-            }
-
-            int brightness = -1;
-            try {
-                brightness = android.provider.Settings.System.getInt(
-                        getContentResolver(),
-                        android.provider.Settings.System.SCREEN_BRIGHTNESS
-                );
-            } catch (Exception ignored) {
-            }
-
-            int brightnessPercent = brightness >= 0
-                    ? Math.round((brightness / 255f) * 100f)
-                    : -1;
-
-            String charging = "NOT CHARGING";
-            if (batteryStatus != null) {
-                int chargeStatus = batteryStatus.getIntExtra(
-                        android.os.BatteryManager.EXTRA_STATUS, -1
-                );
-
-                if (chargeStatus ==
-                        android.os.BatteryManager.BATTERY_STATUS_CHARGING) {
-                    charging = "CHARGING";
-                } else if (chargeStatus ==
-                        android.os.BatteryManager.BATTERY_STATUS_FULL) {
-                    charging = "FULL";
-                }
-            }
-
-            String network = "OFFLINE";
-            try {
-                android.net.ConnectivityManager cm =
-                        (android.net.ConnectivityManager)
-                                getSystemService(CONNECTIVITY_SERVICE);
-
-                if (cm != null) {
-                    android.net.Network networkObj =
-                            cm.getActiveNetwork();
-
-                    android.net.NetworkCapabilities caps =
-                            cm.getNetworkCapabilities(networkObj);
-
-                    if (caps != null &&
-                            caps.hasCapability(
-                                    android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                        network = "ONLINE";
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-
-            String time = new java.text.SimpleDateFormat(
-                    "HH:mm:ss",
-                    java.util.Locale.getDefault()
-            ).format(new java.util.Date());
-
-            if (systemData != null) {
-                systemData.setText(
-                        "SYSTEM DATA\n" +
-                        "Battery: " + (battery >= 0 ? battery + "%" : "--%") +
-                        "     Brightness: " +
-                        (brightnessPercent >= 0 ? brightnessPercent + "%" : "--%") +
-                        "\nNetwork: " + network +
-                        "     Charging: " + charging +
-                        "\nTime: " + time
-                );
-            }
-        } catch (Exception e) {
-            android.util.Log.e("ULTRON", "Dashboard update failed", e);
-        }
+        helpNav.setOnClickListener(v ->
+                status.setText("● HELP MODULE READY"));
     }
 
     private void createVoiceManager() {
