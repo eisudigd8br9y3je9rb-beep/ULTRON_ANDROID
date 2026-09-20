@@ -226,8 +226,8 @@ private WebView ultronWebView;
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
-        settings.setUseWideViewPort(false);
-        settings.setLoadWithOverviewMode(false);
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
 
         UltronWebBridge bridge = new UltronWebBridge(
                 this,
