@@ -91,7 +91,7 @@ public class UltronWebBridge {
             String line = new java.io.BufferedReader(
                     new java.io.FileReader("/proc/stat")).readLine();
             if (line == null || !line.startsWith("cpu")) return "--%";
-            String[] p = line.trim().split("\s+");
+            String[] p = line.trim().split("\\s+");
             long user=Long.parseLong(p[1]), nice=Long.parseLong(p[2]), sys=Long.parseLong(p[3]);
             long idle=Long.parseLong(p[4]), iowait=p.length>5?Long.parseLong(p[5]):0;
             long total=user+nice+sys+idle+iowait;
