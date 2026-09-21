@@ -1,5 +1,6 @@
 package com.ultron.assistant.web;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -23,6 +24,8 @@ public class UltronWebBridge {
 
     private final Context context;
     private final CommandListener listener;
+    private static long prevIdle = -1;
+    private static long prevTotal = -1;
 
     public UltronWebBridge(Context context, CommandListener listener) {
         this.context = context.getApplicationContext();
@@ -68,34 +71,49 @@ public class UltronWebBridge {
         try {
             ConnectivityManager cm =
                     (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
             if (cm == null) return "OFFLINE";
-
             Network network = cm.getActiveNetwork();
             if (network == null) return "OFFLINE";
-
             NetworkCapabilities caps = cm.getNetworkCapabilities(network);
             if (caps == null) return "OFFLINE";
-
-            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                return "Wi-Fi";
-            }
-
-            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) {
-                    return "Mobile";
-                }
-                return "Mobile";
-            }
-
-            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                return "Ethernet";
-            }
-
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) return "Wi-Fi";
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) return "Ethernet";
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) return "4G";
             return "ONLINE";
         } catch (Exception e) {
             return "UNKNOWN";
         }
+    }
+
+    @JavascriptInterface
+    public synchronized String getCpu() {
+        try {
+            String line = new java.io.BufferedReader(
+                    new java.io.FileReader("/proc/stat")).readLine();
+            if (line == null || !line.startsWith("cpu")) return "--%";
+            String[] p = line.trim().split("\s+");
+            long user=Long.parseLong(p[1]), nice=Long.parseLong(p[2]), sys=Long.parseLong(p[3]);
+            long idle=Long.parseLong(p[4]), iowait=p.length>5?Long.parseLong(p[5]):0;
+            long total=user+nice+sys+idle+iowait;
+            if (prevTotal < 0) { prevTotal=total; prevIdle=idle+iowait; return "--%"; }
+            long dt=total-prevTotal, di=(idle+iowait)-prevIdle;
+            prevTotal=total; prevIdle=idle+iowait;
+            if (dt<=0) return "0%";
+            int usage=(int)Math.round((1.0-(double)di/dt)*100.0);
+            return Math.max(0,Math.min(100,usage))+"%";
+        } catch(Exception e) { return "--%"; }
+    }
+
+    @JavascriptInterface
+    public String getMemory() {
+        try {
+            ActivityManager am=(ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+            if(am==null) return "--%";
+            ActivityManager.MemoryInfo mi=new ActivityManager.MemoryInfo();
+            am.getMemoryInfo(mi);
+            long used=mi.totalMem-mi.availMem;
+            return Math.max(0,Math.min(100,Math.round((used*100f)/mi.totalMem)))+"%";
+        } catch(Exception e) { return "--%"; }
     }
 
     @JavascriptInterface

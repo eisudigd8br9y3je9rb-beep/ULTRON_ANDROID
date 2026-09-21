@@ -905,17 +905,20 @@ private WebView ultronWebView;
         if (ultronWebView == null) return;
 
         UltronWebBridge bridge = new UltronWebBridge(this, null);
-
         String battery = bridge.getBattery();
         String brightness = bridge.getBrightness();
         String network = bridge.getNetwork();
         String time = bridge.getTime();
+        String cpu = bridge.getCpu();
+        String memory = bridge.getMemory();
 
         String js = "javascript:setSystemData("
                 + JSONObjectQuote(battery) + ","
                 + JSONObjectQuote(brightness) + ","
                 + JSONObjectQuote(network) + ","
-                + JSONObjectQuote(time) + ")";
+                + JSONObjectQuote(time) + ","
+                + JSONObjectQuote(cpu) + ","
+                + JSONObjectQuote(memory) + ")";
 
         ultronWebView.evaluateJavascript(js, null);
     }
