@@ -1,14 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
+    <!-- =========================
+         BASIC APP PERMISSIONS
+         ========================= -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!-- Android 12+ Bluetooth permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
+    <!-- =========================
+         PHONE / COMMUNICATION
+         ========================= -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
+    <!-- =========================
+         NOTIFICATIONS
+         ========================= -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- =========================
+         STORAGE
+         ========================= -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- =========================
+         LOCATION
+         ========================= -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- =========================
+         FOREGROUND SERVICE
+         ========================= -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
+    <!-- =========================
+         PACKAGE VISIBILITY (Android 11+)
+         — YE PURANA WALA HAI, DELETE NAHI KARNA
+         ========================= -->
     <queries>
         <package android:name="com.whatsapp.w4b" />
         <package android:name="com.google.android.youtube" />
@@ -25,36 +71,48 @@
         </intent>
     </queries>
 
+    <!-- =========================
+         CAMERA FEATURES
+         — YE BHI PURANE HAIN
+         ========================= -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-
     <uses-feature
         android:name="android.hardware.camera.front"
         android:required="false" />
 
+    <!-- =========================
+         APPLICATION
+         ========================= -->
     <application
         android:allowBackup="true"
         android:label="ULTRON"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.NoActionBar">
 
+        <!-- Existing ULTRON Activity -->
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@android:style/Theme.Material.NoActionBar">
-
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
+        <!-- =========================
+             EXISTING BACKGROUND SERVICE
+             — YE BILKUL MAT HATANA
+             ========================= -->
         <service
             android:name=".service.UltronBackgroundService"
             android:exported="false"
             android:stopWithTask="false" />
 
+        <!-- =========================
+             ULTRON ACCESSIBILITY ENGINE
+             ========================= -->
         <service
             android:name=".accessibility.UltronAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
@@ -70,3 +128,4 @@
     </application>
 
 </manifest>
+
