@@ -293,7 +293,6 @@ private void stopHudAutoRefresh() {
         hudHandler.removeCallbacks(hudUpdater);
     }
 }
-    };
 
 
     private void styleHudButton(Button button) {
