@@ -9,8 +9,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 #viewport{position:fixed;inset:0;overflow:hidden;background:#02070b;touch-action:none}
 #stage{position:absolute;left:0;top:0;width:1536px;height:1024px;transform-origin:0 0;overflow:hidden}
 #reference{position:absolute;inset:0;width:1536px;height:1024px;display:block;pointer-events:none;user-select:none;-webkit-user-drag:none}
-
-/* Small opaque masks hide ONLY the old demo values in the reference image. */
 .mask{position:absolute;background:rgba(3,9,14,.94);pointer-events:none;border-radius:3px}
 .topMask{top:82px;height:55px}
 #tm1{left:1170px;width:70px}#tm2{left:1260px;width:72px}#tm3{left:1350px;width:62px}#tm4{left:1410px;width:94px}
@@ -26,21 +24,28 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 #weatherMask{left:320px;top:600px;width:105px;height:112px}
 #scheduleMask{left:105px;top:725px;width:300px;height:88px}
 #insightMask{left:1180px;top:615px;width:285px;height:195px}
-
 .live{position:absolute;color:#eee;text-shadow:0 0 5px #000;white-space:nowrap;font-family:Arial,sans-serif;font-weight:bold;pointer-events:none}
 .topVal{text-align:center;font-size:15px}
-#topBattery{left:1170px;top:99px;width:70px}#topBrightness{left:1258px;top:99px;width:76px}#topNetwork{left:1350px;top:99px;width:62px}#topTime{left:1410px;top:99px;width:94px}
+#topBattery{left:1170px;top:99px;width:70px}
+#topBrightness{left:1258px;top:99px;width:76px}
+#topNetwork{left:1350px;top:99px;width:62px}
+#topTime{left:1410px;top:99px;width:94px}
 #onlineStatus{left:1335px;top:258px;width:140px;text-align:center;color:#00ed88;font-size:20px}
 #readyText{left:1318px;top:300px;width:175px;text-align:center;color:#4cc8ee;font-size:14px}
 #meter{left:1252px;top:469px;width:78px;text-align:center;font-size:23px}
 .sys{font-size:13px;text-align:right}
-#battery{left:1447px;top:426px;width:57px}#brightness{left:1447px;top:467px;width:57px}#network{left:1447px;top:508px;width:57px}#time{left:1435px;top:548px;width:70px}
-#cpu{left:366px;top:861px;width:62px;font-size:12px;text-align:right}#memory{left:366px;top:889px;width:62px;font-size:12px;text-align:right}#bottomNetwork{left:366px;top:917px;width:62px;font-size:12px;text-align:right}
-#weatherTemp{left:326px;top:614px;width:92px;font-size:18px}#weatherDesc{left:326px;top:640px;width:105px;font-size:12px;font-weight:normal}#humidity{left:326px;top:676px;width:92px;font-size:18px}
+#battery{left:1447px;top:426px;width:57px}
+#brightness{left:1447px;top:467px;width:57px}
+#network{left:1447px;top:508px;width:57px}
+#time{left:1435px;top:548px;width:70px}
+#cpu{left:366px;top:861px;width:62px;font-size:12px;text-align:right}
+#memory{left:366px;top:889px;width:62px;font-size:12px;text-align:right}
+#bottomNetwork{left:366px;top:917px;width:62px;font-size:12px;text-align:right}
+#weatherTemp{left:326px;top:614px;width:92px;font-size:18px}
+#weatherDesc{left:326px;top:640px;width:105px;font-size:12px;font-weight:normal}
+#humidity{left:326px;top:676px;width:92px;font-size:18px}
 #schedule{left:105px;top:735px;width:300px;font-size:12px;line-height:24px;font-weight:normal}
 #insights{left:1185px;top:625px;width:270px;font-size:12px;line-height:25px;font-weight:normal}
-
-/* Animated central core overlay: transparent rings over the original core. */
 #coreAnim{position:absolute;left:515px;top:290px;width:505px;height:505px;border-radius:50%;pointer-events:none}
 .ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);box-sizing:border-box}
 .r1{width:100%;height:100%;border:2px solid transparent;border-top-color:rgba(255,125,20,.95);border-right-color:rgba(255,80,10,.75);filter:drop-shadow(0 0 7px rgba(255,110,20,.75));animation:s1 2.4s linear infinite}
@@ -51,14 +56,29 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 @keyframes s2{to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes s3{to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes s4{to{transform:translate(-50%,-50%) rotate(360deg)}}
-
 #controls{position:absolute;inset:0;pointer-events:none}
-.hot{position:absolute;background:transparent;border:0;pointer-events:auto;padding:0;margin:0;-webkit-tap-highlight-color:transparent}
-#home{left:45px;top:65px;width:225px;height:90px}#voice{left:685px;top:128px;width:125px;height:125px}
-#settings{left:45px;top:390px;width:225px;height:80px}#camera{left:420px;top:900px;width:110px;height:70px}#files{left:730px;top:900px;width:110px;height:70px}
+.hot{position:absolute;background:transparent;border:0;pointer-events:auto;padding:0;margin:0;-webkit-tap-highlight-color:transparent;cursor:pointer}
+#btnHome{left:45px;top:65px;width:225px;height:90px}
+#btnChat{left:45px;top:175px;width:225px;height:60px}
+#btnCreate{left:45px;top:245px;width:225px;height:60px}
+#btnAnalyse{left:45px;top:315px;width:225px;height:60px}
+#btnSettings{left:45px;top:390px;width:225px;height:80px}
+#btnHelp{left:45px;top:490px;width:225px;height:70px}
+#btnVoice{left:685px;top:128px;width:125px;height:125px}
+#btnGenerate{left:685px;top:275px;width:125px;height:125px}
+#btnLiveCamera{left:685px;top:425px;width:125px;height:125px}
+#btnResearch{left:565px;top:565px;width:130px;height:70px}
+#btnCenterChat{left:565px;top:655px;width:130px;height:70px}
+#btnIdeate{left:705px;top:710px;width:130px;height:70px}
+#btnAnalyseArc{left:945px;top:565px;width:130px;height:70px}
+#btnArc1{left:945px;top:655px;width:130px;height:70px}
+#btnArc2{left:800px;top:710px;width:130px;height:70px}
+#btnTranslate{left:1080px;top:245px;width:135px;height:75px}
+#btnCode{left:1080px;top:355px;width:135px;height:75px}
+#btnAnalyseFile{left:1080px;top:465px;width:135px;height:75px}
+#btnClose{left:1230px;top:905px;width:125px;height:70px}
+#btnPower{left:1390px;top:905px;width:105px;height:70px}
 #prompt{position:absolute;left:620px;top:835px;width:390px;height:54px;background:transparent;border:0;outline:0;color:#fff;font-size:16px;pointer-events:auto;opacity:.01}
-
-/* Real mobile fitting: entire reference composition scales as one unit. */
 #zoomInfo{position:fixed;left:6px;bottom:6px;color:rgba(255,255,255,.35);font:10px Arial;z-index:99;pointer-events:none}
 </style>
 </head>
@@ -66,51 +86,93 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 <div id="viewport">
 <div id="stage">
 <img id="reference" src="ultron_reference.png" draggable="false">
-
 <div class="mask topMask" id="tm1"></div><div class="mask topMask" id="tm2"></div><div class="mask topMask" id="tm3"></div><div class="mask topMask" id="tm4"></div>
 <div class="mask" id="onlineMask"></div><div class="mask" id="meterMask"></div>
 <div class="mask" id="sysVal1"></div><div class="mask" id="sysVal2"></div><div class="mask" id="sysVal3"></div><div class="mask" id="sysVal4"></div>
 <div class="mask" id="bottomVal1"></div><div class="mask" id="bottomVal2"></div><div class="mask" id="bottomVal3"></div>
 <div class="mask" id="weatherMask"></div><div class="mask" id="scheduleMask"></div><div class="mask" id="insightMask"></div>
-
-<div id="topBattery" class="live topVal">--%</div><div id="topBrightness" class="live topVal">--%</div><div id="topNetwork" class="live topVal">--</div><div id="topTime" class="live topVal">--</div>
-<div id="onlineStatus" class="live">ONLINE</div><div id="readyText" class="live">Ready, Imtiyaz.</div>
-<div id="meter" class="live">--%</div><div id="battery" class="live sys">--%</div><div id="brightness" class="live sys">--%</div><div id="network" class="live sys">--</div><div id="time" class="live sys">--</div>
-<div id="cpu" class="live">--%</div><div id="memory" class="live">--%</div><div id="bottomNetwork" class="live">--</div>
-<div id="weatherTemp" class="live">--°C</div><div id="weatherDesc" class="live">Weather unavailable</div><div id="humidity" class="live">--%</div>
+<div id="topBattery" class="live topVal">--%</div>
+<div id="topBrightness" class="live topVal">--%</div>
+<div id="topNetwork" class="live topVal">--</div>
+<div id="topTime" class="live topVal">--</div>
+<div id="onlineStatus" class="live">ONLINE</div>
+<div id="readyText" class="live">Ready, Imtiyaz.</div>
+<div id="meter" class="live">--%</div>
+<div id="battery" class="live sys">--%</div>
+<div id="brightness" class="live sys">--%</div>
+<div id="network" class="live sys">--</div>
+<div id="time" class="live sys">--</div>
+<div id="cpu" class="live">--%</div>
+<div id="memory" class="live">--%</div>
+<div id="bottomNetwork" class="live">--</div>
+<div id="weatherTemp" class="live">--°C</div>
+<div id="weatherDesc" class="live">Weather unavailable</div>
+<div id="humidity" class="live">--%</div>
 <div id="schedule" class="live">No live calendar data<br>available</div>
 <div id="insights" class="live">ULTRON activity monitor<br>Waiting for live activity...</div>
-
 <div id="coreAnim"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="ring r4"></div></div>
-
 <div id="controls">
-<button id="home" class="hot" onclick="cmd('home')"></button><button id="voice" class="hot" onclick="cmd('voice')"></button><button id="settings" class="hot" onclick="cmd('settings')"></button><button id="camera" class="hot" onclick="cmd('camera')"></button><button id="files" class="hot" onclick="cmd('file')"></button>
+<button id="btnHome" class="hot" onclick="cmd('go home')"></button>
+<button id="btnChat" class="hot" onclick="focusPrompt()"></button>
+<button id="btnCreate" class="hot" onclick="cmd('open play store')"></button>
+<button id="btnAnalyse" class="hot" onclick="cmd('analyse')"></button>
+<button id="btnSettings" class="hot" onclick="cmd('settings')"></button>
+<button id="btnHelp" class="hot" onclick="cmd('what can you do')"></button>
+<button id="btnVoice" class="hot" onclick="cmd('voice')"></button>
+<button id="btnGenerate" class="hot" onclick="cmd('youtube')"></button>
+<button id="btnLiveCamera" class="hot" onclick="cmd('camera')"></button>
+<button id="btnResearch" class="hot" onclick="cmd('google')"></button>
+<button id="btnCenterChat" class="hot" onclick="focusPrompt()"></button>
+<button id="btnIdeate" class="hot" onclick="cmd('music')"></button>
+<button id="btnAnalyseArc" class="hot" onclick="cmd('analyse')"></button>
+<button id="btnArc1" class="hot" onclick="cmd('instagram')"></button>
+<button id="btnArc2" class="hot" onclick="cmd('whatsapp')"></button>
+<button id="btnTranslate" class="hot" onclick="cmd('google translate')"></button>
+<button id="btnCode" class="hot" onclick="cmd('open play store')"></button>
+<button id="btnAnalyseFile" class="hot" onclick="cmd('analyse file')"></button>
+<button id="btnClose" class="hot" onclick="cmd('close')"></button>
+<button id="btnPower" class="hot" onclick="cmd('ultron off')"></button>
 <input id="prompt" aria-label="ULTRON command" onkeydown="if(event.key==='Enter')send()">
 </div>
-</div></div>
+</div>
+</div>
 <div id="zoomInfo">FIT</div>
 <script>
 let userScale=1;
 function fit(){
- const s=Math.min(innerWidth/1536,innerHeight/1024)*userScale;
- const stage=document.getElementById('stage');
- stage.style.transform='scale('+s+')';
- stage.style.left=((innerWidth-1536*s)/2)+'px';
- stage.style.top=((innerHeight-1024*s)/2)+'px';
- document.getElementById('zoomInfo').textContent='ZOOM '+Math.round(s*100)+'%';
+  const s=Math.min(innerWidth/1536,innerHeight/1024)*userScale;
+  const stage=document.getElementById('stage');
+  stage.style.transform='scale('+s+')';
+  stage.style.left=((innerWidth-1536*s)/2)+'px';
+  stage.style.top=((innerHeight-1024*s)/2)+'px';
+  document.getElementById('zoomInfo').textContent='ZOOM '+Math.round(s*100)+'%';
 }
 addEventListener('resize',fit);fit();
 let pinchStart=0, pinchBase=1;
 document.getElementById('viewport').addEventListener('touchstart',e=>{if(e.touches.length===2){pinchStart=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchBase=userScale;}},{passive:true});
 document.getElementById('viewport').addEventListener('touchmove',e=>{if(e.touches.length===2&&pinchStart){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);userScale=Math.max(.6,Math.min(2.5,pinchBase*d/pinchStart));fit();}},{passive:true});
 document.getElementById('viewport').addEventListener('touchend',e=>{if(e.touches.length<2)pinchStart=0;},{passive:true});
-function cmd(x){if(window.Android&&Android.command)Android.command(x)}
-function send(){const q=document.getElementById('prompt').value.trim();if(!q)return;if(window.Android&&Android.ask)Android.ask(q);document.getElementById('prompt').value=''}
+function cmd(x){if(window.Android&&Android.command)Android.command(x);}
+function focusPrompt(){const p=document.getElementById('prompt');if(p){p.style.opacity='0.02';p.focus();}}
+function send(){const q=document.getElementById('prompt').value.trim();if(!q)return;if(window.Android&&Android.ask)Android.ask(q);document.getElementById('prompt').value='';}
 function setSystemData(b,br,n,t,c,m){
- document.getElementById('topBattery').textContent=b||'--%';document.getElementById('topBrightness').textContent=br||'--%';document.getElementById('topNetwork').textContent=n||'--';document.getElementById('topTime').textContent=t||'--';
- document.getElementById('meter').textContent=b||'--%';document.getElementById('battery').textContent=b||'--%';document.getElementById('brightness').textContent=br||'--%';document.getElementById('network').textContent=n||'--';document.getElementById('time').textContent=t||'--';
- document.getElementById('cpu').textContent=c||'--%';document.getElementById('memory').textContent=m||'--%';document.getElementById('bottomNetwork').textContent=n||'--';
+  document.getElementById('topBattery').textContent=b||'--%';
+  document.getElementById('topBrightness').textContent=br||'--%';
+  document.getElementById('topNetwork').textContent=n||'--';
+  document.getElementById('topTime').textContent=t||'--';
+  document.getElementById('meter').textContent=b||'--%';
+  document.getElementById('battery').textContent=b||'--%';
+  document.getElementById('brightness').textContent=br||'--%';
+  document.getElementById('network').textContent=n||'--';
+  document.getElementById('time').textContent=t||'--';
+  document.getElementById('cpu').textContent=c||'--%';
+  document.getElementById('memory').textContent=m||'--%';
+  document.getElementById('bottomNetwork').textContent=n||'--';
 }
-function setUltronStatus(status,ready){document.getElementById('onlineStatus').textContent=status||'ONLINE';document.getElementById('readyText').textContent=ready||'Ready, Imtiyaz.';}
+function setUltronStatus(status,ready){
+  document.getElementById('onlineStatus').textContent=status||'ONLINE';
+  document.getElementById('readyText').textContent=ready||'Ready, Imtiyaz.';
+}
 </script>
-</body></html>
+</body>
+</html>

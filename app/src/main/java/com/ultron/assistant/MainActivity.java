@@ -183,14 +183,14 @@ private WebView ultronWebView;
             initVisionManager();
             aiClient = new AIClient(this);
 
-            initUltronWebView();
-            createUserInterface();
 
             if (status != null) {
                 status.setText("●  ULTRON READY");
-            }
 
+            }
+            startHudAutoRefresh();
             createVoiceManager();
+
             voiceSpeaker = new VoiceSpeaker(this);
             requestRequiredPermissions();
 
@@ -265,6 +265,34 @@ private WebView ultronWebView;
             updateWebSystemData();
             dashboardHandler.postDelayed(this, 3000);
         }
+    };
+    private android.os.Handler hudHandler;
+private Runnable hudUpdater;
+
+private void startHudAutoRefresh() {
+    if (hudHandler == null) {
+        hudHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    }
+    if (hudUpdater == null) {
+        hudUpdater = new Runnable() {
+            @Override
+            public void run() {
+                updateWebSystemData();
+                if (hudHandler != null) {
+                    hudHandler.postDelayed(this, 2000);
+                }
+            }
+        };
+    }
+    hudHandler.removeCallbacks(hudUpdater);
+    hudHandler.post(hudUpdater);
+}
+
+private void stopHudAutoRefresh() {
+    if (hudHandler != null && hudUpdater != null) {
+        hudHandler.removeCallbacks(hudUpdater);
+    }
+}
     };
 
 
@@ -2907,6 +2935,7 @@ private WebView ultronWebView;
 
     @Override
     protected void onDestroy() {
+        stopHudAutoRefresh();
         dashboardHandler.removeCallbacks(dashboardUpdater);
 
 
@@ -3369,3 +3398,6 @@ private WebView ultronWebView;
     }
 
 }
+
+
+
