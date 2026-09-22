@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0,
+      minimum-scale=0.25,maximum-scale=4.0,user-scalable=yes">
+
+<style>
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:auto;
+    background:#000;
+}
+
+#stage{
+    position:relative;
+    width:1536px;
+    height:1025px;
+    flex:none;
+    transform-origin:0 0;
+}
+
+#reference{
+    position:absolute;
+    left:0;
+    top:0;
+    width:1536px;
+    height:1025px;
+    display:block;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none;
+}
+
+#controls{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+
+#systemData{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    font-family:Arial,sans-serif;
+    font-weight:bold;
+    color:#f4a340;
+    text-shadow:0 0 8px rgba(255,120,20,.75);
+}
+
+#systemData > div{
+    position:absolute;
+    min-width:70px;
+    text-align:center;
+    font-size:18px;
+}
+
+#batteryValue{
+    left:1105px;
+    top:70px;
+    width:115px;
+}
+
+#brightnessValue{
+    left:1195px;
+    top:70px;
+    width:115px;
+}
+
+#networkValue{
+    left:1282px;
+    top:70px;
+    width:115px;
+}
+
+#timeValue{
+    left:1352px;
+    top:70px;
+    width:145px;
+}
+
+#dateValue{
+    left:1340px;
+    top:118px;
+    width:160px;
+    font-size:13px;
+}
+
+.hotspot{
+    position:absolute;
+    border:0;
+    padding:0;
+    margin:0;
+    background:transparent;
+    pointer-events:auto;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+}
+
+.hotspot:active{
+    background:rgba(255,120,20,.10);
+}
+
+#home{
+    left:45px;
+    top:170px;
+    width:170px;
+    height:70px;
+}
+
+#voice{
+    left:650px;
+    top:115px;
+    width:120px;
+    height:120px;
+}
+
+#camera{
+    left:500px;
+    top:850px;
+    width:100px;
+    height:70px;
+}
+
+#files{
+    left:850px;
+    top:850px;
+    width:100px;
+    height:70px;
+}
+
+#settings{
+    right:45px;
+    bottom:95px;
+    width:120px;
+    height:70px;
+}
+
+#prompt{
+    position:absolute;
+    left:455px;
+    bottom:115px;
+    width:620px;
+    height:52px;
+    opacity:0;
+    pointer-events:auto;
+}
+
+#zoomInfo{
+    position:fixed;
+    left:8px;
+    bottom:8px;
+    z-index:20;
+    padding:5px 9px;
+    border-radius:6px;
+    background:rgba(0,0,0,.65);
+    color:#aaa;
+    font:11px Arial;
+    pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="stage">
+
+    <img id="reference"
+         src="ultron_reference.png"
+         draggable="false">
+
+    <div id="systemData">
+        <div id="batteryValue">--</div>
+        <div id="brightnessValue">--</div>
+        <div id="networkValue">--</div>
+        <div id="timeValue">--</div>
+        <div id="dateValue">--</div>
+    </div>
+
+    <div id="controls">
+
+        <button id="home"
+                class="hotspot"
+                onclick="command('home')"></button>
+
+        <button id="voice"
+                class="hotspot"
+                onclick="command('voice')"></button>
+
+        <button id="camera"
+                class="hotspot"
+                onclick="command('camera')"></button>
+
+        <button id="files"
+                class="hotspot"
+                onclick="command('file')"></button>
+
+        <button id="settings"
+                class="hotspot"
+                onclick="command('settings')"></button>
+
+        <input id="prompt"
+               aria-label="ULTRON command"
+               onkeydown="if(event.key==='Enter')sendCommand()">
+
+    </div>
+</div>
+
+<div id="zoomInfo">ZOOM 100%</div>
+
+<script>
+
+function setSystemData(battery, brightness, network, time){
+    document.getElementById("batteryValue").textContent =
+        battery || "--";
+
+    document.getElementById("brightnessValue").textContent =
+        brightness || "--";
+
+    document.getElementById("networkValue").textContent =
+        network || "--";
+
+    document.getElementById("timeValue").textContent =
+        time || "--";
+
+    const now = new Date();
+
+    document.getElementById("dateValue").textContent =
+        now.toLocaleDateString("en-IN", {
+            day:"2-digit",
+            month:"2-digit",
+            year:"numeric"
+        });
+}
+
+function command(value){
+    if(window.Android && Android.command){
+        Android.command(value);
+    }
+}
+
+function sendCommand(){
+    const input=document.getElementById("prompt");
+    const value=input.value.trim();
+
+    if(!value) return;
+
+    if(window.Android && Android.ask){
+        Android.ask(value);
+    }
+
+    input.value="";
+}
+
+function updateZoom(){
+    const stage=document.getElementById("stage");
+    const width=stage.getBoundingClientRect().width;
+    const zoom=(width/1536)*100;
+
+    document.getElementById("zoomInfo").textContent=
+        "ZOOM "+Math.round(zoom)+"%";
+}
+
+window.addEventListener("resize",updateZoom);
+updateZoom();
+
+</script>
+
+</body>
+</html>
