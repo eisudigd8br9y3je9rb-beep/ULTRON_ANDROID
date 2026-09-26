@@ -188,7 +188,7 @@ private WebView ultronWebView;
                 status.setText("●  ULTRON READY");
 
             }
-            startHudAutoRefresh();
+// startHudAutoRefresh();
             createVoiceManager();
 
             voiceSpeaker = new VoiceSpeaker(this);
