@@ -182,13 +182,15 @@ private WebView ultronWebView;
             ownerProfile = new OwnerProfile(this);
             initVisionManager();
             aiClient = new AIClient(this);
+            initUltronWebView();
+            createUserInterface();
 
 
             if (status != null) {
                 status.setText("●  ULTRON READY");
 
             }
-// startHudAutoRefresh();
+            startHudAutoRefresh();
             createVoiceManager();
 
             voiceSpeaker = new VoiceSpeaker(this);
