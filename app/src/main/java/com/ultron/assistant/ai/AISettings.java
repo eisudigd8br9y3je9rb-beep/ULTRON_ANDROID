@@ -1,3 +1,4 @@
+
 package com.ultron.assistant.ai;
 
 import android.content.Context;
@@ -47,8 +48,7 @@ public final class AISettings {
     public static String getApiKey(Context context) {
         if (context == null) return "";
 
-        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .getString(KEY_API_KEY, "");
+        return com.ultron.assistant.BuildConfig.GEMINI_API_KEY;
     }
 
     public static boolean isConfigured(Context context) {
@@ -64,3 +64,4 @@ public final class AISettings {
                 .apply();
     }
 }
+

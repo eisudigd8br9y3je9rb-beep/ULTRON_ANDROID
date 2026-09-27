@@ -25,6 +25,12 @@ jobs:
         with:
           gradle-version: "8.10.2"
 
+      - name: Create local.properties with API key
+        run: |
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > local.properties
+          echo "sdk.dir=$ANDROID_HOME" >> local.properties
+          echo "local.properties created"
+
       - name: Check Android SDK
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
