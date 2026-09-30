@@ -44,6 +44,9 @@ public class UniversalAppOpener {
         HINDI_ALIASES.put("कैलेंडर", "calendar");
         HINDI_ALIASES.put("क्लॉक", "clock");
         HINDI_ALIASES.put("टेलीग्राम", "telegram");
+        HINDI_ALIASES.put("इक्वल एआई", "equal ai");
+        HINDI_ALIASES.put("इक्वल", "equal ai");
+        HINDI_ALIASES.put("कॉल असिस्टेंट", "equal ai");
         HINDI_ALIASES.put("स्नैपचैट", "snapchat");
         HINDI_ALIASES.put("लिंक्डइन", "linkedin");
     }
@@ -120,6 +123,10 @@ public class UniversalAppOpener {
         // 3. Common apps ke explicit package names
         Map<String, String> commonApps = new HashMap<>();
         commonApps.put("whatsapp", "com.whatsapp");
+        commonApps.put("equal ai", "in.equal.ai.assistant");
+        commonApps.put("equal", "in.equal.ai.assistant");
+        commonApps.put("call assistant", "in.equal.ai.assistant");
+        commonApps.put("equal identity", "in.equal.ai.assistant");
         commonApps.put("whatsapp business", "com.whatsapp.w4b");
         commonApps.put("wa business", "com.whatsapp.w4b");
         commonApps.put("youtube", "com.google.android.youtube");
