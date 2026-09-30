@@ -24,6 +24,7 @@ import android.webkit.WebView;
 
 import com.ultron.assistant.actions.AppLauncher;
 import com.ultron.assistant.actions.PhoneActions;
+import com.ultron.assistant.actions.UniversalAppOpener;
 import com.ultron.assistant.communication.CommunicationManager;
 import com.ultron.assistant.core.CommandManager;
 import com.ultron.assistant.core.TechnicianKnowledge;
@@ -123,6 +124,7 @@ public class MainActivity extends Activity {
     private boolean continuousListening = true;
     private String lastUserCommand = "";
     private AppLauncher appLauncher;
+    private UniversalAppOpener universalAppOpener;
     private PhoneActions phoneActions;
     private CommunicationManager communicationManager;
     private OwnerProfile ownerProfile;
@@ -177,6 +179,7 @@ private WebView ultronWebView;
             memoryManager = new MemoryManager(this);
             contactManager = new ContactManager(this);
             appLauncher = new AppLauncher(this);
+            universalAppOpener = new UniversalAppOpener(this);
             phoneActions = new PhoneActions(this);
             communicationManager = new CommunicationManager(this);
             ownerProfile = new OwnerProfile(this);
@@ -1881,6 +1884,12 @@ private void stopHudAutoRefresh() {
                 respond("WhatsApp is not installed.");
             }
 
+            return;
+        }
+
+        // Universal app opener fallback
+        if (universalAppOpener != null && universalAppOpener.openAppByName(command)) {
+            respond("Opening app...");
             return;
         }
 
