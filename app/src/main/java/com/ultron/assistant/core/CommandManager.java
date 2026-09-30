@@ -239,6 +239,10 @@ public class CommandManager {
         if (text.contains("volume up")
                 || text.contains("increase volume")
                 || text.contains("आवाज़ बढ़ाओ")
+                || text.contains("volume badhao")
+                || text.contains("volume badao")
+                || text.contains("awaaz badhao")
+                || text.contains("awaaz badao")
                 || text.contains("वॉल्यूम बढ़ाओ")) {
 
             return CommandType.VOLUME_UP;
@@ -248,7 +252,11 @@ public class CommandManager {
         if (text.contains("volume down")
                 || text.contains("decrease volume")
                 || text.contains("आवाज़ कम करो")
-                || text.contains("वॉल्यूम कम करो")) {
+                || text.contains("वॉल्यूम कम करो")
+                || text.contains("volume kam")
+                || text.contains("volume kam karo")
+                || text.contains("awaaz kam")
+                || text.contains("awaaz kam karo")) {
 
             return CommandType.VOLUME_DOWN;
         }
@@ -667,7 +675,10 @@ public class CommandManager {
                 || text.contains("start whatsapp")
                 || text.contains("whatsapp खोलो")
                 || text.contains("व्हाट्सऐप खोलो")
-                || text.contains("व्हाट्सएप खोलो")) {
+                || text.contains("व्हाट्सएप खोलो")
+                || text.contains("whatsapp kholo")
+                || text.contains("whatsapp khol do")
+                || text.contains("whatsapp on karo")) {
             return CommandType.OPEN_WHATSAPP;
         }
 
