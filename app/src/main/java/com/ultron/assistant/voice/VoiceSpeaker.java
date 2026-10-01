@@ -110,22 +110,9 @@ public class VoiceSpeaker {
     }
 
     private void setBestLanguage(String text) {
-
-        if (containsHindi(text)) {
-
-            int result =
-                    textToSpeech.setLanguage(hindiLocale);
-
-            if (result == TextToSpeech.LANG_MISSING_DATA
-                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-
-                textToSpeech.setLanguage(englishLocale);
-            }
-
-        } else {
-
-            textToSpeech.setLanguage(englishLocale);
-        }
+        // Force English locale — eSpeak NG English male voice
+        // Hindi text bhi male voice me bolegi
+        textToSpeech.setLanguage(englishLocale);
     }
 
     private boolean containsHindi(String text) {
