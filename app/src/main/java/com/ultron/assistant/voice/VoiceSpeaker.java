@@ -36,8 +36,7 @@ public class VoiceSpeaker {
                     } else {
                         ready = false;
                     }
-                },
-                "com.brahmadeo.supertonic.tts"
+                }
         );
     }
 
