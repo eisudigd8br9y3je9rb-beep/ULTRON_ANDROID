@@ -115,21 +115,6 @@ public class VoiceSpeaker {
         textToSpeech.setLanguage(englishLocale);
     }
 
-    private boolean containsHindi(String text) {
-
-        for (int i = 0; i < text.length(); i++) {
-
-            char character = text.charAt(i);
-
-            if (character >= '\u0900'
-                    && character <= '\u097F') {
-
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     public void stop() {
 
