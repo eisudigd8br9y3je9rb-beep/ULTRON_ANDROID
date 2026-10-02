@@ -28,15 +28,16 @@ public class VoiceSpeaker {
 
                     if (status == TextToSpeech.SUCCESS) {
 
-                        textToSpeech.setSpeechRate(0.85f);
-                        textToSpeech.setPitch(0.55f);
+                        textToSpeech.setSpeechRate(1.0f);
+                        textToSpeech.setPitch(1.0f);
 
                         ready = true;
 
                     } else {
                         ready = false;
                     }
-                }
+                },
+                "com.brahmadeo.supertonic.tts"
         );
     }
 
@@ -65,8 +66,8 @@ public class VoiceSpeaker {
 
         setBestLanguage(cleanText);
 
-        textToSpeech.setSpeechRate(0.85f);
-        textToSpeech.setPitch(0.55f);
+        textToSpeech.setSpeechRate(1.0f);
+        textToSpeech.setPitch(1.0f);
 
         textToSpeech.setOnUtteranceProgressListener(
                 new UtteranceProgressListener() {
