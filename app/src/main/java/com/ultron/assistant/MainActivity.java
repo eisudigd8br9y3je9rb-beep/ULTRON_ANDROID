@@ -3016,11 +3016,19 @@ private void stopHudAutoRefresh() {
                 .replaceAll("(?i)\\bcall\\b", "")
                 .replaceAll("(?i)\\bphone\\b", "")
                 .replaceAll("(?i)\\bdial\\b", "")
+                .replaceAll("(?i)\\bko\\b", "")
+                .replaceAll("(?i)\\bkaro\\b", "")
+                .replaceAll("(?i)\\bkar\\b", "")
+                .replaceAll("(?i)\\bdo\\b", "")
                 .replace("कॉल", "")
                 .replace("फोन", "")
                 .replace("डायल", "")
                 .replace("करो", "")
                 .replace("करना है", "")
+                .replace("को", "")
+                .replace("के लिए", "")
+                .replace("का", "")
+                .replace("से", "")
                 .trim();
 
         if (name.isEmpty()) {
@@ -3028,16 +3036,16 @@ private void stopHudAutoRefresh() {
             return;
         }
 
+        respond("Searching for: " + name);
+
         String contactNumber = contactManager.findPhoneNumber(name);
 
         if (contactNumber.isEmpty()) {
-            respond("I could not find that contact.");
+            respond("I could not find " + name + " in contacts.");
         } else {
             openDialerWithNumber(contactNumber);
         }
     }
-
-
 
     private void openDialerWithNumber(String number) {
 
