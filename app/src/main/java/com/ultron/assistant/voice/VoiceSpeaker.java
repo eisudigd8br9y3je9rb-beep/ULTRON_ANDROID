@@ -28,8 +28,8 @@ public class VoiceSpeaker {
 
                     if (status == TextToSpeech.SUCCESS) {
 
-                        textToSpeech.setSpeechRate(1.0f);
-                        textToSpeech.setPitch(1.0f);
+                        textToSpeech.setSpeechRate(0.85f);
+                        textToSpeech.setPitch(0.3f);
 
                         ready = true;
 
@@ -65,8 +65,8 @@ public class VoiceSpeaker {
 
         setBestLanguage(cleanText);
 
-        textToSpeech.setSpeechRate(1.0f);
-        textToSpeech.setPitch(1.0f);
+        textToSpeech.setSpeechRate(0.85f);
+        textToSpeech.setPitch(0.3f);
 
         textToSpeech.setOnUtteranceProgressListener(
                 new UtteranceProgressListener() {
