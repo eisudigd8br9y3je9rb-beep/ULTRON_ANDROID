@@ -46,8 +46,8 @@ public class VoiceSpeaker {
         final String utteranceId = "ULTRON_" + (++speechCounter);
         final AtomicBoolean callbackCalled = new AtomicBoolean(false);
 
-        textToSpeech.setSpeechRate(0.75f);
-        textToSpeech.setPitch(0.1f);
+        textToSpeech.setSpeechRate(0.85f);
+        textToSpeech.setPitch(0.55f);
         textToSpeech.setLanguage(englishLocale);
 
         textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
