@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class VoiceSpeaker {
 
-    private final TextToSpeech textToSpeech;
+    private TextToSpeech textToSpeech;
     private final Context appContext;
     private boolean ready = false;
     private MediaPlayer currentPlayer;
@@ -26,14 +26,21 @@ public class VoiceSpeaker {
 
     public VoiceSpeaker(Context context) {
         appContext = context.getApplicationContext();
-        textToSpeech = new TextToSpeech(appContext, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                textToSpeech.setSpeechRate(0.85f);
-                textToSpeech.setPitch(0.55f);
-                textToSpeech.setLanguage(englishLocale);
-                ready = true;
-            } else {
-                ready = false;
+        initTts();
+    }
+
+    private void initTts() {
+        textToSpeech = new TextToSpeech(appContext, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS && textToSpeech != null) {
+                    textToSpeech.setSpeechRate(0.85f);
+                    textToSpeech.setPitch(0.55f);
+                    textToSpeech.setLanguage(englishLocale);
+                    ready = true;
+                } else {
+                    ready = false;
+                }
             }
         });
     }
@@ -102,7 +109,6 @@ public class VoiceSpeaker {
 
             int sessionId = player.getAudioSessionId();
 
-            // Ultron-style reverb (room echo)
             EnvironmentalReverb reverb = new EnvironmentalReverb(0, sessionId);
             reverb.setDecayTime(2500);
             reverb.setDensity((short) 1000);
@@ -111,7 +117,6 @@ public class VoiceSpeaker {
             reverb.setRoomLevel((short) -1500);
             reverb.setEnabled(true);
 
-            // Bass boost for deep voice
             BassBoost bass = new BassBoost(0, sessionId);
             if (bass.getStrengthSupported()) {
                 bass.setStrength((short) 800);
