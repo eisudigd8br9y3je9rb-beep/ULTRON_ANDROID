@@ -39,6 +39,10 @@ import com.ultron.assistant.ui.UltronReferenceDesignView;
 import com.ultron.assistant.ai.AIClient;
 import com.ultron.assistant.service.UltronBackgroundService;
 import com.ultron.assistant.web.UltronWebBridge;
+import com.ultron.assistant.core.ActivationManager;
+import com.ultron.assistant.core.PalmDetector;
+import com.ultron.assistant.core.CallTriggerListener;
+import android.telephony.PhoneStateListener;
 
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -52,6 +56,9 @@ public class MainActivity extends Activity {
             @Override
             public void onImageReady(android.graphics.Bitmap bitmap) {
                 // Live frame received.
+                if (palmDetector != null && bitmap != null) {
+                    palmDetector.analyzeFrame(bitmap);
+                }
             }
 
             @Override
@@ -126,6 +133,10 @@ public class MainActivity extends Activity {
     private AppLauncher appLauncher;
     private UniversalAppOpener universalAppOpener;
     private PhoneActions phoneActions;
+    private ActivationManager activationManager;
+    private PalmDetector palmDetector;
+    private CallTriggerListener callTriggerListener;
+    private android.telephony.TelephonyManager telephonyManager;
     private CommunicationManager communicationManager;
     private OwnerProfile ownerProfile;
     private VisionManager visionManager;
@@ -180,6 +191,23 @@ private WebView ultronWebView;
             contactManager = new ContactManager(this);
             appLauncher = new AppLauncher(this);
             universalAppOpener = new UniversalAppOpener(this);
+
+            activationManager = new ActivationManager(this);
+
+            palmDetector = new PalmDetector(() -> {
+                activationManager.triggerActivation();
+                runOnUiThread(this::updateUltronHudState);
+            });
+
+            callTriggerListener = new CallTriggerListener(number -> {
+                activationManager.triggerActivation();
+                runOnUiThread(this::updateUltronHudState);
+            });
+
+            telephonyManager = (android.telephony.TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+            if (telephonyManager != null) {
+                telephonyManager.listen(callTriggerListener, android.telephony.PhoneStateListener.LISTEN_CALL_STATE);
+            }
             phoneActions = new PhoneActions(this);
             communicationManager = new CommunicationManager(this);
             ownerProfile = new OwnerProfile(this);
@@ -1052,6 +1080,7 @@ private void stopHudAutoRefresh() {
 
                     @Override
                     public void onStatus(String voiceStatus) {
+                        if (ultronWebView != null) { ultronWebView.evaluateJavascript("setCoreActive(true)", null); }
                         runOnUiThread(
                                 () -> status.setText(voiceStatus)
                         );
@@ -1059,6 +1088,7 @@ private void stopHudAutoRefresh() {
 
                     @Override
                     public void onResult(String text) {
+                        if (ultronWebView != null) { ultronWebView.evaluateJavascript("setCoreActive(false)", null); }
                         runOnUiThread(
                                 () -> handleVoiceCommand(text)
                         );
@@ -1066,6 +1096,7 @@ private void stopHudAutoRefresh() {
 
                     @Override
                     public void onError(int errorCode) {
+                        if (ultronWebView != null) { ultronWebView.evaluateJavascript("setCoreActive(false)", null); }
                         // Detailed error status is already shown by VoiceManager.
                         // Keep the useful message visible on screen.
                     }
@@ -1146,6 +1177,21 @@ private void stopHudAutoRefresh() {
         lastUserCommand = "";
         return command;
     }
+    private void updateUltronHudState() {
+        if (ultronWebView == null || activationManager == null) return;
+        String state;
+        if (activationManager.isActive()) {
+            state = "ACTIVE";
+        } else if (activationManager.isPending()) {
+            state = "UNLOCKED";
+        } else {
+            state = "LOCKED";
+        }
+        long secsLeft = activationManager.getPendingSecondsLeft();
+        ultronWebView.evaluateJavascript(
+            "setUltronState(\"" + state + "\"," + secsLeft + ")", null);
+    }
+
 
     private void respond(String message) {
 
@@ -1293,6 +1339,7 @@ private void stopHudAutoRefresh() {
             case ULTRON_ON:
                 ultronActive = true;
                 ultronWaiting = false;
+                if (activationManager != null) { activationManager.confirmActivation(); updateUltronHudState(); }
                 respond("ULTRON is now active.");
                 break;
 

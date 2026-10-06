@@ -46,16 +46,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 #humidity{left:326px;top:676px;width:92px;font-size:18px}
 #schedule{left:105px;top:735px;width:300px;font-size:12px;line-height:24px;font-weight:normal}
 #insights{left:1185px;top:625px;width:270px;font-size:12px;line-height:25px;font-weight:normal}
-#coreAnim{position:absolute;left:515px;top:290px;width:505px;height:505px;border-radius:50%;pointer-events:none}
+#coreAnim{position:absolute;left:515px;top:290px;width:505px;height:505px;border-radius:50%;pointer-events:none;transition:filter 0.3s ease}
+#coreAnim.core-active{animation:coreGlow 0.6s ease-in-out infinite alternate}
+@keyframes coreGlow{from{filter:drop-shadow(0 0 15px rgba(255,140,30,.7)) drop-shadow(0 0 30px rgba(255,180,60,.5))}to{filter:drop-shadow(0 0 40px rgba(255,200,80,1)) drop-shadow(0 0 80px rgba(255,140,30,.9))}}
 .ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);box-sizing:border-box}
-.r1{width:100%;height:100%;border:2px solid transparent;border-top-color:rgba(255,125,20,.95);border-right-color:rgba(255,80,10,.75);filter:drop-shadow(0 0 7px rgba(255,110,20,.75));animation:s1 2.4s linear infinite}
-.r2{width:88%;height:88%;border:2px solid transparent;border-bottom-color:rgba(255,210,130,.9);border-left-color:rgba(255,90,15,.75);filter:drop-shadow(0 0 6px rgba(255,120,20,.7));animation:s2 2s linear infinite reverse}
-.r3{width:74%;height:74%;border:1px solid transparent;border-top-color:rgba(255,235,190,.95);border-bottom-color:rgba(255,100,20,.8);animation:s3 1.7s linear infinite}
-.r4{width:94%;height:94%;border:3px dashed rgba(255,125,25,.45);animation:s4 3s linear infinite reverse}
-@keyframes s1{to{transform:translate(-50%,-50%) rotate(360deg)}}
-@keyframes s2{to{transform:translate(-50%,-50%) rotate(360deg)}}
-@keyframes s3{to{transform:translate(-50%,-50%) rotate(360deg)}}
-@keyframes s4{to{transform:translate(-50%,-50%) rotate(360deg)}}
 #controls{position:absolute;inset:0;pointer-events:none}
 .hot{position:absolute;background:transparent;border:0;pointer-events:auto;padding:0;margin:0;-webkit-tap-highlight-color:transparent;cursor:pointer}
 #btnHome{left:45px;top:65px;width:225px;height:90px}
@@ -97,6 +91,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 <div id="topTime" class="live topVal">--</div>
 <div id="onlineStatus" class="live">ONLINE</div>
 <div id="readyText" class="live">Ready, Imtiyaz.</div>
+
+<div id="ultronState" class="live" style="left:1490px;top:258px;width:120px;text-align:center;font-size:14px;color:#ff4444;font-weight:bold;">\ud83d\udd12 LOCKED</div>
 <div id="meter" class="live">--%</div>
 <div id="battery" class="live sys">--%</div>
 <div id="brightness" class="live sys">--%</div>
@@ -110,7 +106,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 <div id="humidity" class="live">--%</div>
 <div id="schedule" class="live">No live calendar data<br>available</div>
 <div id="insights" class="live">ULTRON activity monitor<br>Waiting for live activity...</div>
-<div id="coreAnim"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="ring r4"></div></div>
 <div id="controls">
 <button id="btnHome" class="hot" onclick="cmd('go home')"></button>
 <button id="btnChat" class="hot" onclick="focusPrompt()"></button>
@@ -170,8 +165,31 @@ function setSystemData(b,br,n,t,c,m){
   document.getElementById('bottomNetwork').textContent=n||'--';
 }
 function setUltronStatus(status,ready){
+
+function setUltronState(state, secsLeft) {
+    var el = document.getElementById("ultronState");
+    if (!el) return;
+    if (state === "ACTIVE") {
+        el.textContent = "\u2705 ACTIVE";
+        el.style.color = "#00ed88";
+    } else if (state === "UNLOCKED") {
+        el.textContent = "\ud83d\udd13 UNLOCKED " + secsLeft + "s";
+        el.style.color = "#ffcc00";
+    } else {
+        el.textContent = "\ud83d\udd12 LOCKED";
+        el.style.color = "#ff4444";
+    }
+}
+
   document.getElementById('onlineStatus').textContent=status||'ONLINE';
   document.getElementById('readyText').textContent=ready||'Ready, Imtiyaz.';
+}
+
+function setCoreActive(active){
+    var c = document.getElementById("coreAnim");
+    if(!c) return;
+    if(active) c.classList.add("core-active");
+    else c.classList.remove("core-active");
 }
 </script>
 </body>

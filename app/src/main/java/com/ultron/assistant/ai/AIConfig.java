@@ -5,10 +5,10 @@ public final class AIConfig {
     private AIConfig() {}
 
     public static final String DEFAULT_ENDPOINT =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent";
 
     public static final String MODEL =
-            "gemini-3.8-flash";
+            "gemini-3.5-flash-lite";
 
     public static final String AUTH_HEADER = "x-goog-api-key";
 
