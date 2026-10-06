@@ -1196,6 +1196,10 @@ private void stopHudAutoRefresh() {
     private void respond(String message) {
 
         status.setText(message);
+        if (ultronWebView != null && message != null) {
+            String safe = message.replace("'", "\\'").replace("\n", " ");
+            ultronWebView.evaluateJavascript("addInsight('\ud83d\udcac " + safe + "')", null);
+        }
 
         if (memoryManager != null
                 && message != null
@@ -1250,6 +1254,11 @@ private void stopHudAutoRefresh() {
     }
 
     private void handleVoiceCommand(String command) {
+
+        if (ultronWebView != null && command != null) {
+            String safeCmd = command.replace("'", "\\'").replace("\n", " ");
+            ultronWebView.evaluateJavascript("addInsight('\ud83c\udfa4 " + safeCmd + "')", null);
+        }
         if (command == null || command.trim().isEmpty()) {
             respond("I did not hear a command.");
             return;

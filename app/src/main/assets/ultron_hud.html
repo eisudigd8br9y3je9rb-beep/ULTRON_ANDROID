@@ -92,7 +92,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 <div id="onlineStatus" class="live">ONLINE</div>
 <div id="readyText" class="live">Ready, Imtiyaz.</div>
 
-<div id="ultronState" class="live" style="left:1490px;top:258px;width:120px;text-align:center;font-size:14px;color:#ff4444;font-weight:bold;">\ud83d\udd12 LOCKED</div>
+<div id="ultronState" class="live" style="left:1490px;top:258px;width:120px;text-align:center;font-size:14px;color:#ff4444;font-weight:bold;">&#128274; LOCKED</div>
 <div id="meter" class="live">--%</div>
 <div id="battery" class="live sys">--%</div>
 <div id="brightness" class="live sys">--%</div>
@@ -105,7 +105,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 <div id="weatherDesc" class="live">Weather unavailable</div>
 <div id="humidity" class="live">--%</div>
 <div id="schedule" class="live">No live calendar data<br>available</div>
-<div id="insights" class="live">ULTRON activity monitor<br>Waiting for live activity...</div>
+<div id="insights" class="live">ULTRON activity monitor<br><span id="insightLog1">Waiting for activity...</span><br><span id="insightLog2"></span><br><span id="insightLog3"></span><br><span id="insightLog4"></span><br><span id="insightLog5"></span></div>
 <div id="controls">
 <button id="btnHome" class="hot" onclick="cmd('go home')"></button>
 <button id="btnChat" class="hot" onclick="focusPrompt()"></button>
@@ -190,6 +190,20 @@ function setCoreActive(active){
     if(!c) return;
     if(active) c.classList.add("core-active");
     else c.classList.remove("core-active");
+
+function addInsight(text) {
+    if (!text) return;
+    var stamp = new Date().toLocaleTimeString("en-IN", {hour:"2-digit", minute:"2-digit"});
+    var line = "[" + stamp + "] " + text;
+    for (var i = 4; i >= 1; i--) {
+        var next = document.getElementById("insightLog" + (i + 1));
+        var curr = document.getElementById("insightLog" + i);
+        if (next && curr) next.textContent = curr.textContent;
+    }
+    var first = document.getElementById("insightLog1");
+    if (first) first.textContent = line;
+}
+
 }
 </script>
 </body>
