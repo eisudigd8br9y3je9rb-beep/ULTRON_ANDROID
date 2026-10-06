@@ -105,10 +105,10 @@ public class VoiceSpeaker {
             // Ultron-style reverb (room echo)
             EnvironmentalReverb reverb = new EnvironmentalReverb(0, sessionId);
             reverb.setDecayTime(2500);
-            reverb.setDensity(1000);
-            reverb.setDiffusion(1000);
-            reverb.setReverbLevel(-500);
-            reverb.setRoomLevel(-1500);
+            reverb.setDensity((short) 1000);
+            reverb.setDiffusion((short) 1000);
+            reverb.setReverbLevel((short) -500);
+            reverb.setRoomLevel((short) -1500);
             reverb.setEnabled(true);
 
             // Bass boost for deep voice
