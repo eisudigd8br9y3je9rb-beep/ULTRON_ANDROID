@@ -106,6 +106,7 @@ public class MainActivity extends Activity {
     private static final int CALL_REQUEST = 103;
     private static final int AUDIO_REQUEST = 101;
     private static final int REQUEST_CONTACTS = 104;
+    private static final int PHONE_STATE_REQUEST = 105;
 
     private TextureView preview;
     private TextView status;
@@ -199,13 +200,47 @@ private WebView ultronWebView;
                 runOnUiThread(this::updateUltronHudState);
             });
 
-            callTriggerListener = new CallTriggerListener(number -> {
-                activationManager.triggerActivation();
-                runOnUiThread(this::updateUltronHudState);
+            callTriggerListener = new CallTriggerListener(new CallTriggerListener.CallListener() {
+                @Override
+                public void onIncomingCall(String phoneNumber) {
+                    activationManager.triggerActivation();
+                    String name = contactManager != null
+                            ? contactManager.findPhoneNumber(phoneNumber)
+                            : "";
+                    if (name == null || name.isEmpty()) name = "Unknown";
+                    final String safeName = name.replace("'", "");
+                    final String safeNum = (phoneNumber == null ? "" : phoneNumber).replace("'", "");
+                    runOnUiThread(() -> {
+                        updateUltronHudState();
+                        if (ultronWebView != null) {
+                            ultronWebView.evaluateJavascript(
+                                    "showCallCard('" + safeName + "','" + safeNum + "')", null);
+                        }
+                    });
+                }
+
+                @Override
+                public void onCallAnswered(String phoneNumber) {
+                    runOnUiThread(() -> {
+                        if (ultronWebView != null) {
+                            ultronWebView.evaluateJavascript(
+                                    "showActivityCard('&#128222;','Call Active','Speaking...')", null);
+                        }
+                    });
+                }
+
+                @Override
+                public void onCallEnded() {
+                    runOnUiThread(() -> {
+                        if (ultronWebView != null) {
+                            ultronWebView.evaluateJavascript("hideCallCard()", null);
+                        }
+                    });
+                }
             });
 
             telephonyManager = (android.telephony.TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-            if (telephonyManager != null) {
+            if (telephonyManager != null && checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                 telephonyManager.listen(callTriggerListener, android.telephony.PhoneStateListener.LISTEN_CALL_STATE);
             }
             phoneActions = new PhoneActions(this);
@@ -1140,6 +1175,18 @@ private void stopHudAutoRefresh() {
                     CALL_REQUEST
             );
         }
+
+        if (checkSelfPermission(
+                Manifest.permission.READ_PHONE_STATE
+        ) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{
+                            Manifest.permission.READ_PHONE_STATE
+                    },
+                    PHONE_STATE_REQUEST
+            );
+        }
     }
 
     private void startVoice() {
@@ -1263,6 +1310,26 @@ private void stopHudAutoRefresh() {
             respond("I did not hear a command.");
             return;
         }
+
+        // ============ GATE: LOCKED check ============
+        if (activationManager != null && !activationManager.isActive()) {
+            String lower = command.toLowerCase().trim();
+            boolean isUnlockCmd = lower.contains("hello ultron")
+                    || lower.contains("ultron activate")
+                    || lower.contains("ultron on")
+                    || lower.contains("अल्ट्रॉन एक्टिवेट")
+                    || lower.contains("अल्ट्रॉन ऑन")
+                    || lower.contains("ultron चालू");
+            if (isUnlockCmd) {
+                activationManager.setActive(true);
+                respond("ULTRON is now active. Welcome Imtiyaz.");
+                updateUltronHudState();
+            } else {
+                respond("ULTRON is locked. Say Hello ULTRON to unlock.");
+            }
+            return;
+        }
+
 
         handleDroneCommand(command);
         String droneCheck = command.toLowerCase().trim();
@@ -2987,6 +3054,30 @@ private void stopHudAutoRefresh() {
                 status.setText(
                         "Camera permission denied"
                 );
+            }
+        }
+
+        if (requestCode == PHONE_STATE_REQUEST) {
+
+            if (grantResults.length > 0
+                    && grantResults[0]
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                if (telephonyManager != null && callTriggerListener != null) {
+                    try {
+                        telephonyManager.listen(
+                                callTriggerListener,
+                                android.telephony.PhoneStateListener.LISTEN_CALL_STATE
+                        );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                status.setText("Phone state permission granted");
+
+            } else {
+                status.setText("Phone state permission denied");
             }
         }
     }
