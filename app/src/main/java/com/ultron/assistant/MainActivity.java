@@ -1192,8 +1192,17 @@ private void stopHudAutoRefresh() {
             "setUltronState(\"" + state + "\"," + secsLeft + ")", null);
     }
 
+    private void showHudCard(String icon, String title, String body) {
+        if (ultronWebView == null) return;
+        String safeTitle = title == null ? "" : title.replace("'", "").replace("\n", " ");
+        String safeBody = body == null ? "" : body.replace("'", "").replace("\n", " ");
+        final String js = "showActivityCard('" + icon + "','" + safeTitle + "','" + safeBody + "')";
+        runOnUiThread(() -> ultronWebView.evaluateJavascript(js, null));
+    }
+
 
     private void respond(String message) {
+        showHudCard("\ud83d\udcac", "Reply", message);
 
         status.setText(message);
         if (ultronWebView != null && message != null) {
@@ -1254,6 +1263,7 @@ private void stopHudAutoRefresh() {
     }
 
     private void handleVoiceCommand(String command) {
+        showHudCard("\ud83c\udfa4", "Voice", command);
 
         if (ultronWebView != null && command != null) {
             String safeCmd = command.replace("'", "\\'").replace("\n", " ");

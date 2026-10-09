@@ -74,10 +74,30 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02070b}
 #btnPower{left:1390px;top:905px;width:105px;height:70px}
 #prompt{position:absolute;left:620px;top:835px;width:390px;height:54px;background:transparent;border:0;outline:0;color:#fff;font-size:16px;pointer-events:auto;opacity:.01}
 #zoomInfo{position:fixed;left:6px;bottom:6px;color:rgba(255,255,255,.35);font:10px Arial;z-index:99;pointer-events:none}
+
+.callCard,.activityCard{position:fixed;right:20px;top:20px;background:linear-gradient(135deg,rgba(20,10,5,0.96),rgba(40,20,10,0.96));border:2px solid #ff7d14;border-radius:10px;padding:12px 16px;color:#fff;font-family:Arial,sans-serif;box-shadow:0 0 20px rgba(255,125,20,0.6);z-index:9999;display:none;min-width:260px;max-width:340px}
+.callCard.show,.activityCard.show{display:block;animation:slideIn 0.3s ease-out}
+@keyframes slideIn{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
+.callRow{display:flex;align-items:center;gap:12px}
+.callIcon{font-size:28px;color:#ff7d14}
+.activityIcon{font-size:24px;color:#4cc8ee}
+.callInfo{flex:1;overflow:hidden}
+.callName{font-size:16px;font-weight:bold;color:#ffcc00;margin-bottom:2px}
+.activityCard .callName{color:#4cc8ee}
+.callNumber{font-size:12px;color:#aaa}
+.callActions{display:flex;gap:8px;margin-top:10px}
+.callBtn{flex:1;padding:8px;border:0;border-radius:6px;font-size:14px;font-weight:bold;color:#fff}
+.callBtn.accept{background:#00a854}
+.callBtn.reject{background:#cc2222}
+
 </style>
 </head>
 <body>
 <div id="viewport">
+
+<div id="callCard" class="callCard"></div>
+<div id="activityCard" class="activityCard"></div>
+
 <div id="stage">
 <img id="reference" src="ultron_reference.png" draggable="false">
 <div class="mask topMask" id="tm1"></div><div class="mask topMask" id="tm2"></div><div class="mask topMask" id="tm3"></div><div class="mask topMask" id="tm4"></div>
@@ -205,6 +225,42 @@ function addInsight(text) {
 }
 
 }
+
+function showCallCard(name, number) {
+    var card = document.getElementById('callCard');
+    if (!card) return;
+    var n = (name || 'Unknown').replace(/</g,'').replace(/>/g,'');
+    var num = (number || '').replace(/</g,'').replace(/>/g,'');
+    card.innerHTML = '<div class="callRow"><div class="callIcon">&#128222;</div><div class="callInfo"><div class="callName">' + n + '</div><div class="callNumber">' + num + '</div></div></div><div class="callActions"><button class="callBtn reject" onclick="rejectCall()">Reject</button><button class="callBtn accept" onclick="answerCall()">Accept</button></div>';
+    card.classList.add('show');
+}
+function hideCallCard() {
+    var c = document.getElementById('callCard');
+    if (c) c.classList.remove('show');
+}
+function answerCall() {
+    if (window.Android && Android.command) Android.command('answer call');
+    hideCallCard();
+}
+function rejectCall() {
+    if (window.Android && Android.command) Android.command('reject call');
+    hideCallCard();
+}
+function showActivityCard(icon, title, body) {
+    var card = document.getElementById('activityCard');
+    if (!card) return;
+    var t = (title || '').replace(/</g,'').replace(/>/g,'');
+    var b = (body || '').replace(/</g,'').replace(/>/g,'');
+    card.innerHTML = '<div class="callRow"><div class="activityIcon">' + icon + '</div><div class="callInfo"><div class="callName">' + t + '</div><div class="callNumber">' + b + '</div></div></div>';
+    card.classList.add('show');
+    if (window._actTimer) clearTimeout(window._actTimer);
+    window._actTimer = setTimeout(hideActivityCard, 5000);
+}
+function hideActivityCard() {
+    var c = document.getElementById('activityCard');
+    if (c) c.classList.remove('show');
+}
+
 </script>
 </body>
 </html>
