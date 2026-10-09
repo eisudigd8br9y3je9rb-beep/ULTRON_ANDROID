@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
             public void onImageReady(android.graphics.Bitmap bitmap) {
                 // Live frame received.
                 if (palmDetector != null && bitmap != null) {
-                    palmDetector.analyzeFrame(bitmap);
+                    // palmDetector.analyzeFrame(bitmap); // TEMP DISABLED
                 }
             }
 
