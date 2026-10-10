@@ -1393,6 +1393,32 @@ private void stopHudAutoRefresh() {
                 openYouTube();
                 break;
 
+            case PLAY_SONG: {
+                String song = CommandManager.extractSongName(command);
+                if (song == null || song.isEmpty()) {
+                    respond("Which song should I play?");
+                } else {
+                    respond("Playing " + song + " on YouTube.");
+                    com.ultron.assistant.actions.YouTubePlayer.searchAndPlay(this, song);
+                }
+                break;
+            }
+
+            case PAUSE_MUSIC:
+                com.ultron.assistant.actions.YouTubePlayer.playPause(this);
+                respond("Toggled playback.");
+                break;
+
+            case NEXT_SONG:
+                com.ultron.assistant.actions.YouTubePlayer.next(this);
+                respond("Next song.");
+                break;
+
+            case PREV_SONG:
+                com.ultron.assistant.actions.YouTubePlayer.previous(this);
+                respond("Previous song.");
+                break;
+
             case OPEN_INSTAGRAM:
                 openInstagram();
                 break;

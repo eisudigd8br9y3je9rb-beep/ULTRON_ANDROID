@@ -4,6 +4,18 @@ import java.util.Locale;
 
 public class CommandManager {
 
+    public static String extractSongName(String text) {
+        if (text == null) return "";
+        String t = text.toLowerCase(Locale.ROOT);
+        String[] remove = {"play karo", "play song", "gaana bajao", "गाना चलाओ",
+                "गाना बजाओ", "gaana chalao", "song chalao", "चलाओ गाना",
+                "play", "chalao", "bajao", "song", "gaana", "गाना", "चलाओ", "बजाओ"};
+        for (String r : remove) {
+            t = t.replace(r, " ");
+        }
+        return t.trim().replaceAll("\\s+", " ");
+    }
+
     public enum CommandType {
         OPEN_YOUTUBE,
         OPEN_INSTAGRAM,
@@ -57,6 +69,10 @@ public class CommandManager {
         WHATSAPP_MESSAGE,
         OPEN_PLAY_STORE,
         OPEN_MUSIC_APP,
+        PLAY_SONG,
+        PAUSE_MUSIC,
+        NEXT_SONG,
+        PREV_SONG,
         CHECK_WIFI_STATUS,
         GET_CHARGING_STATUS,
         OPEN_APP_SETTINGS,
@@ -326,6 +342,39 @@ public class CommandManager {
                 && !text.contains("बैटरी सेविंग")) {
 
             return CommandType.GET_BATTERY;
+        }
+
+        // SONG PLAYBACK (must be before YOUTUBE open)
+        if (text.contains("pause")
+                || text.contains("पॉज़")
+                || text.contains("रोको गाना")
+                || text.contains("pause karo")) {
+            return CommandType.PAUSE_MUSIC;
+        }
+
+        if (text.contains("next song")
+                || text.contains("अगला गाना")
+                || text.contains("agla gaana")
+                || text.contains("next gaana")) {
+            return CommandType.NEXT_SONG;
+        }
+
+        if (text.contains("previous song")
+                || text.contains("पिछला गाना")
+                || text.contains("pichhla gaana")
+                || text.contains("back gaana")) {
+            return CommandType.PREV_SONG;
+        }
+
+        if (text.contains("play karo")
+                || text.contains("play song")
+                || text.contains("gaana bajao")
+                || text.contains("गाना चलाओ")
+                || text.contains("गाना बजाओ")
+                || text.contains("gaana chalao")
+                || text.contains("song chalao")
+                || text.contains("चलाओ गाना")) {
+            return CommandType.PLAY_SONG;
         }
 
         // YOUTUBE

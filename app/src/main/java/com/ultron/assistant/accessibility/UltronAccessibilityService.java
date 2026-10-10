@@ -257,6 +257,41 @@ public class UltronAccessibilityService
         return null;
     }
 
+    public static boolean clickFirstYouTubeResult() {
+        if (instance == null) return false;
+        AccessibilityNodeInfo root = instance.getRootInActiveWindow();
+        if (root == null) return false;
+        java.util.List<AccessibilityNodeInfo> candidates = new java.util.ArrayList<>();
+        collectYouTubeCandidates(root, candidates);
+        for (AccessibilityNodeInfo node : candidates) {
+            AccessibilityNodeInfo target = node;
+            int safety = 0;
+            while (target != null && !target.isClickable() && safety < 6) {
+                target = target.getParent();
+                safety++;
+            }
+            if (target != null && target.isClickable()) {
+                if (target.performAction(AccessibilityNodeInfo.ACTION_CLICK)) return true;
+            }
+        }
+        return false;
+    }
+
+    private static void collectYouTubeCandidates(AccessibilityNodeInfo node, java.util.List<AccessibilityNodeInfo> out) {
+        if (node == null) return;
+        CharSequence desc = node.getContentDescription();
+        if (desc != null) {
+            String d = desc.toString().toLowerCase();
+            if ((d.contains("minute") || d.contains("views") || d.contains("ago"))
+                && !d.contains("search") && !d.contains("subscribe")) {
+                out.add(node);
+            }
+        }
+        for (int i = 0; i < node.getChildCount(); i++) {
+            collectYouTubeCandidates(node.getChild(i), out);
+        }
+    }
+
     public static boolean goBack() {
 
         return instance != null
