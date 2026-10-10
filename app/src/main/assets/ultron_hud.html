@@ -247,14 +247,16 @@ function rejectCall() {
     hideCallCard();
 }
 function showActivityCard(icon, title, body) {
-    var card = document.getElementById('activityCard');
-    if (!card) return;
     var t = (title || '').replace(/</g,'').replace(/>/g,'');
     var b = (body || '').replace(/</g,'').replace(/>/g,'');
-    card.innerHTML = '<div class="callRow"><div class="activityIcon">' + icon + '</div><div class="callInfo"><div class="callName">' + t + '</div><div class="callNumber">' + b + '</div></div></div>';
-    card.classList.add('show');
-    if (window._actTimer) clearTimeout(window._actTimer);
-    window._actTimer = setTimeout(hideActivityCard, 5000);
+    var line = (icon ? icon + ' ' : '') + t + (b ? ' -> ' + b : '');
+    for (var i = 5; i > 1; i--) {
+        var prev = document.getElementById('insightLog' + (i-1));
+        var cur = document.getElementById('insightLog' + i);
+        if (cur && prev) cur.innerHTML = prev.innerHTML;
+    }
+    var top = document.getElementById('insightLog1');
+    if (top) top.innerHTML = line;
 }
 function hideActivityCard() {
     var c = document.getElementById('activityCard');
